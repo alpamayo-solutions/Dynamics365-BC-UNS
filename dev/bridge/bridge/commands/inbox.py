@@ -55,8 +55,8 @@ def get_inbox(inbox_type: str, status: str | None, top: int, json_out: bool):
                             "messageId": str(e.message_id),
                             "orderNo": e.order_no,
                             "operationNo": e.operation_no,
-                            "outputQty": e.output_quantity,
-                            "scrapQty": e.scrap_quantity,
+                            "qtyProduced": e.qty_produced,
+                            "qtyRejected": e.qty_rejected,
                             "status": e.status,
                             "receivedAt": e.received_at.isoformat() if e.received_at else None,
                             "error": e.error,
@@ -75,8 +75,8 @@ def get_inbox(inbox_type: str, status: str | None, top: int, json_out: bool):
                 table.add_column("Order No", style="cyan")
                 table.add_column("Op No")
                 table.add_column("Status")
-                table.add_column("Output", justify="right")
-                table.add_column("Scrap", justify="right")
+                table.add_column("Produced", justify="right")
+                table.add_column("Rejected", justify="right")
                 table.add_column("Received At")
                 table.add_column("Error", style="red", max_width=25)
                 table.add_column("Warning", style="yellow", max_width=25)
@@ -95,8 +95,8 @@ def get_inbox(inbox_type: str, status: str | None, top: int, json_out: bool):
                         entry.get("orderNo") or "-",
                         entry.get("operationNo") or "-",
                         f"[{status_style}]{entry.get('status') or '-'}[/{status_style}]",
-                        f"{entry.get('outputQty', 0):.0f}" if entry.get("type") == "output" else "-",
-                        f"{entry.get('scrapQty', 0):.0f}" if entry.get("type") == "output" else "-",
+                        f"{entry.get('qtyProduced', 0):.0f}" if entry.get("type") == "output" else "-",
+                        f"{entry.get('qtyRejected', 0):.0f}" if entry.get("type") == "output" else "-",
                         entry.get("receivedAt", "-") or "-",
                         (entry.get("error") or "-")[:25],
                         (entry.get("warning") or "-")[:25],

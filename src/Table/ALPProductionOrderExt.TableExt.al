@@ -14,21 +14,21 @@ tableextension 50003 "ALP Production Order Ext" extends "Production Order"
             DataClassification = CustomerContent;
             Editable = false;
         }
-        field(50002; "ALP Total Output Qty"; Decimal)
+        field(50002; "ALP Total Qty. Produced"; Decimal)
         {
-            Caption = 'Total Output Quantity';
+            Caption = 'Total Quantity Produced';
             Editable = false;
             DecimalPlaces = 0 : 5;
             FieldClass = FlowField;
-            CalcFormula = sum("ALP Output Inbox"."Output Quantity" where("Order No." = field("No."), Status = const(Processed)));
+            CalcFormula = sum("ALP Output Inbox"."Qty. Produced" where("Order No." = field("No."), Status = const(Processed)));
         }
-        field(50003; "ALP Total Scrap Qty"; Decimal)
+        field(50003; "ALP Total Qty. Rejected"; Decimal)
         {
-            Caption = 'Total Scrap Quantity';
+            Caption = 'Total Quantity Rejected';
             Editable = false;
             DecimalPlaces = 0 : 5;
             FieldClass = FlowField;
-            CalcFormula = sum("ALP Output Inbox"."Scrap Quantity" where("Order No." = field("No."), Status = const(Processed)));
+            CalcFormula = sum("ALP Output Inbox"."Qty. Rejected" where("Order No." = field("No."), Status = const(Processed)));
         }
         field(50004; "ALP Last Output Update At"; DateTime)
         {
@@ -42,15 +42,15 @@ tableextension 50003 "ALP Production Order Ext" extends "Production Order"
             DataClassification = CustomerContent;
             Editable = false;
         }
-        field(50006; "ALP Exec Total Parts"; Integer)
+        field(50006; "ALP Exec Qty. Produced"; Integer)
         {
-            Caption = 'Total Parts Produced';
+            Caption = 'Execution Quantity Produced';
             DataClassification = CustomerContent;
             Editable = false;
         }
-        field(50007; "ALP Exec Total Rejected"; Integer)
+        field(50007; "ALP Exec Qty. Rejected"; Integer)
         {
-            Caption = 'Total Parts Rejected';
+            Caption = 'Execution Quantity Rejected';
             DataClassification = CustomerContent;
             Editable = false;
         }

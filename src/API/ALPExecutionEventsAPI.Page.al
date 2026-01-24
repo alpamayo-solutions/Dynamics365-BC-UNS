@@ -36,13 +36,13 @@ page 50030 "ALP Execution Events API"
                 {
                     Caption = 'Work Center';
                 }
-                field(nParts; Rec."nParts")
+                field(qtyProduced; Rec."Qty. Produced")
                 {
-                    Caption = 'Parts Produced';
+                    Caption = 'Quantity Produced';
                 }
-                field(nRejected; Rec."nRejected")
+                field(qtyRejected; Rec."Qty. Rejected")
                 {
-                    Caption = 'Parts Rejected';
+                    Caption = 'Quantity Rejected';
                 }
                 field(runtimeSec; Rec."Runtime Sec")
                 {

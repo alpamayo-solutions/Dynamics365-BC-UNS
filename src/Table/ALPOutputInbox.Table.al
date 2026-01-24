@@ -21,16 +21,16 @@ table 50003 "ALP Output Inbox"
             Caption = 'Operation No.';
             DataClassification = SystemMetadata;
         }
-        field(4; "Output Quantity"; Decimal)
+        field(4; "Qty. Produced"; Decimal)
         {
-            Caption = 'Output Quantity';
+            Caption = 'Quantity Produced';
             DataClassification = SystemMetadata;
             MinValue = 0;
             DecimalPlaces = 0 : 5;
         }
-        field(5; "Scrap Quantity"; Decimal)
+        field(5; "Qty. Rejected"; Decimal)
         {
-            Caption = 'Scrap Quantity';
+            Caption = 'Quantity Rejected';
             DataClassification = SystemMetadata;
             MinValue = 0;
             DecimalPlaces = 0 : 5;
@@ -86,7 +86,7 @@ table 50003 "ALP Output Inbox"
         }
         key(OrderStatus; "Order No.", Status)
         {
-            SumIndexFields = "Output Quantity", "Scrap Quantity";
+            SumIndexFields = "Qty. Produced", "Qty. Rejected";
         }
     }
 }

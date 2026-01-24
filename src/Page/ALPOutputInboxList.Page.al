@@ -31,15 +31,15 @@ page 50021 "ALP Output Inbox List"
                     ApplicationArea = Manufacturing;
                     ToolTip = 'Operation number within the routing';
                 }
-                field("Output Quantity"; Rec."Output Quantity")
+                field("Qty. Produced"; Rec."Qty. Produced")
                 {
                     ApplicationArea = Manufacturing;
-                    ToolTip = 'Quantity of output produced';
+                    ToolTip = 'Quantity produced';
                 }
-                field("Scrap Quantity"; Rec."Scrap Quantity")
+                field("Qty. Rejected"; Rec."Qty. Rejected")
                 {
                     ApplicationArea = Manufacturing;
-                    ToolTip = 'Quantity of scrap produced';
+                    ToolTip = 'Quantity rejected';
                 }
                 field("Posting Date"; Rec."Posting Date")
                 {

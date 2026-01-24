@@ -1,9 +1,14 @@
 """Pydantic models for BC API payloads."""
 
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_serializer
+
+
+def utc_now() -> datetime:
+    """Return current UTC time with timezone info."""
+    return datetime.now(timezone.utc)
 
 
 class ExecutionEvent(BaseModel):
@@ -13,19 +18,24 @@ class ExecutionEvent(BaseModel):
     order_no: str = Field(alias="orderNo")
     operation_no: str = Field(default="10", alias="operationNo")
     work_center: str | None = Field(default=None, alias="workCenter")
-    n_parts: int = Field(default=0, alias="nParts")
-    n_rejected: int = Field(default=0, alias="nRejected")
+    qty_produced: int = Field(default=0, alias="qtyProduced")
+    qty_rejected: int = Field(default=0, alias="qtyRejected")
     runtime_sec: float = Field(default=0, alias="runtimeSec")
     downtime_sec: float = Field(default=0, alias="downtimeSec")
     availability: float = Field(default=0.95, ge=0, le=1)
     productivity: float = Field(default=0.90, ge=0, le=1)
     actual_cycle_time_sec: float = Field(default=0, alias="actualCycleTimeSec")
-    source_timestamp: datetime = Field(
-        default_factory=datetime.utcnow, alias="sourceTimestamp"
-    )
+    source_timestamp: datetime = Field(default_factory=utc_now, alias="sourceTimestamp")
     source: str = "BRIDGE-CLI"
 
     model_config = {"populate_by_name": True}
+
+    @field_serializer("source_timestamp")
+    def serialize_timestamp(self, value: datetime) -> str:
+        """Serialize datetime to ISO format with Z suffix for BC OData."""
+        if value.tzinfo is None:
+            value = value.replace(tzinfo=timezone.utc)
+        return value.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
 
 
 class ProductionOrder(BaseModel):
@@ -140,13 +150,18 @@ class OutputEvent(BaseModel):
     message_id: UUID = Field(default_factory=uuid4, alias="messageId")
     order_no: str = Field(alias="orderNo")
     operation_no: str = Field(default="10", alias="operationNo")
-    output_quantity: float = Field(alias="outputQuantity")
-    scrap_quantity: float = Field(default=0, alias="scrapQuantity")
+    qty_produced: float = Field(alias="qtyProduced")
+    qty_rejected: float = Field(default=0, alias="qtyRejected")
     posting_date: date | None = Field(default=None, alias="postingDate")
-    source_timestamp: datetime = Field(
-        default_factory=datetime.utcnow, alias="sourceTimestamp"
-    )
+    source_timestamp: datetime = Field(default_factory=utc_now, alias="sourceTimestamp")
     source: str = "BRIDGE-CLI"
+
+    @field_serializer("source_timestamp")
+    def serialize_timestamp(self, value: datetime) -> str:
+        """Serialize datetime to ISO format with Z suffix for BC OData."""
+        if value.tzinfo is None:
+            value = value.replace(tzinfo=timezone.utc)
+        return value.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
 
     model_config = {"populate_by_name": True}
 
@@ -173,8 +188,8 @@ class OutputInboxEntry(BaseModel):
     message_id: UUID = Field(alias="messageId")
     order_no: str | None = Field(default=None, alias="orderNo")
     operation_no: str | None = Field(default=None, alias="operationNo")
-    output_quantity: float | None = Field(default=None, alias="outputQuantity")
-    scrap_quantity: float | None = Field(default=None, alias="scrapQuantity")
+    qty_produced: float | None = Field(default=None, alias="qtyProduced")
+    qty_rejected: float | None = Field(default=None, alias="qtyRejected")
     posting_date: date | None = Field(default=None, alias="postingDate")
     source_timestamp: datetime | None = Field(default=None, alias="sourceTimestamp")
     source: str | None = None

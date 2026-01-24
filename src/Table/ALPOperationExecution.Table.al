@@ -22,15 +22,15 @@ table 50002 "ALP Operation Execution"
             DataClassification = CustomerContent;
             TableRelation = "Work Center";
         }
-        field(10; "nParts"; Integer)
+        field(10; "Qty. Produced"; Integer)
         {
-            Caption = 'Parts Produced';
+            Caption = 'Quantity Produced';
             DataClassification = CustomerContent;
             MinValue = 0;
         }
-        field(11; "nRejected"; Integer)
+        field(11; "Qty. Rejected"; Integer)
         {
-            Caption = 'Parts Rejected';
+            Caption = 'Quantity Rejected';
             DataClassification = CustomerContent;
             MinValue = 0;
         }

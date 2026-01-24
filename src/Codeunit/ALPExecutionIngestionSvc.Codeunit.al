@@ -4,7 +4,7 @@ codeunit 50010 "ALP Execution Ingestion Svc"
         ProdOrderNotFoundErr: Label 'Production Order %1 not found or not in Released status', Comment = '%1 = Order No.';
         RoutingLineNotFoundErr: Label 'Routing line not found for Order %1, Operation %2', Comment = '%1 = Order No., %2 = Operation No.';
         WorkCenterMismatchLbl: Label 'WorkCenter mismatch: payload has %1, routing line has %2', Comment = '%1 = Payload WC, %2 = Routing WC';
-        RejectedExceedsPartsErr: Label 'nRejected (%1) cannot exceed nParts (%2)', Comment = '%1 = nRejected, %2 = nParts';
+        RejectedExceedsProducedErr: Label 'Qty. Rejected (%1) cannot exceed Qty. Produced (%2)', Comment = '%1 = Qty. Rejected, %2 = Qty. Produced';
         AvailabilityOutOfRangeErr: Label 'Availability (%1) must be between 0 and 1', Comment = '%1 = Availability value';
         ProductivityOutOfRangeErr: Label 'Productivity (%1) must be between 0 and 1', Comment = '%1 = Productivity value';
 
@@ -51,8 +51,8 @@ codeunit 50010 "ALP Execution Ingestion Svc"
         end;
 
         // Step 3b: Validate business rules
-        if Exec."nRejected" > Exec."nParts" then begin
-            ErrorText := StrSubstNo(RejectedExceedsPartsErr, Exec."nRejected", Exec."nParts");
+        if Exec."Qty. Rejected" > Exec."Qty. Produced" then begin
+            ErrorText := StrSubstNo(RejectedExceedsProducedErr, Exec."Qty. Rejected", Exec."Qty. Produced");
             MarkInboxFailed(Inbox, ErrorText);
             exit(false);
         end;
@@ -116,8 +116,8 @@ codeunit 50010 "ALP Execution Ingestion Svc"
         if ProdOrderRoutingLine.FindFirst() then begin
             ProdOrderRoutingLine."ALP Actual Availability" := Exec.Availability;
             ProdOrderRoutingLine."ALP Actual Productivity" := Exec.Productivity;
-            ProdOrderRoutingLine."ALP nParts" := Exec."nParts";
-            ProdOrderRoutingLine."ALP nRejected" := Exec."nRejected";
+            ProdOrderRoutingLine."ALP Qty. Produced" := Exec."Qty. Produced";
+            ProdOrderRoutingLine."ALP Qty. Rejected" := Exec."Qty. Rejected";
             ProdOrderRoutingLine."ALP Source Timestamp" := Exec."Source Timestamp";
             ProdOrderRoutingLine.Modify(true);
         end;

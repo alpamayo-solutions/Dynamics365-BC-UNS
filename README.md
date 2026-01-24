@@ -77,8 +77,9 @@ This extension ingests aggregated shopfloor execution metrics via REST API, stor
 | 50035 | API Page | ALP Output Inbox API |
 | 50036 | API Page | ALP Routings API |
 | 50037 | API Page | ALP Integration Inbox API |
-| 50040 | PermissionSet | ALP Shopfloor API |
-| 50041 | PermissionSet | ALP Shopfloor Reader |
+| 50040 | PermissionSet | ALP Shopfloor View |
+| 50041 | PermissionSet | ALP Shopfloor Exec |
+| 50042 | PermissionSet | ALP Shopfloor Post |
 
 ## Technical Details
 
@@ -108,8 +109,8 @@ OAuth 2.0 Bearer token with `https://api.businesscentral.dynamics.com` resource.
   "orderNo": "101001",
   "operationNo": "10",
   "workCenter": "MACH0001",
-  "nParts": 100,
-  "nRejected": 5,
+  "qtyProduced": 100,
+  "qtyRejected": 5,
   "runtimeSec": 3600,
   "downtimeSec": 300,
   "availability": 0.92,
@@ -128,8 +129,8 @@ OAuth 2.0 Bearer token with `https://api.businesscentral.dynamics.com` resource.
 | orderNo | Code[20] | Yes | Production Order number |
 | operationNo | Code[10] | Yes | Operation number in routing |
 | workCenter | Code[20] | No | Work Center code |
-| nParts | Integer | No | Total parts produced |
-| nRejected | Integer | No | Rejected parts (must be <= nParts) |
+| qtyProduced | Integer | No | Quantity produced (total) |
+| qtyRejected | Integer | No | Quantity rejected (must be <= qtyProduced) |
 | runtimeSec | Decimal | No | Runtime in seconds |
 | downtimeSec | Decimal | No | Downtime in seconds |
 | availability | Decimal | No | Availability ratio (0-1) |
@@ -169,8 +170,8 @@ curl -X POST "https://api.businesscentral.dynamics.com/v2.0/${BC_TENANT}/${BC_EN
     "orderNo": "101001",
     "operationNo": "10",
     "workCenter": "MACH0001",
-    "nParts": 100,
-    "nRejected": 5,
+    "qtyProduced": 100,
+    "qtyRejected": 5,
     "runtimeSec": 3600,
     "downtimeSec": 300,
     "availability": 0.92,
@@ -196,7 +197,7 @@ curl -X POST "https://api.businesscentral.dynamics.com/v2.0/${BC_TENANT}/${BC_EN
     "orderNo": "101001",
     "operationNo": "10",
     "workCenter": "MACH0001",
-    "nParts": 90,
+    "qtyProduced": 90,
     "sourceTimestamp": "2024-01-24T09:00:00Z",
     "source": "MES-SCADA"
   }'
@@ -221,7 +222,7 @@ curl -X POST "https://api.businesscentral.dynamics.com/v2.0/${BC_TENANT}/${BC_EN
 
 Should return 400 Bad Request.
 
-### 5. Rejected > Parts
+### 5. Rejected > Produced
 
 ```bash
 curl -X POST "https://api.businesscentral.dynamics.com/v2.0/${BC_TENANT}/${BC_ENV}/api/alpamayo/shopfloor/v1.0/companies(${BC_COMPANY})/executionEvents" \
@@ -231,8 +232,8 @@ curl -X POST "https://api.businesscentral.dynamics.com/v2.0/${BC_TENANT}/${BC_EN
     "messageId": "44444444-4444-4444-4444-444444444444",
     "orderNo": "101001",
     "operationNo": "10",
-    "nParts": 10,
-    "nRejected": 20,
+    "qtyProduced": 10,
+    "qtyRejected": 20,
     "sourceTimestamp": "2024-01-24T11:00:00Z"
   }'
 ```
@@ -277,57 +278,101 @@ BC_COMPANY=your-company-id
 az login
 ```
 
-### Demo Workflow
+### Complete Demo Workflow
 
 ```bash
-# 1. List available production orders with routing
-bridge get-orders
+# ─────────────────────────────────────────────────────────────────
+# STEP 1: Verify Connection
+# ─────────────────────────────────────────────────────────────────
+bridge auth                    # Verify OAuth token works
+bridge config                  # Show current configuration
 
-# 2. Check routing lines exist for an order
-bridge get-routing 101010
+# ─────────────────────────────────────────────────────────────────
+# STEP 2: Create a Production Order (uses existing Cronus items)
+# ─────────────────────────────────────────────────────────────────
+bridge setup prod-order --item SP-BOM2000 --quantity 100 --due-date 2026-01-26
 
-# 3. Post execution event for operation 10
-bridge post-event --order 101010 --operation 10 \
-  --parts 50 --rejected 2 --availability 0.95 --productivity 0.90
+# ─────────────────────────────────────────────────────────────────
+# STEP 3: Discover Production Orders and Routing
+# ─────────────────────────────────────────────────────────────────
+bridge get-orders              # List released production orders
+bridge get-routing 101023      # Check routing lines for the order
 
-# 4. Post execution event for operation 20
-bridge post-event --order 101010 --operation 20 \
-  --parts 48 --rejected 1 --availability 0.92 --productivity 0.88
+# ─────────────────────────────────────────────────────────────────
+# STEP 4: Post Execution Events (KPIs - no inventory impact)
+# ─────────────────────────────────────────────────────────────────
+# Post execution event for operation 10 (Reservoirmontage)
+bridge post-event --order 101023 --operation 10 \
+  --qty-produced 50 --qty-rejected 2 \
+  --availability 0.95 --productivity 0.90
 
-# 5. View integration inbox
-bridge get-inbox --type execution
+# Post execution event for operation 20 (Elektrische Verdrahtung)
+bridge post-event --order 101023 --operation 20 \
+  --qty-produced 48 --qty-rejected 1 \
+  --availability 0.92 --productivity 0.88
 
-# 6. View all orders modified since a timestamp
-bridge get-orders --since "2024-01-24T00:00:00Z"
+# Post execution event for operation 30 (Testen)
+bridge post-event --order 101023 --operation 30 \
+  --qty-produced 47 --qty-rejected 0 \
+  --availability 0.98 --productivity 0.95
+
+# ─────────────────────────────────────────────────────────────────
+# STEP 5: Post Output Events (for later inventory posting)
+# ─────────────────────────────────────────────────────────────────
+bridge post-output --order 101023 --operation 30 \
+  --qty-produced 47 --qty-rejected 0
+
+# ─────────────────────────────────────────────────────────────────
+# STEP 6: View Integration Inboxes
+# ─────────────────────────────────────────────────────────────────
+bridge get-inbox --type execution   # View execution events
+bridge get-inbox --type output      # View output events
+
+# ─────────────────────────────────────────────────────────────────
+# STEP 7: Verify in Business Central UI
+# ─────────────────────────────────────────────────────────────────
+# Open Released Production Order 101023 and check:
+# - Execution KPIs section (Qty. Produced, Qty. Rejected, Qty. Good)
+# - Shopfloor Output section (Total Qty. Produced, Total Qty. Rejected)
+# - Routing subpage (per-operation KPIs)
+
+# ─────────────────────────────────────────────────────────────────
+# CLEANUP (optional)
+# ─────────────────────────────────────────────────────────────────
+bridge setup cleanup --status Released  # Delete released orders
 ```
 
 ### Verify in Business Central
 
-1. Open **Released Production Order** 101010
+1. Open **Released Production Order** RPO-00001
 2. Check the **Execution KPIs** section:
-   - Total Parts: 98
-   - Total Rejected: 3
-   - Good Parts: 95
+   - Qty. Produced: 98
+   - Qty. Rejected: 3
+   - Qty. Good: 95
    - Progress %: 95%
-   - Weighted Availability
-   - Weighted Productivity
-3. Open **Routing** subpage to see per-operation KPIs
+   - Availability (weighted)
+   - Productivity (weighted)
+3. Check the **Shopfloor Output** section:
+   - Total Qty. Produced
+   - Total Qty. Rejected
+4. Open **Routing** subpage to see per-operation KPIs
 
 ### Test Scenarios
 
 ```bash
 # Test idempotency (re-post same event)
-bridge post-event --order 101010 --operation 10 \
-  --parts 50 --rejected 2 --availability 0.95 --productivity 0.90
+bridge post-event --order RPO-00001 --operation 10 \
+  --qty-produced 50 --qty-rejected 2
 # Result: Returns success, no duplicate data
 
 # Test validation (invalid routing line)
-bridge post-event --order 101010 --operation 99 --parts 10
+bridge post-event --order RPO-00001 --operation 99 --qty-produced 10
 # Result: Error - routing line not found
 
-# Test validation (rejected > parts)
-bridge post-event --order 101010 --operation 10 --parts 10 --rejected 20
-# Result: Error - nRejected cannot exceed nParts
+# Test validation (rejected > produced)
+bridge post-event --order RPO-00001 --operation 10 \
+  --qty-produced 10 --qty-rejected 20
+# Result: Error - Qty. Rejected cannot exceed Qty. Produced
 ```
 
 ## Development
@@ -368,8 +413,9 @@ d365_uns_app/
 │   │   ├── ALPOperationExecution.Table.al
 │   │   ├── ALPProductionOrderExt.TableExt.al
 │   │   ├── ALPProdOrderRtngLineExt.TableExt.al
-│   │   ├── ALPShopfloorAPI.PermissionSet.al
-│   │   └── ALPShopfloorReader.PermissionSet.al
+│   │   ├── ALPShopfloorView.PermissionSet.al
+│   │   ├── ALPShopfloorExec.PermissionSet.al
+│   │   └── ALPShopfloorPost.PermissionSet.al
 │   ├── Codeunit/
 │   │   └── ALPExecutionIngestionSvc.Codeunit.al
 │   ├── Page/
@@ -385,10 +431,19 @@ d365_uns_app/
 
 ## Permission Sets
 
-| Permission Set | Purpose | Grants |
-|----------------|---------|--------|
-| ALP Shopfloor API | Integration users | Full CRUD on tables, Execute on API |
-| ALP Shopfloor Reader | Planners/viewers | Read-only on tables |
+| Permission Set | ID | Purpose | Grants |
+|----------------|-----|---------|--------|
+| ALP Shopfloor View | 50040 | Dashboard viewers | Read-only on all tables, Execute on view pages |
+| ALP Shopfloor Exec | 50041 | Report execution KPIs | Insert/Modify on execution tables, Execute on execution API |
+| ALP Shopfloor Post | 50042 | Post output events | Insert/Modify on output tables, Execute on output API |
+
+**User Assignment:**
+| Role | Permission Sets |
+|------|-----------------|
+| Dashboard Viewer | View |
+| Shopfloor Device (SCADA/MES) | View + Exec |
+| Production Operator | View + Exec + Post |
+| Integration Service Account | View + Exec + Post |
 
 ## License
 

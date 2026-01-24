@@ -2,7 +2,7 @@ codeunit 50011 "ALP Output Ingestion Svc"
 {
     var
         ProdOrderNotFoundErr: Label 'Production Order %1 not found or not in Released status', Comment = '%1 = Order No.';
-        ScrapExceedsOutputErr: Label 'Scrap Quantity (%1) cannot exceed Output Quantity (%2)', Comment = '%1 = Scrap Qty, %2 = Output Qty';
+        RejectedExceedsProducedErr: Label 'Qty. Rejected (%1) cannot exceed Qty. Produced (%2)', Comment = '%1 = Qty. Rejected, %2 = Qty. Produced';
         NegativeQuantityErr: Label '%1 (%2) cannot be negative', Comment = '%1 = Field Name, %2 = Value';
 
     procedure ProcessOutputEvent(var OutputInbox: Record "ALP Output Inbox"; MessageId: Guid): Boolean
@@ -40,20 +40,20 @@ codeunit 50011 "ALP Output Ingestion Svc"
         end;
 
         // Step 3b: Validate business rules
-        if OutputInbox."Output Quantity" < 0 then begin
-            ErrorText := StrSubstNo(NegativeQuantityErr, 'Output Quantity', OutputInbox."Output Quantity");
+        if OutputInbox."Qty. Produced" < 0 then begin
+            ErrorText := StrSubstNo(NegativeQuantityErr, 'Qty. Produced', OutputInbox."Qty. Produced");
             MarkInboxFailed(OutputInbox, ErrorText);
             exit(false);
         end;
 
-        if OutputInbox."Scrap Quantity" < 0 then begin
-            ErrorText := StrSubstNo(NegativeQuantityErr, 'Scrap Quantity', OutputInbox."Scrap Quantity");
+        if OutputInbox."Qty. Rejected" < 0 then begin
+            ErrorText := StrSubstNo(NegativeQuantityErr, 'Qty. Rejected', OutputInbox."Qty. Rejected");
             MarkInboxFailed(OutputInbox, ErrorText);
             exit(false);
         end;
 
-        if OutputInbox."Scrap Quantity" > OutputInbox."Output Quantity" then begin
-            ErrorText := StrSubstNo(ScrapExceedsOutputErr, OutputInbox."Scrap Quantity", OutputInbox."Output Quantity");
+        if OutputInbox."Qty. Rejected" > OutputInbox."Qty. Produced" then begin
+            ErrorText := StrSubstNo(RejectedExceedsProducedErr, OutputInbox."Qty. Rejected", OutputInbox."Qty. Produced");
             MarkInboxFailed(OutputInbox, ErrorText);
             exit(false);
         end;

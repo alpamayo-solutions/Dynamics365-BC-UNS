@@ -13,19 +13,19 @@ codeunit 50012 "ALP Execution Calc Svc"
 
         if RoutingLine.FindSet() then
             repeat
-                TotalParts += RoutingLine."ALP nParts";
-                TotalRejected += RoutingLine."ALP nRejected";
+                TotalParts += RoutingLine."ALP Qty. Produced";
+                TotalRejected += RoutingLine."ALP Qty. Rejected";
 
-                // Weight by nParts for availability/productivity
-                if RoutingLine."ALP nParts" > 0 then begin
-                    WeightedAvailSum += RoutingLine."ALP Actual Availability" * RoutingLine."ALP nParts";
-                    WeightedProdSum += RoutingLine."ALP Actual Productivity" * RoutingLine."ALP nParts";
+                // Weight by quantity produced for availability/productivity
+                if RoutingLine."ALP Qty. Produced" > 0 then begin
+                    WeightedAvailSum += RoutingLine."ALP Actual Availability" * RoutingLine."ALP Qty. Produced";
+                    WeightedProdSum += RoutingLine."ALP Actual Productivity" * RoutingLine."ALP Qty. Produced";
                 end;
             until RoutingLine.Next() = 0;
 
         // Store totals
-        ProdOrder."ALP Exec Total Parts" := TotalParts;
-        ProdOrder."ALP Exec Total Rejected" := TotalRejected;
+        ProdOrder."ALP Exec Qty. Produced" := TotalParts;
+        ProdOrder."ALP Exec Qty. Rejected" := TotalRejected;
 
         // Calculate weighted averages (fall back to 0 if no weight)
         if TotalParts > 0 then begin
@@ -64,6 +64,6 @@ codeunit 50012 "ALP Execution Calc Svc"
 
     procedure GetQtyGood(ProdOrder: Record "Production Order"): Integer
     begin
-        exit(ProdOrder."ALP Exec Total Parts" - ProdOrder."ALP Exec Total Rejected");
+        exit(ProdOrder."ALP Exec Qty. Produced" - ProdOrder."ALP Exec Qty. Rejected");
     end;
 }

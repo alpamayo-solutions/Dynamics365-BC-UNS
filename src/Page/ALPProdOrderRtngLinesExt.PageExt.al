@@ -4,25 +4,25 @@ pageextension 50022 "ALP Prod Order Rtng Lines Ext" extends "Prod. Order Routing
     {
         addlast(Control1)
         {
-            field("ALP nParts"; Rec."ALP nParts")
+            field("ALP Qty. Produced"; Rec."ALP Qty. Produced")
             {
                 ApplicationArea = Manufacturing;
-                Caption = 'Parts Produced';
-                ToolTip = 'Number of parts produced at this operation';
+                Caption = 'Qty. Produced';
+                ToolTip = 'Quantity produced at this operation';
                 Editable = false;
             }
-            field("ALP nRejected"; Rec."ALP nRejected")
+            field("ALP Qty. Rejected"; Rec."ALP Qty. Rejected")
             {
                 ApplicationArea = Manufacturing;
-                Caption = 'Parts Rejected';
-                ToolTip = 'Number of parts rejected at this operation';
+                Caption = 'Qty. Rejected';
+                ToolTip = 'Quantity rejected at this operation';
                 Editable = false;
             }
-            field(ALPQtyGoodOp; Rec."ALP nParts" - Rec."ALP nRejected")
+            field(ALPQtyGood; Rec."ALP Qty. Produced" - Rec."ALP Qty. Rejected")
             {
                 ApplicationArea = Manufacturing;
-                Caption = 'Good Parts';
-                ToolTip = 'Good parts at this operation (produced minus rejected)';
+                Caption = 'Qty. Good';
+                ToolTip = 'Quantity good at this operation (produced minus rejected)';
                 Editable = false;
             }
             field("ALP Actual Availability"; Rec."ALP Actual Availability")

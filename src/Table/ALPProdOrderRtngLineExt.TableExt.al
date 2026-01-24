@@ -20,16 +20,16 @@ tableextension 50004 "ALP Prod Order Rtng Line Ext" extends "Prod. Order Routing
             MinValue = 0;
             MaxValue = 1;
         }
-        field(50002; "ALP nParts"; Integer)
+        field(50002; "ALP Qty. Produced"; Integer)
         {
-            Caption = 'Parts Produced';
+            Caption = 'Quantity Produced';
             DataClassification = CustomerContent;
             Editable = false;
             MinValue = 0;
         }
-        field(50003; "ALP nRejected"; Integer)
+        field(50003; "ALP Qty. Rejected"; Integer)
         {
-            Caption = 'Parts Rejected';
+            Caption = 'Quantity Rejected';
             DataClassification = CustomerContent;
             Editable = false;
             MinValue = 0;

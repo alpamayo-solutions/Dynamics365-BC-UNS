@@ -72,15 +72,15 @@ bridge get-routing RPO-00001
 bridge post-event
 
 # With arguments
-bridge post-event --order RPO-00001 --operation 10 --parts 100 --rejected 5
+bridge post-event --order RPO-00001 --operation 10 --qty-produced 100 --qty-rejected 5
 
 # With more options
 bridge post-event \
   --order RPO-00001 \
   --operation 10 \
   --work-center WC-001 \
-  --parts 100 \
-  --rejected 5 \
+  --qty-produced 100 \
+  --qty-rejected 5 \
   --runtime 3600 \
   --downtime 300 \
   --availability 0.92 \
@@ -96,8 +96,8 @@ Example `event.json`:
   "orderNo": "RPO-00001",
   "operationNo": "10",
   "workCenter": "WC-001",
-  "nParts": 100,
-  "nRejected": 5,
+  "qtyProduced": 100,
+  "qtyRejected": 5,
   "runtimeSec": 3600,
   "downtimeSec": 300,
   "availability": 0.92,
@@ -106,22 +106,22 @@ Example `event.json`:
 }
 ```
 
-### Setup Test Data
+### Setup Production Orders
+
+The Cronus sandbox already has items (with BOMs/routings) and work centers. Use `setup prod-order` to create production orders from existing items.
 
 ```bash
-# Create test items
-bridge setup items
-bridge setup items --prefix PROD --count 5
+# Create a released production order (item must have BOM/routing)
+bridge setup prod-order --item SP-BOM2000 --quantity 100
+bridge setup prod-order --item SP-BOM2000 --quantity 100 --due-date 2026-01-26
 
-# Create test work centers
-bridge setup work-centers
-bridge setup work-centers --prefix MACH --count 5
+# Create demo orders (3 released + 2 planned, uses existing items)
+bridge setup demo
+bridge setup demo --released 5 --planned 3
 
-# Create a production order (requires existing item)
-bridge setup prod-order --item TEST-001 --quantity 100
-
-# Run all setup commands
-bridge setup all
+# Cleanup - delete production orders (sandbox only!)
+bridge setup cleanup
+bridge setup cleanup --status Released  # Only delete released orders
 ```
 
 ## Verification

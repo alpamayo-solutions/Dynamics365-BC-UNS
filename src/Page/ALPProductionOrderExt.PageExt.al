@@ -21,22 +21,70 @@ pageextension 50021 "ALP Production Order Ext" extends "Released Production Orde
                     Editable = false;
                 }
             }
+            group(ShopfloorExecutionKPIs)
+            {
+                Caption = 'Execution KPIs';
+
+                field("ALP Exec Qty. Produced"; Rec."ALP Exec Qty. Produced")
+                {
+                    ApplicationArea = Manufacturing;
+                    Caption = 'Qty. Produced';
+                    ToolTip = 'Total quantity produced across all operations';
+                    Editable = false;
+                }
+                field("ALP Exec Qty. Rejected"; Rec."ALP Exec Qty. Rejected")
+                {
+                    ApplicationArea = Manufacturing;
+                    Caption = 'Qty. Rejected';
+                    ToolTip = 'Total quantity rejected across all operations';
+                    Editable = false;
+                }
+                field(ALPQtyGood; QtyGood)
+                {
+                    ApplicationArea = Manufacturing;
+                    Caption = 'Qty. Good';
+                    ToolTip = 'Total quantity good (Produced - Rejected)';
+                    Editable = false;
+                }
+                field(ALPProgressPct; ProgressPct)
+                {
+                    ApplicationArea = Manufacturing;
+                    Caption = 'Progress %';
+                    ToolTip = 'Completion percentage based on good quantity vs planned quantity';
+                    Editable = false;
+                    DecimalPlaces = 0 : 1;
+                }
+                field("ALP Exec Weighted Avail"; Rec."ALP Exec Weighted Avail")
+                {
+                    ApplicationArea = Manufacturing;
+                    Caption = 'Availability';
+                    ToolTip = 'Quantity-weighted average availability across operations';
+                    Editable = false;
+                }
+                field("ALP Exec Weighted Prod"; Rec."ALP Exec Weighted Prod")
+                {
+                    ApplicationArea = Manufacturing;
+                    Caption = 'Productivity';
+                    ToolTip = 'Quantity-weighted average productivity across operations';
+                    Editable = false;
+                }
+            }
             group(ShopfloorOutput)
             {
                 Caption = 'Shopfloor Output';
 
-                field("ALP Total Output Qty"; Rec."ALP Total Output Qty")
+                field("ALP Total Qty. Produced"; Rec."ALP Total Qty. Produced")
                 {
                     ApplicationArea = Manufacturing;
-                    Caption = 'Total Output';
-                    ToolTip = 'Total output quantity reported from the shopfloor system';
+                    Caption = 'Total Qty. Produced';
+                    ToolTip = 'Total quantity produced reported from the shopfloor system';
                     Editable = false;
                 }
-                field("ALP Total Scrap Qty"; Rec."ALP Total Scrap Qty")
+                field("ALP Total Qty. Rejected"; Rec."ALP Total Qty. Rejected")
                 {
                     ApplicationArea = Manufacturing;
-                    Caption = 'Total Scrap';
-                    ToolTip = 'Total scrap quantity reported from the shopfloor system';
+                    Caption = 'Total Qty. Rejected';
+                    ToolTip = 'Total quantity rejected reported from the shopfloor system';
                     Editable = false;
                 }
                 field("ALP Last Output Update At"; Rec."ALP Last Output Update At")
@@ -49,54 +97,6 @@ pageextension 50021 "ALP Production Order Ext" extends "Released Production Orde
                 {
                     ApplicationArea = Manufacturing;
                     ToolTip = 'Identifier of the shopfloor system that sent the last output update';
-                    Editable = false;
-                }
-            }
-            group(ShopfloorExecutionKPIs)
-            {
-                Caption = 'Execution KPIs';
-
-                field("ALP Exec Total Parts"; Rec."ALP Exec Total Parts")
-                {
-                    ApplicationArea = Manufacturing;
-                    Caption = 'Total Parts';
-                    ToolTip = 'Total parts produced across all operations';
-                    Editable = false;
-                }
-                field("ALP Exec Total Rejected"; Rec."ALP Exec Total Rejected")
-                {
-                    ApplicationArea = Manufacturing;
-                    Caption = 'Total Rejected';
-                    ToolTip = 'Total rejected parts across all operations';
-                    Editable = false;
-                }
-                field(ALPQtyGood; QtyGood)
-                {
-                    ApplicationArea = Manufacturing;
-                    Caption = 'Good Parts';
-                    ToolTip = 'Total good parts (Total - Rejected)';
-                    Editable = false;
-                }
-                field(ALPProgressPct; ProgressPct)
-                {
-                    ApplicationArea = Manufacturing;
-                    Caption = 'Progress %';
-                    ToolTip = 'Completion percentage based on good parts vs planned quantity';
-                    Editable = false;
-                    DecimalPlaces = 0 : 1;
-                }
-                field("ALP Exec Weighted Avail"; Rec."ALP Exec Weighted Avail")
-                {
-                    ApplicationArea = Manufacturing;
-                    Caption = 'Availability';
-                    ToolTip = 'Parts-weighted average availability across operations';
-                    Editable = false;
-                }
-                field("ALP Exec Weighted Prod"; Rec."ALP Exec Weighted Prod")
-                {
-                    ApplicationArea = Manufacturing;
-                    Caption = 'Productivity';
-                    ToolTip = 'Parts-weighted average productivity across operations';
                     Editable = false;
                 }
             }
@@ -150,7 +150,7 @@ pageextension 50021 "ALP Production Order Ext" extends "Released Production Orde
 
     trigger OnAfterGetRecord()
     begin
-        QtyGood := Rec."ALP Exec Total Parts" - Rec."ALP Exec Total Rejected";
+        QtyGood := Rec."ALP Exec Qty. Produced" - Rec."ALP Exec Qty. Rejected";
         if Rec.Quantity > 0 then
             ProgressPct := Round((QtyGood / Rec.Quantity) * 100, 0.1)
         else

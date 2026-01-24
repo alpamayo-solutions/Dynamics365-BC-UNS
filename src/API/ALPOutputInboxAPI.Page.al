@@ -31,13 +31,13 @@ page 50035 "ALP Output Inbox API"
                 {
                     Caption = 'Operation No.';
                 }
-                field(outputQuantity; Rec."Output Quantity")
+                field(qtyProduced; Rec."Qty. Produced")
                 {
-                    Caption = 'Output Quantity';
+                    Caption = 'Quantity Produced';
                 }
-                field(scrapQuantity; Rec."Scrap Quantity")
+                field(qtyRejected; Rec."Qty. Rejected")
                 {
-                    Caption = 'Scrap Quantity';
+                    Caption = 'Quantity Rejected';
                 }
                 field(postingDate; Rec."Posting Date")
                 {

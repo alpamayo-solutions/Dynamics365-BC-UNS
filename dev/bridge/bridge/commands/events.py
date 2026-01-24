@@ -18,8 +18,8 @@ console = Console()
 @click.option("--order", "-o", "order_no", help="Production order number")
 @click.option("--operation", "-op", "operation_no", default="10", help="Operation number")
 @click.option("--work-center", "-w", help="Work center code")
-@click.option("--parts", "-p", "n_parts", type=int, default=0, help="Number of parts produced")
-@click.option("--rejected", "-r", "n_rejected", type=int, default=0, help="Number of rejected parts")
+@click.option("--qty-produced", "-p", type=int, default=0, help="Quantity produced")
+@click.option("--qty-rejected", "-r", type=int, default=0, help="Quantity rejected")
 @click.option("--runtime", type=float, default=0, help="Runtime in seconds")
 @click.option("--downtime", type=float, default=0, help="Downtime in seconds")
 @click.option("--availability", type=float, default=0.95, help="Availability (0-1)")
@@ -31,8 +31,8 @@ def post_event(
     order_no: str | None,
     operation_no: str,
     work_center: str | None,
-    n_parts: int,
-    n_rejected: int,
+    qty_produced: int,
+    qty_rejected: int,
     runtime: float,
     downtime: float,
     availability: float,
@@ -58,8 +58,8 @@ def post_event(
                 order_no=order_no,
                 operation_no=operation_no,
                 work_center=work_center,
-                n_parts=n_parts,
-                n_rejected=n_rejected,
+                qty_produced=qty_produced,
+                qty_rejected=qty_rejected,
                 runtime_sec=runtime,
                 downtime_sec=downtime,
                 availability=availability,
@@ -81,7 +81,7 @@ def post_event(
                     f"Order: {event.order_no}\n"
                     f"Operation: {event.operation_no}\n"
                     f"Message ID: {event.message_id}\n"
-                    f"Parts: {event.n_parts} (rejected: {event.n_rejected})",
+                    f"Qty. Produced: {event.qty_produced} (rejected: {event.qty_rejected})",
                     title="Execution Event",
                 ))
 
@@ -98,21 +98,21 @@ def post_event(
 @click.command("post-output")
 @click.option("--order", "-o", "order_no", help="Production order number")
 @click.option("--operation", "-op", "operation_no", default="10", help="Operation number")
-@click.option("--output", "output_qty", type=float, default=0, help="Output quantity")
-@click.option("--scrap", "scrap_qty", type=float, default=0, help="Scrap quantity")
+@click.option("--qty-produced", type=float, default=0, help="Quantity produced")
+@click.option("--qty-rejected", type=float, default=0, help="Quantity rejected")
 @click.option("--posting-date", help="Posting date (YYYY-MM-DD)")
 @click.option("--file", "-f", "file_path", type=click.Path(exists=True), help="Load output event from JSON file")
 @click.option("--json-output", "json_out", is_flag=True, help="Output as JSON")
 def post_output(
     order_no: str | None,
     operation_no: str,
-    output_qty: float,
-    scrap_qty: float,
+    qty_produced: float,
+    qty_rejected: float,
     posting_date: str | None,
     file_path: str | None,
     json_out: bool,
 ):
-    """POST an output event (output/scrap quantities) to the ERP API."""
+    """POST an output event (produced/rejected quantities) to the ERP API."""
     from datetime import date as date_type
 
     try:
@@ -134,8 +134,8 @@ def post_output(
             event = OutputEvent(
                 order_no=order_no,
                 operation_no=operation_no,
-                output_quantity=output_qty,
-                scrap_quantity=scrap_qty,
+                qty_produced=qty_produced,
+                qty_rejected=qty_rejected,
                 posting_date=parsed_date,
             )
 
@@ -153,7 +153,7 @@ def post_output(
                     f"Order: {event.order_no}\n"
                     f"Operation: {event.operation_no}\n"
                     f"Message ID: {event.message_id}\n"
-                    f"Output: {event.output_quantity} (scrap: {event.scrap_quantity})",
+                    f"Qty. Produced: {event.qty_produced} (rejected: {event.qty_rejected})",
                     title="Output Event",
                 ))
 

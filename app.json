@@ -7,7 +7,7 @@
 
   "brief": "Ingest and display shopfloor execution KPIs",
   "description": "Read-only bridge for aggregated shopfloor execution metrics from shopfloor systems to Business Central",
-  "contextSensitiveHelpUrl": "https://github.com/alpamayo-solutions/Dynamics365-BC---UNS-Workorders",
+  "contextSensitiveHelpUrl": "https://alpamayo-solutions.com/docs/shopfloor-execution-bridge",
 
   "platform": "26.0.0.0",
   "application": "26.0.0.0",
