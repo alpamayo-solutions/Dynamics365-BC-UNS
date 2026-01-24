@@ -145,15 +145,20 @@ def setup_prod_order(item_no: str | None, quantity: float, description: str | No
                 due_date=due_date.date() if due_date else None,
             )
 
-            # Debug: print payload
-            import json
-            console.print(f"[dim]Payload: {json.dumps(order.model_dump(mode='json', by_alias=True, exclude_none=True))}[/dim]")
-
             result = client.create_production_order(order)
             order_no = result.get("number", "Unknown")
             system_id = result.get("id")
+            etag = result.get("@odata.etag")
 
             console.print(f"[green]Created production order: {order_no}[/green]")
+
+            # Set due date if specified (must be done via PATCH after creation)
+            if system_id and due_date:
+                try:
+                    client.update_production_order(system_id, {"dueDate": due_date.strftime("%Y-%m-%d")}, etag=etag)
+                    console.print(f"  [dim]Due date set to {due_date.strftime('%Y-%m-%d')}[/dim]")
+                except BCApiError as e:
+                    console.print(f"  [yellow]Warning: Failed to set due date:[/yellow] {e.message}")
 
             # Refresh to calculate routing and components
             if system_id:

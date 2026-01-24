@@ -88,6 +88,10 @@ class BCClient:
         if response.status_code == 204:
             return {}
 
+        # Handle empty response body
+        if not response.content:
+            return {}
+
         return response.json()
 
     def get_companies(self) -> list[dict[str, Any]]:
@@ -175,8 +179,30 @@ class BCClient:
     ) -> dict[str, Any]:
         """Create a production order via custom API."""
         url = f"{self.config.custom_api_url}/productionOrders"
-        payload = order.model_dump(mode="json", by_alias=True, exclude_none=True)
+        # Exclude dueDate from creation - must be set via PATCH after
+        payload = order.model_dump(mode="json", by_alias=True, exclude_none=True, exclude={"due_date"})
         return self._request("POST", url, json=payload)
+
+    def update_production_order(
+        self, system_id: str, updates: dict[str, Any], etag: str | None = None
+    ) -> dict[str, Any]:
+        """Update a production order via custom API."""
+        url = f"{self.config.custom_api_url}/productionOrders({system_id})"
+        headers = self._headers()
+        if etag:
+            headers["If-Match"] = etag
+        response = self._client.request("PATCH", url, headers=headers, json=updates)
+        if response.status_code >= 400:
+            try:
+                error_body = response.json()
+                error_msg = error_body.get("error", {}).get("message", response.reason_phrase)
+            except Exception:
+                error_msg = response.reason_phrase or "Unknown error"
+                error_body = {}
+            raise BCApiError(response.status_code, error_msg, error_body)
+        if response.status_code == 204:
+            return {}
+        return response.json()
 
     def get_production_order(self, order_no: str) -> ProductionOrderDetail | None:
         """Get a single production order by number via custom API."""

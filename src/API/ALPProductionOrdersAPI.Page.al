@@ -104,15 +104,25 @@ page 50032 "ALP Production Orders API"
     var
         ProdOrder: Record "Production Order";
         RefreshProdOrder: Report "Refresh Production Order";
+        SavedWorkDate: Date;
     begin
         if not EnvironmentInfo.IsSandbox() then
             Error('Production order refresh via API is only allowed in Sandbox environments.');
 
         ProdOrder.GetBySystemId(Rec.SystemId);
+
+        // Temporarily set work date to due date to avoid weekend calendar issues
+        // This is a standard BC pattern for programmatic scheduling
+        SavedWorkDate := WorkDate();
+        if ProdOrder."Due Date" <> 0D then
+            WorkDate(ProdOrder."Due Date");
+
         RefreshProdOrder.SetTableView(ProdOrder);
-        RefreshProdOrder.InitializeRequest(0, true, true, true, false); // Direction=Both, CalcLines, CalcRoutings, CalcComponents, CreateInboundWhseRequest=false
+        RefreshProdOrder.InitializeRequest(1, true, true, true, false); // Direction=Backward
         RefreshProdOrder.UseRequestPage(false);
         RefreshProdOrder.Run();
+
+        WorkDate(SavedWorkDate);
 
         ActionContext.SetObjectType(ObjectType::Page);
         ActionContext.SetObjectId(Page::"ALP Production Orders API");
