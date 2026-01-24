@@ -257,3 +257,76 @@ def setup_all(ctx, item_prefix: str, wc_prefix: str):
     console.print()
 
     console.print("[green]All setup complete![/green]")
+
+
+@setup.command("cleanup")
+@click.option("--status", "-s", help="Only delete orders with this status (Released, Planned, etc.)")
+@click.option("--yes", "-y", is_flag=True, help="Skip confirmation prompt")
+def setup_cleanup(status: str | None, yes: bool):
+    """Delete all production orders (sandbox only).
+
+    This command deletes production orders from the BC sandbox environment.
+    Use with caution - this operation cannot be undone.
+    """
+    try:
+        config = get_config_with_token()
+
+        with BCClient(config) as client:
+            # Fetch orders to delete
+            console.print("[dim]Fetching production orders...[/dim]")
+
+            orders_to_delete = []
+            for order_status in ["Released", "Planned", "Firm_Planned", "Simulated"]:
+                if status and order_status != status:
+                    continue
+                try:
+                    orders = client.get_production_orders(status=order_status, top=100)
+                    orders_to_delete.extend(orders)
+                except BCApiError:
+                    pass  # Status may not have any orders
+
+            if not orders_to_delete:
+                console.print("[yellow]No production orders found to delete.[/yellow]")
+                return
+
+            # Show what will be deleted
+            console.print(f"\n[bold]Found {len(orders_to_delete)} production order(s) to delete:[/bold]")
+            for order in orders_to_delete[:10]:
+                console.print(f"  {order.number} - {order.status} - {order.source_no or 'N/A'}")
+            if len(orders_to_delete) > 10:
+                console.print(f"  ... and {len(orders_to_delete) - 10} more")
+
+            # Confirm deletion
+            if not yes:
+                console.print()
+                if not click.confirm("[bold red]Delete these production orders?[/bold red]", default=False):
+                    console.print("[yellow]Cancelled.[/yellow]")
+                    return
+
+            # Delete orders
+            console.print()
+            console.print("[dim]Deleting production orders (sandbox only)...[/dim]")
+
+            deleted = 0
+            failed = 0
+            for order in orders_to_delete:
+                try:
+                    client.delete_production_order(str(order.id))
+                    console.print(f"  [green]Deleted {order.number}[/green]")
+                    deleted += 1
+                except BCApiError as e:
+                    console.print(f"  [red]Failed to delete {order.number}:[/red] {e.message}")
+                    failed += 1
+
+            console.print()
+            if failed == 0:
+                console.print(f"[green]Successfully deleted {deleted} production order(s).[/green]")
+            else:
+                console.print(f"[yellow]Deleted {deleted}, failed {failed} production order(s).[/yellow]")
+
+    except BCApiError as e:
+        console.print(f"[red]API Error ({e.status_code}):[/red] {e.message}")
+        raise SystemExit(1)
+    except Exception as e:
+        console.print(f"[red]Error:[/red] {e}")
+        raise SystemExit(1)

@@ -98,7 +98,7 @@ class BCClient:
 
     def get_production_orders(
         self, status: str = "Released", top: int = 50
-    ) -> list[ProductionOrder]:
+    ) -> list[ProductionOrderDetail]:
         """Get production orders filtered by status via custom API."""
         url = f"{self.config.custom_api_url}/productionOrders"
         params = {
@@ -106,7 +106,7 @@ class BCClient:
             "$top": str(top),
         }
         result = self._request("GET", url, params=params)
-        return [ProductionOrder.model_validate(o) for o in result.get("value", [])]
+        return [ProductionOrderDetail.model_validate(o) for o in result.get("value", [])]
 
     def get_routing_lines(self, order_no: str) -> list[RoutingLine]:
         """Get routing lines for a production order via custom API."""
@@ -229,6 +229,11 @@ class BCClient:
             params["$filter"] = f"status eq '{status}'"
         result = self._request("GET", url, params=params)
         return [OutputInboxEntry.model_validate(e) for e in result.get("value", [])]
+
+    def delete_production_order(self, system_id: str) -> None:
+        """Delete a production order by its SystemId (only works in sandbox)."""
+        url = f"{self.config.custom_api_url}/productionOrders({system_id})"
+        self._request("DELETE", url)
 
     def close(self):
         """Close the HTTP client."""

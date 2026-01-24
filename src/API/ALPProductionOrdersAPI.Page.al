@@ -8,10 +8,11 @@ page 50032 "ALP Production Orders API"
     EntityName = 'productionOrder';
     EntitySetName = 'productionOrders';
     SourceTable = "Production Order";
+    ODataKeyFields = SystemId;
     DelayedInsert = true;
     InsertAllowed = true;
     ModifyAllowed = true;
-    DeleteAllowed = false;
+    DeleteAllowed = true;
     Editable = true;
 
     layout
@@ -88,6 +89,13 @@ page 50032 "ALP Production Orders API"
     begin
         if not EnvironmentInfo.IsSandbox() then
             Error('Production order modification via API is only allowed in Sandbox environments.');
+        exit(true);
+    end;
+
+    trigger OnDeleteRecord(): Boolean
+    begin
+        if not EnvironmentInfo.IsSandbox() then
+            Error('Production order deletion via API is only allowed in Sandbox environments.');
         exit(true);
     end;
 }
