@@ -3,6 +3,7 @@
   "name": "ShopfloorExecutionBridge",
   "publisher": "alpamayo",
   "version": "1.0.0.0",
+  "logo": "assets/logo.png",
 
   "brief": "Ingest and display shopfloor execution KPIs",
   "description": "Read-only bridge for aggregated shopfloor execution metrics from shopfloor systems to Business Central",

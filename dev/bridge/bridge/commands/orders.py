@@ -162,66 +162,6 @@ def get_orders(status: str, item_filter: str | None, since: str | None, top: int
         raise SystemExit(1)
 
 
-@click.command("poll")
-@click.option("--since", help="Only return orders modified since this timestamp (ISO format)")
-@click.option("--status", "-s", default="Released", help="Filter by status (default: Released)")
-@click.option("--top", "-n", default=50, help="Maximum number of results")
-@click.option("--json-output", "json_out", is_flag=True, help="Output as JSON")
-def poll(since: str | None, status: str, top: int, json_out: bool):
-    """Poll for production orders (simulates ERP→UNS polling).
-
-    Returns all orders by default, or only those modified since --since.
-    """
-    try:
-        config = get_config_with_token()
-
-        with BCClient(config) as client:
-            if not json_out:
-                if since:
-                    console.print(f"[dim]Polling for {status.lower()} orders modified since {since}...[/dim]")
-                else:
-                    console.print(f"[dim]Polling for all {status.lower()} orders...[/dim]")
-
-            if since:
-                orders = client.poll_production_orders(since=since, status=status, top=top)
-            else:
-                orders = client.get_production_orders(status=status, top=top)
-
-            if json_out:
-                data = [o.model_dump(mode="json", by_alias=True) for o in orders]
-                console.print_json(json.dumps(data))
-            elif not orders:
-                console.print(f"[yellow]No {status.lower()} orders found.[/yellow]")
-            else:
-                title = f"Orders Modified Since {since}" if since else f"{status} Production Orders"
-                table = Table(title=title)
-                table.add_column("Number", style="cyan")
-                table.add_column("Item", style="green")
-                table.add_column("Description")
-                table.add_column("Quantity", justify="right")
-                table.add_column("Modified At")
-
-                for order in orders:
-                    modified = getattr(order, "system_modified_at", None)
-                    table.add_row(
-                        order.number,
-                        order.source_no or "-",
-                        order.description or "-",
-                        f"{order.quantity:.0f}" if order.quantity else "-",
-                        modified.isoformat() if modified else "-",
-                    )
-
-                console.print(table)
-                console.print(f"\n[dim]Found {len(orders)} order(s)[/dim]")
-
-    except BCApiError as e:
-        console.print(f"[red]API Error ({e.status_code}):[/red] {e.message}")
-        raise SystemExit(1)
-    except Exception as e:
-        console.print(f"[red]Error:[/red] {e}")
-        raise SystemExit(1)
-
-
 @click.command("get-order")
 @click.argument("order_no")
 @click.option("--json-output", "json_out", is_flag=True, help="Output as JSON")

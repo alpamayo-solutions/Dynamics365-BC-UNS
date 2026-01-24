@@ -59,13 +59,24 @@ This extension ingests aggregated shopfloor execution metrics via REST API, stor
 | 50000 | Enum | ALP Integration Status |
 | 50001 | Table | ALP Integration Inbox |
 | 50002 | Table | ALP Operation Execution |
+| 50003 | Table | ALP Output Inbox |
 | 50003 | TableExt | ALP Production Order Ext |
 | 50004 | TableExt | ALP Prod Order Rtng Line Ext |
 | 50010 | Codeunit | ALP Execution Ingestion Svc |
+| 50011 | Codeunit | ALP Output Ingestion Svc |
+| 50012 | Codeunit | ALP Execution Calc Svc |
 | 50020 | Page | ALP Integration Inbox List |
 | 50021 | PageExt | ALP Production Order Ext |
 | 50022 | PageExt | ALP Prod Order Rtng Lines Ext |
+| 50023 | Page | ALP Output Inbox List |
 | 50030 | API Page | ALP Execution Events API |
+| 50031 | API Page | ALP Production Orders API |
+| 50032 | API Page | ALP Prod Order Routing API |
+| 50033 | API Page | ALP Work Centers API |
+| 50034 | API Page | ALP Prod Order Components API |
+| 50035 | API Page | ALP Output Inbox API |
+| 50036 | API Page | ALP Routings API |
+| 50037 | API Page | ALP Integration Inbox API |
 | 50040 | PermissionSet | ALP Shopfloor API |
 | 50041 | PermissionSet | ALP Shopfloor Reader |
 
@@ -243,6 +254,81 @@ curl -X POST "https://api.businesscentral.dynamics.com/v2.0/${BC_TENANT}/${BC_EN
 ```
 
 Should return 400 Bad Request.
+
+## Bridge CLI Demo Flow
+
+The Bridge CLI provides a convenient way to test the integration without manual curl commands.
+
+### Setup
+
+```bash
+# Navigate to the bridge CLI directory
+cd dev/bridge
+
+# Install dependencies
+pip install -e .
+
+# Configure environment (.env file)
+BC_TENANT=your-tenant-id
+BC_ENV=Sandbox
+BC_COMPANY=your-company-id
+
+# Authenticate via Azure CLI
+az login
+```
+
+### Demo Workflow
+
+```bash
+# 1. List available production orders with routing
+bridge get-orders
+
+# 2. Check routing lines exist for an order
+bridge get-routing 101010
+
+# 3. Post execution event for operation 10
+bridge post-event --order 101010 --operation 10 \
+  --parts 50 --rejected 2 --availability 0.95 --productivity 0.90
+
+# 4. Post execution event for operation 20
+bridge post-event --order 101010 --operation 20 \
+  --parts 48 --rejected 1 --availability 0.92 --productivity 0.88
+
+# 5. View integration inbox
+bridge get-inbox --type execution
+
+# 6. View all orders modified since a timestamp
+bridge get-orders --since "2024-01-24T00:00:00Z"
+```
+
+### Verify in Business Central
+
+1. Open **Released Production Order** 101010
+2. Check the **Execution KPIs** section:
+   - Total Parts: 98
+   - Total Rejected: 3
+   - Good Parts: 95
+   - Progress %: 95%
+   - Weighted Availability
+   - Weighted Productivity
+3. Open **Routing** subpage to see per-operation KPIs
+
+### Test Scenarios
+
+```bash
+# Test idempotency (re-post same event)
+bridge post-event --order 101010 --operation 10 \
+  --parts 50 --rejected 2 --availability 0.95 --productivity 0.90
+# Result: Returns success, no duplicate data
+
+# Test validation (invalid routing line)
+bridge post-event --order 101010 --operation 99 --parts 10
+# Result: Error - routing line not found
+
+# Test validation (rejected > parts)
+bridge post-event --order 101010 --operation 10 --parts 10 --rejected 20
+# Result: Error - nRejected cannot exceed nParts
+```
 
 ## Development
 

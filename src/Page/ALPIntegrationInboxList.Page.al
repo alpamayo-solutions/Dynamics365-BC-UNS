@@ -57,6 +57,13 @@ page 50020 "ALP Integration Inbox List"
                     ApplicationArea = Manufacturing;
                     ToolTip = 'Error message if processing failed';
                 }
+                field(Warning; Rec.Warning)
+                {
+                    ApplicationArea = Manufacturing;
+                    Caption = 'Warning';
+                    ToolTip = 'Warning message (e.g., WorkCenter mismatch)';
+                    StyleExpr = WarningStyle;
+                }
             }
         }
         area(FactBoxes)
@@ -104,6 +111,7 @@ page 50020 "ALP Integration Inbox List"
 
     var
         StatusStyle: Text;
+        WarningStyle: Text;
         HasExecutionData: Boolean;
 
     trigger OnAfterGetRecord()
@@ -118,6 +126,11 @@ page 50020 "ALP Integration Inbox List"
             Rec.Status::Failed:
                 StatusStyle := 'Unfavorable';
         end;
+
+        if Rec.Warning <> '' then
+            WarningStyle := 'Attention'
+        else
+            WarningStyle := '';
 
         HasExecutionData := OpExec.Get(Rec."Order No.", Rec."Operation No.");
     end;

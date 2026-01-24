@@ -28,3 +28,5 @@ Translations/*.g.xlf
 
 .venv/
 __pycache__/
+
+.claude/

@@ -160,6 +160,7 @@ class InboxEntry(BaseModel):
     received_at: datetime | None = Field(default=None, alias="receivedAt")
     processed_at: datetime | None = Field(default=None, alias="processedAt")
     error: str | None = None
+    warning: str | None = None
 
     model_config = {"populate_by_name": True}
 

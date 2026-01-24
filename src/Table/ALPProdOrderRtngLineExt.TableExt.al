@@ -20,5 +20,32 @@ tableextension 50004 "ALP Prod Order Rtng Line Ext" extends "Prod. Order Routing
             MinValue = 0;
             MaxValue = 1;
         }
+        field(50002; "ALP nParts"; Integer)
+        {
+            Caption = 'Parts Produced';
+            DataClassification = CustomerContent;
+            Editable = false;
+            MinValue = 0;
+        }
+        field(50003; "ALP nRejected"; Integer)
+        {
+            Caption = 'Parts Rejected';
+            DataClassification = CustomerContent;
+            Editable = false;
+            MinValue = 0;
+        }
+        field(50004; "ALP Source Timestamp"; DateTime)
+        {
+            Caption = 'Execution Source Timestamp';
+            DataClassification = CustomerContent;
+            Editable = false;
+        }
+    }
+
+    keys
+    {
+        key(ALPProdOrder; Status, "Prod. Order No.")
+        {
+        }
     }
 }

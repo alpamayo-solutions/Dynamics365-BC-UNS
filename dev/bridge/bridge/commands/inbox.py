@@ -40,6 +40,7 @@ def get_inbox(inbox_type: str, status: str | None, top: int, json_out: bool):
                             "status": e.status,
                             "receivedAt": e.received_at.isoformat() if e.received_at else None,
                             "error": e.error,
+                            "warning": e.warning,
                         })
                 except BCApiError:
                     # Integration inbox API may not exist yet
@@ -77,7 +78,8 @@ def get_inbox(inbox_type: str, status: str | None, top: int, json_out: bool):
                 table.add_column("Output", justify="right")
                 table.add_column("Scrap", justify="right")
                 table.add_column("Received At")
-                table.add_column("Error", style="red", max_width=30)
+                table.add_column("Error", style="red", max_width=25)
+                table.add_column("Warning", style="yellow", max_width=25)
 
                 for entry in results:
                     status_style = ""
@@ -96,7 +98,8 @@ def get_inbox(inbox_type: str, status: str | None, top: int, json_out: bool):
                         f"{entry.get('outputQty', 0):.0f}" if entry.get("type") == "output" else "-",
                         f"{entry.get('scrapQty', 0):.0f}" if entry.get("type") == "output" else "-",
                         entry.get("receivedAt", "-") or "-",
-                        (entry.get("error") or "-")[:30],
+                        (entry.get("error") or "-")[:25],
+                        (entry.get("warning") or "-")[:25],
                     )
 
                 console.print(table)

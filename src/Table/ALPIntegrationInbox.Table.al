@@ -45,6 +45,11 @@ table 50001 "ALP Integration Inbox"
             Caption = 'Error';
             DataClassification = SystemMetadata;
         }
+        field(9; Warning; Text[2048])
+        {
+            Caption = 'Warning';
+            DataClassification = SystemMetadata;
+        }
     }
 
     keys
