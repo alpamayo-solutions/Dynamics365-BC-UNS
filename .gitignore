@@ -1,0 +1,27 @@
+# AL Language packages
+.alpackages/
+.netpackages/
+
+# Build outputs
+*.app
+
+# VS Code
+.vscode/*.code-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Backup files
+*.bak
+*.tmp
+
+# Translation files (if generated)
+Translations/*.g.xlf
+
+# Symbols
+*.app.json
+
+# Environment files
+.env
+.env.local
