@@ -11,6 +11,7 @@ permissionset 50040 "ALP Shopfloor API"
         tabledata "Prod. Order Routing Line" = R,
         tabledata "Prod. Order Component" = R,
         tabledata "Work Center" = RIM,
+        tabledata "Routing Header" = R,
         codeunit "ALP Execution Ingestion Svc" = X,
         codeunit "ALP Output Ingestion Svc" = X,
         page "ALP Execution Events API" = X,
@@ -21,5 +22,6 @@ permissionset 50040 "ALP Shopfloor API"
         page "ALP Prod Order Routing API" = X,
         page "ALP Prod Order Components API" = X,
         page "ALP Production Orders API" = X,
+        page "ALP Routings API" = X,
         page "ALP Work Centers API" = X;
 }

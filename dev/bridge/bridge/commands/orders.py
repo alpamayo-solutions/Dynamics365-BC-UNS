@@ -13,6 +13,49 @@ from ..config import get_config_with_token
 console = Console()
 
 
+@click.command("get-routings")
+@click.option("--status", "-s", default="Certified", help="Filter by status (default: Certified)")
+@click.option("--json-output", "json_out", is_flag=True, help="Output as JSON")
+def get_routings(status: str, json_out: bool):
+    """GET available routings from BC."""
+    try:
+        config = get_config_with_token()
+
+        with BCClient(config) as client:
+            if not json_out:
+                console.print(f"[dim]Fetching {status.lower()} routings...[/dim]")
+
+            routings = client.get_routings(status=status)
+
+            if json_out:
+                console.print_json(json.dumps(routings))
+            elif not routings:
+                console.print(f"[yellow]No {status.lower()} routings found.[/yellow]")
+            else:
+                table = Table(title=f"{status} Routings")
+                table.add_column("Number", style="cyan")
+                table.add_column("Description", style="green")
+                table.add_column("Type")
+
+                for r in routings:
+                    table.add_row(
+                        r.get("number", "-"),
+                        r.get("description", "-"),
+                        r.get("type", "-"),
+                    )
+
+                console.print(table)
+                console.print(f"\n[dim]Found {len(routings)} routing(s)[/dim]")
+                console.print("\n[dim]To use a routing, assign it to an Item's 'Routing No.' field in BC[/dim]")
+
+    except BCApiError as e:
+        console.print(f"[red]API Error ({e.status_code}):[/red] {e.message}")
+        raise SystemExit(1)
+    except Exception as e:
+        console.print(f"[red]Error:[/red] {e}")
+        raise SystemExit(1)
+
+
 @click.command("get-work-centers")
 @click.option("--json-output", "json_out", is_flag=True, help="Output as JSON")
 def get_work_centers(json_out: bool):

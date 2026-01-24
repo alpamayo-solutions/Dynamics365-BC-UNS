@@ -235,6 +235,13 @@ class BCClient:
         url = f"{self.config.custom_api_url}/productionOrders({system_id})"
         self._request("DELETE", url)
 
+    def get_routings(self, status: str = "Certified") -> list[dict[str, Any]]:
+        """Get available routings via custom API."""
+        url = f"{self.config.custom_api_url}/routings"
+        params = {"$filter": f"status eq '{status}'"} if status else {}
+        result = self._request("GET", url, params=params)
+        return result.get("value", [])
+
     def close(self):
         """Close the HTTP client."""
         self._client.close()
