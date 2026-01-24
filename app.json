@@ -3,17 +3,16 @@
   "name": "ShopfloorExecutionBridge",
   "publisher": "alpamayo",
   "version": "1.0.0.0",
+
   "brief": "Ingest and display shopfloor execution KPIs",
   "description": "Read-only bridge for aggregated shopfloor execution metrics from shopfloor systems to Business Central",
-  "privacyStatement": "",
-  "EULA": "",
-  "help": "",
   "contextSensitiveHelpUrl": "https://alpamayo-solutions.com",
-  "logo": "",
-  "platform": "26.5.0.0",
-  "application": "26.5.0.0",
-  "runtime": "14.0",
+
+  "platform": "26.0.0.0",
+  "application": "26.0.0.0",
+  "runtime": "15.0",
   "target": "Cloud",
+
   "idRanges": [
     {
       "from": 50000,
@@ -25,5 +24,6 @@
     "allowDownloadingSource": true,
     "includeSourceInSymbolFile": true
   },
+
   "features": ["NoImplicitWith"]
 }
