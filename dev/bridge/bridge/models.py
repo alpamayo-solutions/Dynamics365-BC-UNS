@@ -1,6 +1,6 @@
 """Pydantic models for BC API payloads."""
 
-from datetime import datetime
+from datetime import date, datetime
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
@@ -84,5 +84,100 @@ class CreateProductionOrder(BaseModel):
     source_no: str = Field(alias="sourceNo")
     description: str | None = None
     quantity: float = 1.0
+
+    model_config = {"populate_by_name": True}
+
+
+class ProductionOrderDetail(BaseModel):
+    """Production order with full details from BC API."""
+
+    id: UUID | None = None
+    number: str
+    description: str | None = None
+    status: str | None = None
+    source_type: str | None = Field(default=None, alias="sourceType")
+    source_no: str | None = Field(default=None, alias="sourceNo")
+    quantity: float | None = None
+    due_date: date | None = Field(default=None, alias="dueDate")
+    starting_date: date | None = Field(default=None, alias="startingDate")
+    ending_date: date | None = Field(default=None, alias="endingDate")
+    location_code: str | None = Field(default=None, alias="locationCode")
+    last_modified_date_time: datetime | None = Field(
+        default=None, alias="lastModifiedDateTime"
+    )
+    system_modified_at: datetime | None = Field(default=None, alias="systemModifiedAt")
+
+    model_config = {"populate_by_name": True}
+
+
+class ProductionOrderComponent(BaseModel):
+    """Production order component (BOM line) from BC API."""
+
+    status: str | None = None
+    prod_order_no: str = Field(alias="prodOrderNo")
+    prod_order_line_no: int | None = Field(default=None, alias="prodOrderLineNo")
+    line_no: int | None = Field(default=None, alias="lineNo")
+    item_no: str | None = Field(default=None, alias="itemNo")
+    description: str | None = None
+    unit_of_measure_code: str | None = Field(default=None, alias="unitOfMeasureCode")
+    quantity_per: float | None = Field(default=None, alias="quantityPer")
+    expected_quantity: float | None = Field(default=None, alias="expectedQuantity")
+    remaining_quantity: float | None = Field(default=None, alias="remainingQuantity")
+    location_code: str | None = Field(default=None, alias="locationCode")
+    bin_code: str | None = Field(default=None, alias="binCode")
+    flushing_method: str | None = Field(default=None, alias="flushingMethod")
+    routing_link_code: str | None = Field(default=None, alias="routingLinkCode")
+    due_date: date | None = Field(default=None, alias="dueDate")
+
+    model_config = {"populate_by_name": True}
+
+
+class OutputEvent(BaseModel):
+    """Output event payload for the Shopfloor API."""
+
+    message_id: UUID = Field(default_factory=uuid4, alias="messageId")
+    order_no: str = Field(alias="orderNo")
+    operation_no: str = Field(default="10", alias="operationNo")
+    output_quantity: float = Field(alias="outputQuantity")
+    scrap_quantity: float = Field(default=0, alias="scrapQuantity")
+    posting_date: date | None = Field(default=None, alias="postingDate")
+    source_timestamp: datetime = Field(
+        default_factory=datetime.utcnow, alias="sourceTimestamp"
+    )
+    source: str = "BRIDGE-CLI"
+
+    model_config = {"populate_by_name": True}
+
+
+class InboxEntry(BaseModel):
+    """Integration inbox entry from BC API."""
+
+    message_id: UUID = Field(alias="messageId")
+    message_type: str | None = Field(default=None, alias="messageType")
+    order_no: str | None = Field(default=None, alias="orderNo")
+    operation_no: str | None = Field(default=None, alias="operationNo")
+    status: str | None = None
+    received_at: datetime | None = Field(default=None, alias="receivedAt")
+    processed_at: datetime | None = Field(default=None, alias="processedAt")
+    error: str | None = None
+
+    model_config = {"populate_by_name": True}
+
+
+class OutputInboxEntry(BaseModel):
+    """Output inbox entry from BC API."""
+
+    message_id: UUID = Field(alias="messageId")
+    order_no: str | None = Field(default=None, alias="orderNo")
+    operation_no: str | None = Field(default=None, alias="operationNo")
+    output_quantity: float | None = Field(default=None, alias="outputQuantity")
+    scrap_quantity: float | None = Field(default=None, alias="scrapQuantity")
+    posting_date: date | None = Field(default=None, alias="postingDate")
+    source_timestamp: datetime | None = Field(default=None, alias="sourceTimestamp")
+    source: str | None = None
+    status: str | None = None
+    received_at: datetime | None = Field(default=None, alias="receivedAt")
+    processed_at: datetime | None = Field(default=None, alias="processedAt")
+    error: str | None = None
 
     model_config = {"populate_by_name": True}

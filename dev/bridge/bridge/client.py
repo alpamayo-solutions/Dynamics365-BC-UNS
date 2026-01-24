@@ -8,8 +8,13 @@ from .config import Config, get_token_from_az_cli
 from .models import (
     CreateProductionOrder,
     ExecutionEvent,
+    InboxEntry,
     Item,
+    OutputEvent,
+    OutputInboxEntry,
     ProductionOrder,
+    ProductionOrderComponent,
+    ProductionOrderDetail,
     RoutingLine,
     WorkCenter,
 )
@@ -166,6 +171,64 @@ class BCClient:
         url = f"{self.config.custom_api_url}/productionOrders"
         payload = order.model_dump(mode="json", by_alias=True, exclude_none=True)
         return self._request("POST", url, json=payload)
+
+    def get_production_order(self, order_no: str) -> ProductionOrderDetail | None:
+        """Get a single production order by number via custom API."""
+        url = f"{self.config.custom_api_url}/productionOrders"
+        params = {"$filter": f"number eq '{order_no}'"}
+        result = self._request("GET", url, params=params)
+        orders = result.get("value", [])
+        return ProductionOrderDetail.model_validate(orders[0]) if orders else None
+
+    def poll_production_orders(
+        self, since: str, status: str = "Released", top: int = 50
+    ) -> list[ProductionOrderDetail]:
+        """Poll for production orders modified since a given datetime."""
+        url = f"{self.config.custom_api_url}/productionOrders"
+        params = {
+            "$filter": f"status eq '{status}' and systemModifiedAt gt {since}",
+            "$top": str(top),
+            "$orderby": "systemModifiedAt asc",
+        }
+        result = self._request("GET", url, params=params)
+        return [ProductionOrderDetail.model_validate(o) for o in result.get("value", [])]
+
+    def get_components(self, order_no: str) -> list[ProductionOrderComponent]:
+        """Get components (BOM lines) for a production order via custom API."""
+        url = f"{self.config.custom_api_url}/prodOrderComponents"
+        params = {"$filter": f"prodOrderNo eq '{order_no}'"}
+        result = self._request("GET", url, params=params)
+        return [
+            ProductionOrderComponent.model_validate(c) for c in result.get("value", [])
+        ]
+
+    def post_output_event(self, event: OutputEvent) -> dict[str, Any]:
+        """Post an output event to the custom API."""
+        url = f"{self.config.custom_api_url}/outputInbox"
+        payload = event.model_dump(mode="json", by_alias=True, exclude_none=True)
+        return self._request("POST", url, json=payload)
+
+    def get_integration_inbox(
+        self, status: str | None = None, top: int = 50
+    ) -> list[InboxEntry]:
+        """Get integration inbox entries via custom API."""
+        url = f"{self.config.custom_api_url}/integrationInbox"
+        params: dict[str, str] = {"$top": str(top)}
+        if status:
+            params["$filter"] = f"status eq '{status}'"
+        result = self._request("GET", url, params=params)
+        return [InboxEntry.model_validate(e) for e in result.get("value", [])]
+
+    def get_output_inbox(
+        self, status: str | None = None, top: int = 50
+    ) -> list[OutputInboxEntry]:
+        """Get output inbox entries via custom API."""
+        url = f"{self.config.custom_api_url}/outputInbox"
+        params: dict[str, str] = {"$top": str(top)}
+        if status:
+            params["$filter"] = f"status eq '{status}'"
+        result = self._request("GET", url, params=params)
+        return [OutputInboxEntry.model_validate(e) for e in result.get("value", [])]
 
     def close(self):
         """Close the HTTP client."""

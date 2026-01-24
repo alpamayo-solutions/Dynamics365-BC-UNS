@@ -65,6 +65,11 @@ page 50032 "ALP Production Orders API"
                 {
                     Caption = 'Location Code';
                 }
+                field(systemModifiedAt; Rec.SystemModifiedAt)
+                {
+                    Caption = 'System Modified At';
+                    Editable = false;
+                }
             }
         }
     }

@@ -3,8 +3,9 @@
 import click
 from rich.console import Console
 
-from .commands.events import post_event
-from .commands.orders import get_orders, get_routing, get_work_centers
+from .commands.events import post_event, post_output
+from .commands.inbox import get_inbox
+from .commands.orders import get_components, get_order, get_orders, get_routing, get_work_centers
 from .commands.setup import setup
 
 console = Console()
@@ -108,7 +109,11 @@ def config():
 
 # Register commands
 cli.add_command(post_event)
+cli.add_command(post_output)
 cli.add_command(get_orders)
+cli.add_command(get_order)
 cli.add_command(get_routing)
+cli.add_command(get_components)
 cli.add_command(get_work_centers)
+cli.add_command(get_inbox)
 cli.add_command(setup)
