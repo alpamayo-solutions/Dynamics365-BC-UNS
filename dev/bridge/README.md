@@ -25,6 +25,9 @@ uv run --directory dev/bridge bridge --help
    BC_ENV=Sandbox
    BC_COMPANY=your-company-id
    ```
+3. **ShopfloorExecutionBridge extension deployed to BC** (required for `post-event` and `setup work-centers`)
+   - Open project in VS Code
+   - Press F5 to deploy to BC Sandbox
 
 ## Commands
 
@@ -130,15 +133,21 @@ bridge setup all
 
 ## API Endpoints Used
 
+**Standard BC API** (`/api/v2.0/`):
 | Action | Method | Endpoint |
 |--------|--------|----------|
 | List companies | GET | `/api/v2.0/companies` |
-| List prod orders | GET | `/api/v2.0/companies({id})/productionOrders` |
-| Get routing lines | GET | `/api/v2.0/companies({id})/prodOrderRoutingLines` |
-| Create item | POST | `/api/v2.0/companies({id})/items` |
-| Create work center | POST | `/api/v2.0/companies({id})/workCenters` |
-| Create prod order | POST | `/api/v2.0/companies({id})/productionOrders` |
-| Post execution event | POST | `/api/alpamayo/shopfloor/v1.0/companies({id})/executionEvents` |
+| Create/get items | GET/POST | `/api/v2.0/companies({id})/items` |
+
+**Custom API** (`/api/alpamayo/shopfloor/v1.0/`) - requires extension:
+| Action | Method | Endpoint |
+|--------|--------|----------|
+| List/create production orders | GET/POST | `.../productionOrders` |
+| Get routing lines | GET | `.../prodOrderRoutingLines` |
+| List/create work centers | GET/POST | `.../workCenters` |
+| Post execution event | POST | `.../executionEvents` |
+
+Note: Microsoft's standard API doesn't expose manufacturing entities (production orders, work centers, routing). The extension provides custom API pages for these.
 
 ## Development
 

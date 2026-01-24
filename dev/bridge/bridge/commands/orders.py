@@ -1,4 +1,4 @@
-"""Order commands for querying production orders and routing."""
+"""Order commands for querying production orders, routing, and work centers."""
 
 import json
 
@@ -10,6 +10,48 @@ from ..client import BCClient, BCApiError
 from ..config import get_config_with_token
 
 console = Console()
+
+
+@click.command("get-work-centers")
+@click.option("--json-output", "json_out", is_flag=True, help="Output as JSON")
+def get_work_centers(json_out: bool):
+    """GET work centers from the custom API."""
+    try:
+        config = get_config_with_token()
+
+        with BCClient(config) as client:
+            if not json_out:
+                console.print("[dim]Fetching work centers...[/dim]")
+
+            wcs = client.get_work_centers()
+
+            if json_out:
+                console.print_json(json.dumps(wcs))
+            elif not wcs:
+                console.print("[yellow]No work centers found.[/yellow]")
+            else:
+                table = Table(title="Work Centers")
+                table.add_column("Number", style="cyan")
+                table.add_column("Name", style="green")
+                table.add_column("Group")
+                table.add_column("Capacity", justify="right")
+
+                for wc in wcs:
+                    table.add_row(
+                        wc.get("number", "-"),
+                        wc.get("name", "-"),
+                        wc.get("workCenterGroupCode", "-"),
+                        str(wc.get("capacity", "-")),
+                    )
+
+                console.print(table)
+
+    except BCApiError as e:
+        console.print(f"[red]API Error ({e.status_code}):[/red] {e.message}")
+        raise SystemExit(1)
+    except Exception as e:
+        console.print(f"[red]Error:[/red] {e}")
+        raise SystemExit(1)
 
 
 @click.command("get-orders")

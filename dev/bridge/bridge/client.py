@@ -94,22 +94,20 @@ class BCClient:
     def get_production_orders(
         self, status: str = "Released", top: int = 50
     ) -> list[ProductionOrder]:
-        """Get production orders filtered by status."""
-        url = f"{self.config.standard_api_url}/productionOrders"
+        """Get production orders filtered by status via custom API."""
+        url = f"{self.config.custom_api_url}/productionOrders"
         params = {
             "$filter": f"status eq '{status}'",
             "$top": str(top),
-            "$select": "id,number,description,status,sourceNo,quantity",
         }
         result = self._request("GET", url, params=params)
         return [ProductionOrder.model_validate(o) for o in result.get("value", [])]
 
     def get_routing_lines(self, order_no: str) -> list[RoutingLine]:
-        """Get routing lines for a production order."""
-        url = f"{self.config.standard_api_url}/prodOrderRoutingLines"
+        """Get routing lines for a production order via custom API."""
+        url = f"{self.config.custom_api_url}/prodOrderRoutingLines"
         params = {
             "$filter": f"prodOrderNo eq '{order_no}'",
-            "$select": "prodOrderNo,operationNo,type,no,description,runTime,setupTime",
         }
         result = self._request("GET", url, params=params)
         return [RoutingLine.model_validate(r) for r in result.get("value", [])]
@@ -119,6 +117,13 @@ class BCClient:
         url = f"{self.config.custom_api_url}/executionEvents"
         payload = event.model_dump(mode="json", by_alias=True)
         return self._request("POST", url, json=payload)
+
+    def get_items(self, top: int = 50) -> list[dict[str, Any]]:
+        """Get all items."""
+        url = f"{self.config.standard_api_url}/items"
+        params = {"$top": str(top)}
+        result = self._request("GET", url, params=params)
+        return result.get("value", [])
 
     def create_item(self, item: Item) -> dict[str, Any]:
         """Create an item."""
@@ -134,15 +139,21 @@ class BCClient:
         items = result.get("value", [])
         return items[0] if items else None
 
+    def get_work_centers(self) -> list[dict[str, Any]]:
+        """Get all work centers via custom API."""
+        url = f"{self.config.custom_api_url}/workCenters"
+        result = self._request("GET", url)
+        return result.get("value", [])
+
     def create_work_center(self, wc: WorkCenter) -> dict[str, Any]:
-        """Create a work center."""
-        url = f"{self.config.standard_api_url}/workCenters"
+        """Create a work center via custom API."""
+        url = f"{self.config.custom_api_url}/workCenters"
         payload = wc.model_dump(mode="json", by_alias=True, exclude_none=True)
         return self._request("POST", url, json=payload)
 
     def get_work_center(self, wc_number: str) -> dict[str, Any] | None:
-        """Get a work center by number."""
-        url = f"{self.config.standard_api_url}/workCenters"
+        """Get a work center by number via custom API."""
+        url = f"{self.config.custom_api_url}/workCenters"
         params = {"$filter": f"number eq '{wc_number}'"}
         result = self._request("GET", url, params=params)
         wcs = result.get("value", [])
@@ -151,8 +162,8 @@ class BCClient:
     def create_production_order(
         self, order: CreateProductionOrder
     ) -> dict[str, Any]:
-        """Create a production order."""
-        url = f"{self.config.standard_api_url}/productionOrders"
+        """Create a production order via custom API."""
+        url = f"{self.config.custom_api_url}/productionOrders"
         payload = order.model_dump(mode="json", by_alias=True, exclude_none=True)
         return self._request("POST", url, json=payload)
 

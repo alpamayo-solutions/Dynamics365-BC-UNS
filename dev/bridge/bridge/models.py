@@ -79,6 +79,7 @@ class WorkCenter(BaseModel):
 class CreateProductionOrder(BaseModel):
     """Payload for creating a production order."""
 
+    status: str = "Released"  # Simulated, Planned, Firm_Planned, Released, Finished
     source_type: str = Field(default="Item", alias="sourceType")
     source_no: str = Field(alias="sourceNo")
     description: str | None = None

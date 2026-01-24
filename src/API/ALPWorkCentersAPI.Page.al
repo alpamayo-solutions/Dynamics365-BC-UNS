@@ -1,0 +1,78 @@
+page 50031 "ALP Work Centers API"
+{
+    PageType = API;
+    Caption = 'Work Centers API';
+    APIPublisher = 'alpamayo';
+    APIGroup = 'shopfloor';
+    APIVersion = 'v1.0';
+    EntityName = 'workCenter';
+    EntitySetName = 'workCenters';
+    SourceTable = "Work Center";
+    DelayedInsert = true;
+    InsertAllowed = true;
+    ModifyAllowed = true;
+    DeleteAllowed = false;
+
+    layout
+    {
+        area(Content)
+        {
+            repeater(Records)
+            {
+                field(number; Rec."No.")
+                {
+                    Caption = 'No.';
+                }
+                field(name; Rec.Name)
+                {
+                    Caption = 'Name';
+                }
+                field(workCenterGroupCode; Rec."Work Center Group Code")
+                {
+                    Caption = 'Work Center Group Code';
+                }
+                field(unitOfMeasureCode; Rec."Unit of Measure Code")
+                {
+                    Caption = 'Unit of Measure Code';
+                }
+                field(capacity; Rec.Capacity)
+                {
+                    Caption = 'Capacity';
+                }
+                field(efficiency; Rec.Efficiency)
+                {
+                    Caption = 'Efficiency';
+                }
+                field(directUnitCost; Rec."Direct Unit Cost")
+                {
+                    Caption = 'Direct Unit Cost';
+                }
+                field(indirectCostPercent; Rec."Indirect Cost %")
+                {
+                    Caption = 'Indirect Cost %';
+                }
+                field(blocked; Rec.Blocked)
+                {
+                    Caption = 'Blocked';
+                }
+            }
+        }
+    }
+
+    var
+        EnvironmentInfo: Codeunit "Environment Information";
+
+    trigger OnInsertRecord(BelowxRec: Boolean): Boolean
+    begin
+        if not EnvironmentInfo.IsSandbox() then
+            Error('Work center creation is only allowed in Sandbox environments.');
+        exit(true);
+    end;
+
+    trigger OnModifyRecord(): Boolean
+    begin
+        if not EnvironmentInfo.IsSandbox() then
+            Error('Work center modification is only allowed in Sandbox environments.');
+        exit(true);
+    end;
+}

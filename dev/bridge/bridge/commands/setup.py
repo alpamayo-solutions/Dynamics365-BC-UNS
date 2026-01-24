@@ -62,7 +62,10 @@ def setup_items(prefix: str, count: int):
 @click.option("--prefix", "-p", default="WC", help="Work center number prefix")
 @click.option("--count", "-n", default=3, help="Number of work centers to create")
 def setup_work_centers(prefix: str, count: int):
-    """Create test work centers in BC."""
+    """Create test work centers in BC.
+
+    Requires the ShopfloorExecutionBridge extension to be deployed (exposes workCenters API).
+    """
     try:
         config = get_config_with_token()
 
@@ -92,7 +95,15 @@ def setup_work_centers(prefix: str, count: int):
             console.print("[green]Done[/green]")
 
     except BCApiError as e:
-        console.print(f"[red]API Error ({e.status_code}):[/red] {e.message}")
+        if e.status_code == 404:
+            console.print("[red]API Error:[/red] workCenters endpoint not found.")
+            console.print()
+            console.print("Make sure the ShopfloorExecutionBridge extension is deployed:")
+            console.print("  1. Open VS Code in the project root")
+            console.print("  2. Press F5 to deploy to BC Sandbox")
+            console.print("  3. Retry this command")
+        else:
+            console.print(f"[red]API Error ({e.status_code}):[/red] {e.message}")
         raise SystemExit(1)
     except Exception as e:
         console.print(f"[red]Error:[/red] {e}")
@@ -103,27 +114,30 @@ def setup_work_centers(prefix: str, count: int):
 @click.option("--item", "-i", "item_no", help="Item number for the production order")
 @click.option("--quantity", "-q", type=float, default=100, help="Quantity to produce")
 @click.option("--description", "-d", help="Order description")
-def setup_prod_order(item_no: str | None, quantity: float, description: str | None):
-    """Create a production order with routing."""
+@click.option("--status", "-s", default="Released", help="Order status (Released, Planned, Firm_Planned)")
+def setup_prod_order(item_no: str | None, quantity: float, description: str | None, status: str):
+    """Create a released production order."""
     try:
         config = get_config_with_token()
 
-        if not item_no:
-            item_no = click.prompt("Item number", default="TEST-001")
-
-        if not description:
-            description = f"Test production order for {item_no}"
-
         with BCClient(config) as client:
-            # Check if item exists
-            existing_item = client.get_item(item_no)
-            if not existing_item:
-                console.print(f"[yellow]Item {item_no} not found. Create it first with 'bridge setup items'.[/yellow]")
-                raise SystemExit(1)
+            # If no item specified, list available items
+            if not item_no:
+                items = client.get_items(top=20)
+                if items:
+                    console.print("[dim]Available items:[/dim]")
+                    for item in items[:10]:
+                        console.print(f"  {item.get('number', 'N/A'):15} - {item.get('displayName', 'N/A')}")
+                    console.print()
+                item_no = click.prompt("Item number")
 
-            console.print(f"[dim]Creating production order for {item_no}...[/dim]")
+            if not description:
+                description = f"Demo order for {item_no}"
+
+            console.print(f"[dim]Creating {status} production order for {item_no}...[/dim]")
 
             order = CreateProductionOrder(
+                status=status,
                 source_no=item_no,
                 quantity=quantity,
                 description=description,
@@ -136,8 +150,86 @@ def setup_prod_order(item_no: str | None, quantity: float, description: str | No
             console.print(f"  Item: {item_no}")
             console.print(f"  Quantity: {quantity}")
             console.print(f"  Status: {result.get('status', 'Unknown')}")
+
+    except BCApiError as e:
+        console.print(f"[red]API Error ({e.status_code}):[/red] {e.message}")
+        raise SystemExit(1)
+    except Exception as e:
+        console.print(f"[red]Error:[/red] {e}")
+        raise SystemExit(1)
+
+
+@setup.command("demo")
+@click.option("--released", "-r", default=3, help="Number of released orders")
+@click.option("--planned", "-p", default=2, help="Number of planned orders")
+def setup_demo(released: int, planned: int):
+    """Create demo production orders using existing items.
+
+    Creates both released and planned production orders.
+    """
+    try:
+        config = get_config_with_token()
+
+        with BCClient(config) as client:
+            console.print("[dim]Fetching available items...[/dim]")
+            items = client.get_items(top=50)
+
+            if not items:
+                console.print("[red]No items found. Cannot create production orders.[/red]")
+                raise SystemExit(1)
+
+            total = released + planned
+            console.print(f"[dim]Found {len(items)} items. Creating {total} production orders...[/dim]")
             console.print()
-            console.print("[dim]Note: Use BC client to add routing and release the order.[/dim]")
+
+            # Create released orders
+            if released > 0:
+                console.print("[bold]Released orders:[/bold]")
+                for i in range(min(released, len(items))):
+                    item = items[i % len(items)]
+                    item_no = item.get("number")
+
+                    order = CreateProductionOrder(
+                        status="Released",
+                        source_no=item_no,
+                        quantity=100 + (i * 50),
+                        description=f"Demo (Released): {item.get('displayName', item_no)}",
+                    )
+
+                    try:
+                        result = client.create_production_order(order)
+                        order_no = result.get("number", "Unknown")
+                        console.print(f"  [green]{order_no}[/green] - {item_no} x {order.quantity}")
+                    except BCApiError as e:
+                        console.print(f"  [red]Failed for {item_no}:[/red] {e.message}")
+
+            # Create planned orders
+            if planned > 0:
+                console.print()
+                console.print("[bold]Planned orders:[/bold]")
+                for i in range(min(planned, len(items))):
+                    item = items[(released + i) % len(items)]
+                    item_no = item.get("number")
+
+                    order = CreateProductionOrder(
+                        status="Planned",
+                        source_no=item_no,
+                        quantity=200 + (i * 100),
+                        description=f"Demo (Planned): {item.get('displayName', item_no)}",
+                    )
+
+                    try:
+                        result = client.create_production_order(order)
+                        order_no = result.get("number", "Unknown")
+                        console.print(f"  [cyan]{order_no}[/cyan] - {item_no} x {order.quantity}")
+                    except BCApiError as e:
+                        console.print(f"  [red]Failed for {item_no}:[/red] {e.message}")
+
+            console.print()
+            console.print("[green]Demo setup complete![/green]")
+            console.print()
+            console.print("[dim]Run 'bridge get-orders' for released orders[/dim]")
+            console.print("[dim]Run 'bridge get-orders --status Planned' for planned orders[/dim]")
 
     except BCApiError as e:
         console.print(f"[red]API Error ({e.status_code}):[/red] {e.message}")
