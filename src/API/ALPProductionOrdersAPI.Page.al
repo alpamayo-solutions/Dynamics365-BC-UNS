@@ -98,4 +98,25 @@ page 50032 "ALP Production Orders API"
             Error('Production order deletion via API is only allowed in Sandbox environments.');
         exit(true);
     end;
+
+    [ServiceEnabled]
+    procedure Refresh(var ActionContext: WebServiceActionContext)
+    var
+        ProdOrder: Record "Production Order";
+        RefreshProdOrder: Report "Refresh Production Order";
+    begin
+        if not EnvironmentInfo.IsSandbox() then
+            Error('Production order refresh via API is only allowed in Sandbox environments.');
+
+        ProdOrder.GetBySystemId(Rec.SystemId);
+        RefreshProdOrder.SetTableView(ProdOrder);
+        RefreshProdOrder.InitializeRequest(0, true, true, true, false); // Direction=Both, CalcLines, CalcRoutings, CalcComponents, CreateInboundWhseRequest=false
+        RefreshProdOrder.UseRequestPage(false);
+        RefreshProdOrder.Run();
+
+        ActionContext.SetObjectType(ObjectType::Page);
+        ActionContext.SetObjectId(Page::"ALP Production Orders API");
+        ActionContext.AddEntityKey(Rec.FieldNo(SystemId), Rec.SystemId);
+        ActionContext.SetResultCode(WebServiceActionResultCode::Updated);
+    end;
 }

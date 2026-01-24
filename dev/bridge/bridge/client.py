@@ -108,12 +108,18 @@ class BCClient:
         result = self._request("GET", url, params=params)
         return [ProductionOrderDetail.model_validate(o) for o in result.get("value", [])]
 
-    def get_routing_lines(self, order_no: str) -> list[RoutingLine]:
+    def get_routing_lines(self, order_no: str | None = None, status: str | None = None) -> list[RoutingLine]:
         """Get routing lines for a production order via custom API."""
         url = f"{self.config.custom_api_url}/prodOrderRoutingLines"
-        params = {
-            "$filter": f"prodOrderNo eq '{order_no}'",
-        }
+        filters = []
+        if status:
+            filters.append(f"status eq '{status}'")
+        if order_no:
+            filters.append(f"prodOrderNo eq '{order_no}'")
+        params = {}
+        if filters:
+            params["$filter"] = " and ".join(filters)
+        params["$top"] = "50"
         result = self._request("GET", url, params=params)
         return [RoutingLine.model_validate(r) for r in result.get("value", [])]
 
@@ -124,8 +130,8 @@ class BCClient:
         return self._request("POST", url, json=payload)
 
     def get_items(self, top: int = 50) -> list[dict[str, Any]]:
-        """Get all items."""
-        url = f"{self.config.standard_api_url}/items"
+        """Get all items with manufacturing fields via custom API."""
+        url = f"{self.config.custom_api_url}/items"
         params = {"$top": str(top)}
         result = self._request("GET", url, params=params)
         return result.get("value", [])
@@ -234,6 +240,11 @@ class BCClient:
         """Delete a production order by its SystemId (only works in sandbox)."""
         url = f"{self.config.custom_api_url}/productionOrders({system_id})"
         self._request("DELETE", url)
+
+    def refresh_production_order(self, system_id: str) -> dict[str, Any]:
+        """Refresh a production order to calculate routing and components."""
+        url = f"{self.config.custom_api_url}/productionOrders({system_id})/Microsoft.NAV.Refresh"
+        return self._request("POST", url)
 
     def get_routings(self, status: str = "Certified") -> list[dict[str, Any]]:
         """Get available routings via custom API."""

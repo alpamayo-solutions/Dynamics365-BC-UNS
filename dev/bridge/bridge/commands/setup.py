@@ -115,7 +115,8 @@ def setup_work_centers(prefix: str, count: int):
 @click.option("--quantity", "-q", type=float, default=100, help="Quantity to produce")
 @click.option("--description", "-d", help="Order description")
 @click.option("--status", "-s", default="Released", help="Order status (Released, Planned, Firm_Planned)")
-def setup_prod_order(item_no: str | None, quantity: float, description: str | None, status: str):
+@click.option("--due-date", type=click.DateTime(formats=["%Y-%m-%d"]), help="Due date (YYYY-MM-DD)")
+def setup_prod_order(item_no: str | None, quantity: float, description: str | None, status: str, due_date):
     """Create a released production order."""
     try:
         config = get_config_with_token()
@@ -141,12 +142,26 @@ def setup_prod_order(item_no: str | None, quantity: float, description: str | No
                 source_no=item_no,
                 quantity=quantity,
                 description=description,
+                due_date=due_date.date() if due_date else None,
             )
+
+            # Debug: print payload
+            import json
+            console.print(f"[dim]Payload: {json.dumps(order.model_dump(mode='json', by_alias=True, exclude_none=True))}[/dim]")
 
             result = client.create_production_order(order)
             order_no = result.get("number", "Unknown")
+            system_id = result.get("id")
 
             console.print(f"[green]Created production order: {order_no}[/green]")
+
+            # Refresh to calculate routing and components
+            if system_id:
+                try:
+                    client.refresh_production_order(system_id)
+                    console.print(f"  [dim]Refreshed (routing/components calculated)[/dim]")
+                except BCApiError as e:
+                    console.print(f"  [yellow]Warning: Refresh failed:[/yellow] {e.message}")
             console.print(f"  Item: {item_no}")
             console.print(f"  Quantity: {quantity}")
             console.print(f"  Status: {result.get('status', 'Unknown')}")
@@ -199,7 +214,14 @@ def setup_demo(released: int, planned: int):
                     try:
                         result = client.create_production_order(order)
                         order_no = result.get("number", "Unknown")
+                        system_id = result.get("id")
                         console.print(f"  [green]{order_no}[/green] - {item_no} x {order.quantity}")
+                        # Refresh to calculate routing
+                        if system_id:
+                            try:
+                                client.refresh_production_order(system_id)
+                            except BCApiError:
+                                pass  # Non-critical
                     except BCApiError as e:
                         console.print(f"  [red]Failed for {item_no}:[/red] {e.message}")
 
@@ -221,7 +243,14 @@ def setup_demo(released: int, planned: int):
                     try:
                         result = client.create_production_order(order)
                         order_no = result.get("number", "Unknown")
+                        system_id = result.get("id")
                         console.print(f"  [cyan]{order_no}[/cyan] - {item_no} x {order.quantity}")
+                        # Refresh to calculate routing
+                        if system_id:
+                            try:
+                                client.refresh_production_order(system_id)
+                            except BCApiError:
+                                pass  # Non-critical
                     except BCApiError as e:
                         console.print(f"  [red]Failed for {item_no}:[/red] {e.message}")
 

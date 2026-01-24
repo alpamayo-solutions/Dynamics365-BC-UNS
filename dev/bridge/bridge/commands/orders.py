@@ -102,9 +102,10 @@ def get_work_centers(json_out: bool):
 @click.option("--status", "-s", default="Released", help="Filter by status (default: Released)")
 @click.option("--item", "-i", "item_filter", help="Filter by item number")
 @click.option("--since", help="Filter by systemModifiedAt (ISO format, e.g. '2024-01-01T20:00:00Z' - use quotes)")
+@click.option("--with-routing", "with_routing", is_flag=True, help="Only show orders that have routing lines")
 @click.option("--top", "-n", default=50, help="Maximum number of results")
 @click.option("--json-output", "json_out", is_flag=True, help="Output as JSON")
-def get_orders(status: str, item_filter: str | None, since: str | None, top: int, json_out: bool):
+def get_orders(status: str, item_filter: str | None, since: str | None, with_routing: bool, top: int, json_out: bool):
     """GET released production orders from ERP."""
     try:
         config = get_config_with_token()
@@ -125,27 +126,48 @@ def get_orders(status: str, item_filter: str | None, since: str | None, top: int
             if item_filter:
                 orders = [o for o in orders if o.source_no and item_filter in o.source_no]
 
+            # Client-side filter to only orders with routing
+            if with_routing:
+                if not json_out:
+                    console.print("[dim]Checking routing lines...[/dim]")
+                orders_with_routing = []
+                for order in orders:
+                    routing_lines = client.get_routing_lines(order.number)
+                    if routing_lines:
+                        orders_with_routing.append((order, len(routing_lines)))
+                orders = [o for o, _ in orders_with_routing]
+
             if json_out:
                 data = [o.model_dump(mode="json", by_alias=True) for o in orders]
                 console.print_json(json.dumps(data))
             elif not orders:
-                console.print(f"[yellow]No {status.lower()} production orders found.[/yellow]")
+                msg = f"No {status.lower()} production orders found"
+                if with_routing:
+                    msg += " with routing lines"
+                console.print(f"[yellow]{msg}.[/yellow]")
             else:
-                table = Table(title=f"{status} Production Orders")
+                title = f"{status} Production Orders"
+                if with_routing:
+                    title += " (with routing)"
+                table = Table(title=title)
                 table.add_column("Number", style="cyan")
                 table.add_column("Item", style="green")
                 table.add_column("Description")
                 table.add_column("Quantity", justify="right")
+                if with_routing:
+                    table.add_column("Ops", justify="right")
                 if since:
                     table.add_column("Modified At")
 
-                for order in orders:
+                for idx, order in enumerate(orders):
                     row = [
                         order.number,
                         order.source_no or "-",
                         order.description or "-",
                         f"{order.quantity:.0f}" if order.quantity else "-",
                     ]
+                    if with_routing:
+                        row.append(str(orders_with_routing[idx][1]))
                     if since:
                         modified = getattr(order, "system_modified_at", None)
                         row.append(modified.isoformat() if modified else "-")
@@ -153,6 +175,65 @@ def get_orders(status: str, item_filter: str | None, since: str | None, top: int
 
                 console.print(table)
                 console.print(f"\n[dim]Found {len(orders)} order(s)[/dim]")
+
+    except BCApiError as e:
+        console.print(f"[red]API Error ({e.status_code}):[/red] {e.message}")
+        raise SystemExit(1)
+    except Exception as e:
+        console.print(f"[red]Error:[/red] {e}")
+        raise SystemExit(1)
+
+
+@click.command("get-items")
+@click.option("--with-routing", "with_routing", is_flag=True, help="Only show items that have a routing assigned")
+@click.option("--top", "-n", default=100, help="Maximum number of results")
+@click.option("--json-output", "json_out", is_flag=True, help="Output as JSON")
+def get_items(with_routing: bool, top: int, json_out: bool):
+    """GET items from BC."""
+    try:
+        config = get_config_with_token()
+
+        with BCClient(config) as client:
+            if not json_out:
+                console.print("[dim]Fetching items...[/dim]")
+
+            items = client.get_items(top=top)
+
+            # Filter to items with routing if requested
+            if with_routing:
+                items = [i for i in items if i.get("routingNumber")]
+
+            if json_out:
+                console.print_json(json.dumps(items))
+            elif not items:
+                msg = "No items found"
+                if with_routing:
+                    msg += " with routing assigned"
+                console.print(f"[yellow]{msg}.[/yellow]")
+            else:
+                title = "Items"
+                if with_routing:
+                    title += " (with routing)"
+                table = Table(title=title)
+                table.add_column("Number", style="cyan")
+                table.add_column("Description", style="green")
+                table.add_column("Type")
+                table.add_column("Routing No", style="magenta")
+                table.add_column("Prod BOM", style="yellow")
+                table.add_column("Replenishment")
+
+                for item in items:
+                    table.add_row(
+                        item.get("number", "-"),
+                        item.get("description", "-"),
+                        item.get("type", "-"),
+                        item.get("routingNumber") or "-",
+                        item.get("productionBOMNumber") or "-",
+                        item.get("replenishmentSystem") or "-",
+                    )
+
+                console.print(table)
+                console.print(f"\n[dim]Found {len(items)} item(s)[/dim]")
 
     except BCApiError as e:
         console.print(f"[red]API Error ({e.status_code}):[/red] {e.message}")
@@ -264,26 +345,41 @@ def get_components(order_no: str, json_out: bool):
 
 
 @click.command("get-routing")
-@click.argument("order_no")
+@click.argument("order_no", required=False)
+@click.option("--all", "show_all", is_flag=True, help="Show all routing lines (no filter)")
 @click.option("--json-output", "json_out", is_flag=True, help="Output as JSON")
-def get_routing(order_no: str, json_out: bool):
+def get_routing(order_no: str | None, show_all: bool, json_out: bool):
     """GET routing lines for a production order."""
     try:
         config = get_config_with_token()
 
         with BCClient(config) as client:
-            if not json_out:
-                console.print(f"[dim]Fetching routing for order {order_no}...[/dim]")
-
-            lines = client.get_routing_lines(order_no)
+            if show_all:
+                if not json_out:
+                    console.print("[dim]Fetching all routing lines...[/dim]")
+                lines = client.get_routing_lines()
+            elif order_no:
+                if not json_out:
+                    console.print(f"[dim]Fetching routing for order {order_no}...[/dim]")
+                lines = client.get_routing_lines(order_no=order_no)
+            else:
+                console.print("[red]Specify an order number or use --all[/red]")
+                raise SystemExit(1)
 
             if json_out:
                 data = [r.model_dump(mode="json", by_alias=True) for r in lines]
                 console.print_json(json.dumps(data))
             elif not lines:
-                console.print(f"[yellow]No routing lines found for order {order_no}.[/yellow]")
+                if show_all:
+                    console.print("[yellow]No routing lines found.[/yellow]")
+                else:
+                    console.print(f"[yellow]No routing lines found for order {order_no}.[/yellow]")
             else:
-                table = Table(title=f"Routing for {order_no}")
+                title = "All Routing Lines" if show_all else f"Routing for {order_no}"
+                table = Table(title=title)
+                if show_all:
+                    table.add_column("Status")
+                    table.add_column("Order No", style="cyan")
                 table.add_column("Op No", style="cyan", justify="right")
                 table.add_column("Type")
                 table.add_column("No", style="green")
@@ -292,16 +388,22 @@ def get_routing(order_no: str, json_out: bool):
                 table.add_column("Setup Time", justify="right")
 
                 for line in lines:
-                    table.add_row(
+                    row = []
+                    if show_all:
+                        row.append(getattr(line, 'status', '-') or "-")
+                        row.append(line.prod_order_no or "-")
+                    row.extend([
                         line.operation_no,
                         line.type or "-",
                         line.no or "-",
                         line.description or "-",
                         f"{line.run_time:.2f}" if line.run_time else "-",
                         f"{line.setup_time:.2f}" if line.setup_time else "-",
-                    )
+                    ])
+                    table.add_row(*row)
 
                 console.print(table)
+                console.print(f"\n[dim]Found {len(lines)} line(s)[/dim]")
 
     except BCApiError as e:
         console.print(f"[red]API Error ({e.status_code}):[/red] {e.message}")

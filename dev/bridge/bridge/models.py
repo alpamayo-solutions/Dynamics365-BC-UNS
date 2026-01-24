@@ -44,6 +44,7 @@ class ProductionOrder(BaseModel):
 class RoutingLine(BaseModel):
     """Production order routing line from BC API."""
 
+    status: str | None = None
     prod_order_no: str = Field(alias="prodOrderNo")
     operation_no: str = Field(alias="operationNo")
     type: str | None = None
@@ -84,6 +85,7 @@ class CreateProductionOrder(BaseModel):
     source_no: str = Field(alias="sourceNo")
     description: str | None = None
     quantity: float = 1.0
+    due_date: date | None = Field(default=None, alias="dueDate")
 
     model_config = {"populate_by_name": True}
 
