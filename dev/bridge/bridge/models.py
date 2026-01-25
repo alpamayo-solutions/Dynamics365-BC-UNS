@@ -144,28 +144,6 @@ class ProductionOrderComponent(BaseModel):
     model_config = {"populate_by_name": True}
 
 
-class OutputEvent(BaseModel):
-    """Output event payload for the Shopfloor API."""
-
-    message_id: UUID = Field(default_factory=uuid4, alias="messageId")
-    order_no: str = Field(alias="orderNo")
-    operation_no: str = Field(default="10", alias="operationNo")
-    qty_produced: float = Field(alias="qtyProduced")
-    qty_rejected: float = Field(default=0, alias="qtyRejected")
-    posting_date: date | None = Field(default=None, alias="postingDate")
-    source_timestamp: datetime = Field(default_factory=utc_now, alias="sourceTimestamp")
-    source: str = "BRIDGE-CLI"
-
-    @field_serializer("source_timestamp")
-    def serialize_timestamp(self, value: datetime) -> str:
-        """Serialize datetime to ISO format with Z suffix for BC OData."""
-        if value.tzinfo is None:
-            value = value.replace(tzinfo=timezone.utc)
-        return value.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
-
-    model_config = {"populate_by_name": True}
-
-
 class InboxEntry(BaseModel):
     """Integration inbox entry from BC API."""
 
@@ -178,24 +156,5 @@ class InboxEntry(BaseModel):
     processed_at: datetime | None = Field(default=None, alias="processedAt")
     error: str | None = None
     warning: str | None = None
-
-    model_config = {"populate_by_name": True}
-
-
-class OutputInboxEntry(BaseModel):
-    """Output inbox entry from BC API."""
-
-    message_id: UUID = Field(alias="messageId")
-    order_no: str | None = Field(default=None, alias="orderNo")
-    operation_no: str | None = Field(default=None, alias="operationNo")
-    qty_produced: float | None = Field(default=None, alias="qtyProduced")
-    qty_rejected: float | None = Field(default=None, alias="qtyRejected")
-    posting_date: date | None = Field(default=None, alias="postingDate")
-    source_timestamp: datetime | None = Field(default=None, alias="sourceTimestamp")
-    source: str | None = None
-    status: str | None = None
-    received_at: datetime | None = Field(default=None, alias="receivedAt")
-    processed_at: datetime | None = Field(default=None, alias="processedAt")
-    error: str | None = None
 
     model_config = {"populate_by_name": True}

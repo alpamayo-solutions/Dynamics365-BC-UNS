@@ -14,34 +14,6 @@ tableextension 50003 "ALP Production Order Ext" extends "Production Order"
             DataClassification = CustomerContent;
             Editable = false;
         }
-        field(50002; "ALP Total Qty. Produced"; Decimal)
-        {
-            Caption = 'Total Quantity Produced';
-            Editable = false;
-            DecimalPlaces = 0 : 5;
-            FieldClass = FlowField;
-            CalcFormula = sum("ALP Output Inbox"."Qty. Produced" where("Order No." = field("No."), Status = const(Processed)));
-        }
-        field(50003; "ALP Total Qty. Rejected"; Decimal)
-        {
-            Caption = 'Total Quantity Rejected';
-            Editable = false;
-            DecimalPlaces = 0 : 5;
-            FieldClass = FlowField;
-            CalcFormula = sum("ALP Output Inbox"."Qty. Rejected" where("Order No." = field("No."), Status = const(Processed)));
-        }
-        field(50004; "ALP Last Output Update At"; DateTime)
-        {
-            Caption = 'Last Output Update At';
-            DataClassification = SystemMetadata;
-            Editable = false;
-        }
-        field(50005; "ALP Output Source"; Code[20])
-        {
-            Caption = 'Output Source';
-            DataClassification = CustomerContent;
-            Editable = false;
-        }
         field(50006; "ALP Exec Qty. Produced"; Integer)
         {
             Caption = 'Execution Quantity Produced';

@@ -59,27 +59,22 @@ This extension ingests aggregated shopfloor execution metrics via REST API, stor
 | 50000 | Enum | ALP Integration Status |
 | 50001 | Table | ALP Integration Inbox |
 | 50002 | Table | ALP Operation Execution |
-| 50003 | Table | ALP Output Inbox |
 | 50003 | TableExt | ALP Production Order Ext |
 | 50004 | TableExt | ALP Prod Order Rtng Line Ext |
 | 50010 | Codeunit | ALP Execution Ingestion Svc |
-| 50011 | Codeunit | ALP Output Ingestion Svc |
 | 50012 | Codeunit | ALP Execution Calc Svc |
 | 50020 | Page | ALP Integration Inbox List |
 | 50021 | PageExt | ALP Production Order Ext |
 | 50022 | PageExt | ALP Prod Order Rtng Lines Ext |
-| 50023 | Page | ALP Output Inbox List |
 | 50030 | API Page | ALP Execution Events API |
 | 50031 | API Page | ALP Production Orders API |
 | 50032 | API Page | ALP Prod Order Routing API |
 | 50033 | API Page | ALP Work Centers API |
 | 50034 | API Page | ALP Prod Order Components API |
-| 50035 | API Page | ALP Output Inbox API |
 | 50036 | API Page | ALP Routings API |
 | 50037 | API Page | ALP Integration Inbox API |
 | 50040 | PermissionSet | ALP Shopfloor View |
 | 50041 | PermissionSet | ALP Shopfloor Exec |
-| 50042 | PermissionSet | ALP Shopfloor Post |
 
 ## Technical Details
 
@@ -317,23 +312,15 @@ bridge post-event --order 101023 --operation 30 \
   --availability 0.98 --productivity 0.95
 
 # ─────────────────────────────────────────────────────────────────
-# STEP 5: Post Output Events (for later inventory posting)
+# STEP 5: View Execution Inbox
 # ─────────────────────────────────────────────────────────────────
-bridge post-output --order 101023 --operation 30 \
-  --qty-produced 47 --qty-rejected 0
+bridge get-inbox                    # View execution events
 
 # ─────────────────────────────────────────────────────────────────
-# STEP 6: View Integration Inboxes
-# ─────────────────────────────────────────────────────────────────
-bridge get-inbox --type execution   # View execution events
-bridge get-inbox --type output      # View output events
-
-# ─────────────────────────────────────────────────────────────────
-# STEP 7: Verify in Business Central UI
+# STEP 6: Verify in Business Central UI
 # ─────────────────────────────────────────────────────────────────
 # Open Released Production Order 101023 and check:
 # - Execution KPIs section (Qty. Produced, Qty. Rejected, Qty. Good)
-# - Shopfloor Output section (Total Qty. Produced, Total Qty. Rejected)
 # - Routing subpage (per-operation KPIs)
 
 # ─────────────────────────────────────────────────────────────────
@@ -344,18 +331,15 @@ bridge setup cleanup --status Released  # Delete released orders
 
 ### Verify in Business Central
 
-1. Open **Released Production Order** RPO-00001
+1. Open **Released Production Order** 101023
 2. Check the **Execution KPIs** section:
-   - Qty. Produced: 98
-   - Qty. Rejected: 3
-   - Qty. Good: 95
-   - Progress %: 95%
+   - Qty. Produced (aggregated from all operations)
+   - Qty. Rejected
+   - Qty. Good (derived)
+   - Progress %
    - Availability (weighted)
    - Productivity (weighted)
-3. Check the **Shopfloor Output** section:
-   - Total Qty. Produced
-   - Total Qty. Rejected
-4. Open **Routing** subpage to see per-operation KPIs
+3. Open **Routing** subpage to see per-operation KPIs
 
 ### Test Scenarios
 
@@ -414,8 +398,7 @@ d365_uns_app/
 │   │   ├── ALPProductionOrderExt.TableExt.al
 │   │   ├── ALPProdOrderRtngLineExt.TableExt.al
 │   │   ├── ALPShopfloorView.PermissionSet.al
-│   │   ├── ALPShopfloorExec.PermissionSet.al
-│   │   └── ALPShopfloorPost.PermissionSet.al
+│   │   └── ALPShopfloorExec.PermissionSet.al
 │   ├── Codeunit/
 │   │   └── ALPExecutionIngestionSvc.Codeunit.al
 │   ├── Page/
@@ -435,15 +418,13 @@ d365_uns_app/
 |----------------|-----|---------|--------|
 | ALP Shopfloor View | 50040 | Dashboard viewers | Read-only on all tables, Execute on view pages |
 | ALP Shopfloor Exec | 50041 | Report execution KPIs | Insert/Modify on execution tables, Execute on execution API |
-| ALP Shopfloor Post | 50042 | Post output events | Insert/Modify on output tables, Execute on output API |
 
 **User Assignment:**
 | Role | Permission Sets |
 |------|-----------------|
 | Dashboard Viewer | View |
 | Shopfloor Device (SCADA/MES) | View + Exec |
-| Production Operator | View + Exec + Post |
-| Integration Service Account | View + Exec + Post |
+| Integration Service Account | View + Exec |
 
 ## License
 

@@ -10,8 +10,6 @@ from .models import (
     ExecutionEvent,
     InboxEntry,
     Item,
-    OutputEvent,
-    OutputInboxEntry,
     ProductionOrder,
     ProductionOrderComponent,
     ProductionOrderDetail,
@@ -234,12 +232,6 @@ class BCClient:
             ProductionOrderComponent.model_validate(c) for c in result.get("value", [])
         ]
 
-    def post_output_event(self, event: OutputEvent) -> dict[str, Any]:
-        """Post an output event to the custom API."""
-        url = f"{self.config.custom_api_url}/outputInbox"
-        payload = event.model_dump(mode="json", by_alias=True, exclude_none=True)
-        return self._request("POST", url, json=payload)
-
     def get_integration_inbox(
         self, status: str | None = None, top: int = 50
     ) -> list[InboxEntry]:
@@ -250,17 +242,6 @@ class BCClient:
             params["$filter"] = f"status eq '{status}'"
         result = self._request("GET", url, params=params)
         return [InboxEntry.model_validate(e) for e in result.get("value", [])]
-
-    def get_output_inbox(
-        self, status: str | None = None, top: int = 50
-    ) -> list[OutputInboxEntry]:
-        """Get output inbox entries via custom API."""
-        url = f"{self.config.custom_api_url}/outputInbox"
-        params: dict[str, str] = {"$top": str(top)}
-        if status:
-            params["$filter"] = f"status eq '{status}'"
-        result = self._request("GET", url, params=params)
-        return [OutputInboxEntry.model_validate(e) for e in result.get("value", [])]
 
     def delete_production_order(self, system_id: str) -> None:
         """Delete a production order by its SystemId (only works in sandbox)."""

@@ -69,37 +69,6 @@ pageextension 50021 "ALP Production Order Ext" extends "Released Production Orde
                     Editable = false;
                 }
             }
-            group(ShopfloorOutput)
-            {
-                Caption = 'Shopfloor Output';
-
-                field("ALP Total Qty. Produced"; Rec."ALP Total Qty. Produced")
-                {
-                    ApplicationArea = Manufacturing;
-                    Caption = 'Total Qty. Produced';
-                    ToolTip = 'Total quantity produced reported from the shopfloor system';
-                    Editable = false;
-                }
-                field("ALP Total Qty. Rejected"; Rec."ALP Total Qty. Rejected")
-                {
-                    ApplicationArea = Manufacturing;
-                    Caption = 'Total Qty. Rejected';
-                    ToolTip = 'Total quantity rejected reported from the shopfloor system';
-                    Editable = false;
-                }
-                field("ALP Last Output Update At"; Rec."ALP Last Output Update At")
-                {
-                    ApplicationArea = Manufacturing;
-                    ToolTip = 'Timestamp of the last output update received from the shopfloor system';
-                    Editable = false;
-                }
-                field("ALP Output Source"; Rec."ALP Output Source")
-                {
-                    ApplicationArea = Manufacturing;
-                    ToolTip = 'Identifier of the shopfloor system that sent the last output update';
-                    Editable = false;
-                }
-            }
         }
     }
 
@@ -121,15 +90,6 @@ pageextension 50021 "ALP Production Order Ext" extends "Released Production Orde
                     RunObject = page "ALP Integration Inbox List";
                     RunPageLink = "Order No." = field("No.");
                 }
-                action(ALPViewOutputInbox)
-                {
-                    ApplicationArea = Manufacturing;
-                    Caption = 'Output Events';
-                    ToolTip = 'View output events (quantities) for this production order';
-                    Image = OutputJournal;
-                    RunObject = page "ALP Output Inbox List";
-                    RunPageLink = "Order No." = field("No.");
-                }
             }
         }
         addlast(Promoted)
@@ -139,9 +99,6 @@ pageextension 50021 "ALP Production Order Ext" extends "Released Production Orde
                 Caption = 'Shopfloor';
 
                 actionref(ALPViewIntegrationInbox_Promoted; ALPViewIntegrationInbox)
-                {
-                }
-                actionref(ALPViewOutputInbox_Promoted; ALPViewOutputInbox)
                 {
                 }
             }
