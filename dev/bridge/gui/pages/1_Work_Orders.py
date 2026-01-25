@@ -155,6 +155,28 @@ try:
                     if st.button("Post Event", use_container_width=True):
                         st.switch_page("pages/3_Shopfloor_Execution.py")
 
+                # Show components/materials
+                with st.expander("Materials (Components)"):
+                    try:
+                        components = client.get_components(st.session_state["selected_order"])
+                        if not components:
+                            st.info("No components found for this order.")
+                        else:
+                            for comp in components:
+                                col1, col2, col3, col4 = st.columns([3, 2, 2, 2])
+                                with col1:
+                                    st.text(comp.item_no or "-")
+                                    if comp.description:
+                                        st.caption(comp.description)
+                                with col2:
+                                    st.text(f"Qty: {comp.expected_quantity or 0:.2f}")
+                                with col3:
+                                    st.text(f"Remaining: {comp.remaining_quantity or 0:.2f}")
+                                with col4:
+                                    st.text(comp.flushing_method or "-")
+                    except BCApiError as e:
+                        st.error(f"Failed to load components: {e.message}")
+
             # Create order section
             st.divider()
             with st.expander("Create New Order"):

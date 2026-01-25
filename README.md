@@ -553,6 +553,12 @@ d365_uns_app/
 
 Language selection is automatic based on user profile settings in Business Central (Settings > My Settings > Language).
 
+## Related Repositories
+
+| Repository | Description |
+|------------|-------------|
+| [Dynamics365-BC-UNS-Tests](https://github.com/alpamayo-solutions/Dynamics365-BC-UNS-Tests) | Automated test suite for this extension |
+
 ## License
 
 MIT License - see [LICENSE](LICENSE) file.
