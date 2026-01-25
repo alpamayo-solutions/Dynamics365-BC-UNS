@@ -29,7 +29,7 @@ page 50020 "ALP Integration Inbox List"
                 field("Order No."; Rec."Order No.")
                 {
                     ApplicationArea = Manufacturing;
-                    ToolTip = 'Production Order number';
+                    ToolTip = 'Production Order linked to this execution event.';
                 }
                 field("Operation No."; Rec."Operation No.")
                 {

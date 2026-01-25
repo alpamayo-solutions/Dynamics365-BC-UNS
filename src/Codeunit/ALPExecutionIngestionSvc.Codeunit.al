@@ -21,13 +21,10 @@ codeunit 50010 "ALP Execution Ingestion Svc"
         ErrorText: Text;
         IsNew: Boolean;
     begin
-        // Step 1: Idempotency check
         if Inbox.Get(MessageId) then
             if Inbox.Status = Inbox.Status::Processed then
                 exit(true);
         // If previously failed, we'll retry
-
-        // Step 2: Create/update inbox entry
         if not Inbox.Get(MessageId) then begin
             Inbox.Init();
             Inbox."Message Id" := MessageId;
@@ -43,7 +40,6 @@ codeunit 50010 "ALP Execution Ingestion Svc"
             Inbox.Modify(true);
         end;
 
-        // Step 3: Validate Production Order exists and is Released
         ProdOrder.SetRange(Status, ProdOrder.Status::Released);
         ProdOrder.SetRange("No.", Exec."Order No.");
         if not ProdOrder.FindFirst() then begin
@@ -52,7 +48,6 @@ codeunit 50010 "ALP Execution Ingestion Svc"
             exit(false);
         end;
 
-        // Step 3b: Validate business rules
         if Exec."Qty. Rejected" > Exec."Qty. Produced" then begin
             ErrorText := StrSubstNo(RejectedExceedsProducedErr, Exec."Qty. Rejected", Exec."Qty. Produced");
             MarkInboxFailed(Inbox, ErrorText);
@@ -71,9 +66,7 @@ codeunit 50010 "ALP Execution Ingestion Svc"
             exit(false);
         end;
 
-        // Step 3c: Resolve Operation No. dynamically
         if Exec."Operation No." = '' then begin
-            // Operation not provided - resolve from Work Center
             if Exec."Work Center No." = '' then begin
                 ErrorText := WorkCenterRequiredErr;
                 MarkInboxFailed(Inbox, ErrorText);
@@ -92,17 +85,14 @@ codeunit 50010 "ALP Execution Ingestion Svc"
             end;
 
             if ProdOrderRoutingLine.Count() > 1 then begin
-                // Multiple matches - ambiguous
                 ErrorText := StrSubstNo(MultipleOperationsForWCErr, Exec."Order No.", Exec."Work Center No.");
                 MarkInboxFailed(Inbox, ErrorText);
                 exit(false);
             end;
 
-            // Exactly one match - use it
             ProdOrderRoutingLine.FindFirst();
             Exec."Operation No." := ProdOrderRoutingLine."Operation No.";
         end else begin
-            // Operation provided - validate it exists
             ProdOrderRoutingLine.SetRange(Status, ProdOrderRoutingLine.Status::Released);
             ProdOrderRoutingLine.SetRange("Prod. Order No.", Exec."Order No.");
             ProdOrderRoutingLine.SetRange("Operation No.", Exec."Operation No.");
@@ -112,7 +102,6 @@ codeunit 50010 "ALP Execution Ingestion Svc"
                 exit(false);
             end;
 
-            // Step 3d: Check WorkCenter mismatch (hard failure)
             if (Exec."Work Center No." <> '') and
                (ProdOrderRoutingLine.Type = ProdOrderRoutingLine.Type::"Work Center") and
                (ProdOrderRoutingLine."No." <> Exec."Work Center No.") then begin
@@ -122,7 +111,6 @@ codeunit 50010 "ALP Execution Ingestion Svc"
             end;
         end;
 
-        // Step 4: Out-of-order guard
         IsNew := not ExistingExec.Get(Exec."Order No.", Exec."Operation No.");
         if not IsNew then
             if ExistingExec."Source Timestamp" >= Exec."Source Timestamp" then begin
@@ -131,7 +119,6 @@ codeunit 50010 "ALP Execution Ingestion Svc"
                 exit(true);
             end;
 
-        // Step 5: Upsert execution record
         Exec."Last Update At" := CurrentDateTime();
         if IsNew then
             Exec.Insert(true)
@@ -141,12 +128,10 @@ codeunit 50010 "ALP Execution Ingestion Svc"
             ExistingExec.Modify(true);
         end;
 
-        // Step 6: Update summary fields on Production Order
         ProdOrder."ALP Last Exec Update At" := CurrentDateTime();
         ProdOrder."ALP Execution Source" := Exec.Source;
         ProdOrder.Modify(true);
 
-        // Step 6b: Update Routing Line with execution data
         ProdOrderRoutingLine.SetRange(Status, ProdOrderRoutingLine.Status::Released);
         ProdOrderRoutingLine.SetRange("Prod. Order No.", Exec."Order No.");
         ProdOrderRoutingLine.SetRange("Operation No.", Exec."Operation No.");
@@ -159,10 +144,8 @@ codeunit 50010 "ALP Execution Ingestion Svc"
             ProdOrderRoutingLine.Modify(true);
         end;
 
-        // Step 6c: Update Production Order aggregates (weighted averages)
         ExecCalcSvc.UpdateProductionOrderAggregates(ProdOrder);
 
-        // Step 7: Mark inbox as processed
         MarkInboxProcessed(Inbox);
         exit(true);
     end;

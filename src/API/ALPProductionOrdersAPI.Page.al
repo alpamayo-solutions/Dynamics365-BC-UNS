@@ -75,6 +75,9 @@ page 50032 "ALP Production Orders API"
         }
     }
 
+    // SANDBOX-ONLY: Master data APIs restricted to sandbox environments.
+    // Production orders are owned by ERP admins.
+    // API creation/modification is for dev/test data setup only.
     var
         EnvironmentInfo: Codeunit "Environment Information";
         SandboxOnlyCreateErr: Label 'Production order creation via API is only allowed in Sandbox environments.', Comment = 'Error when trying to create production order in non-sandbox environment';

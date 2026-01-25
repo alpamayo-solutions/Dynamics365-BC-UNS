@@ -1,13 +1,13 @@
 {
   "id": "dbbe7042-978c-461f-abe3-5ce36a97d621",
-  "name": "ShopfloorExecutionBridge",
+  "name": "UNS Bridge Connector",
   "publisher": "alpamayo",
   "version": "1.0.0.0",
   "logo": "assets/logo.png",
 
-  "brief": "Ingest and display shopfloor execution KPIs",
-  "description": "Read-only bridge for aggregated shopfloor execution metrics from shopfloor systems to Business Central",
-  "contextSensitiveHelpUrl": "https://alpamayo-solutions.com/docs/shopfloor-execution-bridge",
+  "brief": "Connect Business Central to the Unified Namespace",
+  "description": "Read-only bridge for aggregated shopfloor execution metrics from UNS to Business Central",
+  "contextSensitiveHelpUrl": "https://alpamayo-solutions.com/docs/uns-bridge-connector",
 
   "platform": "26.0.0.0",
   "application": "26.0.0.0",

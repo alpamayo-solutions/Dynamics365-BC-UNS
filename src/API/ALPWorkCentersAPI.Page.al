@@ -59,6 +59,9 @@ page 50031 "ALP Work Centers API"
         }
     }
 
+    // SANDBOX-ONLY: Master data APIs restricted to sandbox environments.
+    // Work centers are owned by ERP admins.
+    // API creation/modification is for dev/test data setup only.
     var
         EnvironmentInfo: Codeunit "Environment Information";
         SandboxOnlyCreateErr: Label 'Work center creation is only allowed in Sandbox environments.', Comment = 'Error when trying to create work center in non-sandbox environment';

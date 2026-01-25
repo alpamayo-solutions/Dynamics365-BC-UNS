@@ -16,18 +16,15 @@ codeunit 50012 "ALP Execution Calc Svc"
                 TotalParts += RoutingLine."ALP Qty. Produced";
                 TotalRejected += RoutingLine."ALP Qty. Rejected";
 
-                // Weight by quantity produced for availability/productivity
                 if RoutingLine."ALP Qty. Produced" > 0 then begin
                     WeightedAvailSum += RoutingLine."ALP Actual Availability" * RoutingLine."ALP Qty. Produced";
                     WeightedProdSum += RoutingLine."ALP Actual Productivity" * RoutingLine."ALP Qty. Produced";
                 end;
             until RoutingLine.Next() = 0;
 
-        // Store totals
         ProdOrder."ALP Exec Qty. Produced" := TotalParts;
         ProdOrder."ALP Exec Qty. Rejected" := TotalRejected;
 
-        // Calculate weighted averages (fall back to 0 if no weight)
         if TotalParts > 0 then begin
             ProdOrder."ALP Exec Weighted Avail" := WeightedAvailSum / TotalParts;
             ProdOrder."ALP Exec Weighted Prod" := WeightedProdSum / TotalParts;
@@ -53,7 +50,6 @@ codeunit 50012 "ALP Execution Calc Svc"
 
         Progress := QtyGood / QtyPlanned;
 
-        // Clamp to 0..1
         if Progress < 0 then
             Progress := 0;
         if Progress > 1 then

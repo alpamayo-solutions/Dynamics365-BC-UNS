@@ -1,6 +1,6 @@
-# ShopfloorExecutionBridge
+# UNS Bridge Connector
 
-A Dynamics 365 Business Central AL extension that provides a read-only bridge for aggregated shopfloor execution KPIs.
+A Dynamics 365 Business Central AL extension that connects Business Central to the Unified Namespace (UNS) for aggregated shopfloor execution KPIs.
 
 ## Overview
 
@@ -70,12 +70,13 @@ This extension ingests aggregated shopfloor execution metrics via REST API, stor
 | 50022 | PageExt | ALP Prod Order Rtng Lines Ext |
 | 50023 | Page | ALP UNS Topic Mapping List |
 | 50030 | API Page | ALP Execution Events API |
-| 50031 | API Page | ALP Production Orders API |
-| 50032 | API Page | ALP Prod Order Routing API |
-| 50033 | API Page | ALP Work Centers API |
+| 50031 | API Page | ALP Work Centers API |
+| 50032 | API Page | ALP Production Orders API |
+| 50033 | API Page | ALP Prod Order Routing API |
 | 50034 | API Page | ALP Prod Order Components API |
-| 50036 | API Page | ALP Routings API |
-| 50037 | API Page | ALP Integration Inbox API |
+| 50036 | API Page | ALP Integration Inbox API |
+| 50037 | API Page | ALP Routings API |
+| 50038 | API Page | ALP Items API |
 | 50039 | API Page | ALP UNS Topic Mapping API |
 | 50040 | PermissionSet | ALP Shopfloor View |
 | 50041 | PermissionSet | ALP Shopfloor Exec |
@@ -226,6 +227,35 @@ This approach:
 ### WorkCenter Validation
 
 When `operationNo` **is** provided in the payload, the ERP validates that the routing line's Work Center matches the payload's `workCenter`. A mismatch results in a **hard failure** and the event is rejected.
+
+## Items API
+
+Read-only reference data API for manufacturing items.
+
+### Endpoint
+
+```
+GET /api/alpamayo/shopfloor/v1.0/companies({companyId})/items
+```
+
+### Permissions
+
+Read-only. Insert, modify, and delete operations are not allowed.
+
+### Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | GUID | System ID |
+| number | Code[20] | Item number |
+| description | Text[100] | Item description |
+| type | Enum | Item type (Inventory, Service, Non-Inventory) |
+| baseUnitOfMeasure | Code[10] | Base unit of measure |
+| itemCategoryCode | Code[20] | Item category |
+| routingNumber | Code[20] | Default routing number |
+| productionBOMNumber | Code[20] | Production BOM number |
+| replenishmentSystem | Enum | Replenishment system (Purchase, Prod. Order, etc.) |
+| manufacturingPolicy | Enum | Manufacturing policy (Make-to-Stock, Make-to-Order) |
 
 ## Test Harness
 
