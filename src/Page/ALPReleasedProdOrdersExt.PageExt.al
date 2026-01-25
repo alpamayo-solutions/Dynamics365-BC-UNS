@@ -14,14 +14,5 @@ pageextension 50023 "ALP Released Prod. Orders Ext" extends "Released Production
                 StyleExpr = Rec."ALP Exec Qty. Produced" > 0;
             }
         }
-        addfirst(factboxes)
-        {
-            part(ALPExecFactBox; "ALP Prod. Order Exec FactBox")
-            {
-                ApplicationArea = Manufacturing;
-                Caption = 'Execution';
-                SubPageLink = Status = field(Status), "No." = field("No.");
-            }
-        }
     }
 }

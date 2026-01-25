@@ -13,7 +13,6 @@ permissionset 50040 "ALP Shopfloor View"
         tabledata "Routing Header" = R,
         tabledata Item = R,
         page "ALP Integration Inbox List" = X,
-        page "ALP Prod. Order Exec FactBox" = X,
         page "ALP Integration Inbox API" = X,
         page "ALP Prod Order Routing API" = X,
         page "ALP Prod Order Components API" = X,
