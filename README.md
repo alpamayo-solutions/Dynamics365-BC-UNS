@@ -75,6 +75,7 @@ This extension ingests aggregated shopfloor execution metrics via REST API, stor
 | 50037 | API Page | ALP Integration Inbox API |
 | 50040 | PermissionSet | ALP Shopfloor View |
 | 50041 | PermissionSet | ALP Shopfloor Exec |
+| 50051 | Report | ALP Daily Exec Performance |
 
 ## Technical Details
 

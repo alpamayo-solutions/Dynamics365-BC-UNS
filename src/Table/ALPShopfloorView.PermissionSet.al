@@ -19,5 +19,6 @@ permissionset 50040 "ALP Shopfloor View"
         page "ALP Production Orders API" = X,
         page "ALP Routings API" = X,
         page "ALP Work Centers API" = X,
-        page "ALP Items API" = X;
+        page "ALP Items API" = X,
+        report "ALP Daily Exec Performance" = X;
 }
