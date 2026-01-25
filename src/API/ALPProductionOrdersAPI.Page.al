@@ -77,25 +77,29 @@ page 50032 "ALP Production Orders API"
 
     var
         EnvironmentInfo: Codeunit "Environment Information";
+        SandboxOnlyCreateErr: Label 'Production order creation via API is only allowed in Sandbox environments.', Comment = 'Error when trying to create production order in non-sandbox environment';
+        SandboxOnlyModifyErr: Label 'Production order modification via API is only allowed in Sandbox environments.', Comment = 'Error when trying to modify production order in non-sandbox environment';
+        SandboxOnlyDeleteErr: Label 'Production order deletion via API is only allowed in Sandbox environments.', Comment = 'Error when trying to delete production order in non-sandbox environment';
+        SandboxOnlyRefreshErr: Label 'Production order refresh via API is only allowed in Sandbox environments.', Comment = 'Error when trying to refresh production order in non-sandbox environment';
 
     trigger OnInsertRecord(BelowxRec: Boolean): Boolean
     begin
         if not EnvironmentInfo.IsSandbox() then
-            Error('Production order creation via API is only allowed in Sandbox environments.');
+            Error(SandboxOnlyCreateErr);
         exit(true);
     end;
 
     trigger OnModifyRecord(): Boolean
     begin
         if not EnvironmentInfo.IsSandbox() then
-            Error('Production order modification via API is only allowed in Sandbox environments.');
+            Error(SandboxOnlyModifyErr);
         exit(true);
     end;
 
     trigger OnDeleteRecord(): Boolean
     begin
         if not EnvironmentInfo.IsSandbox() then
-            Error('Production order deletion via API is only allowed in Sandbox environments.');
+            Error(SandboxOnlyDeleteErr);
         exit(true);
     end;
 
@@ -107,7 +111,7 @@ page 50032 "ALP Production Orders API"
         SavedWorkDate: Date;
     begin
         if not EnvironmentInfo.IsSandbox() then
-            Error('Production order refresh via API is only allowed in Sandbox environments.');
+            Error(SandboxOnlyRefreshErr);
 
         ProdOrder.GetBySystemId(Rec.SystemId);
 

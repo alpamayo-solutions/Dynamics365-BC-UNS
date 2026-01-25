@@ -14,66 +14,12 @@
     <ReportSection>
       <Body>
         <ReportItems>
-          <Textbox Name="ReportTitle">
-            <CanGrow>true</CanGrow>
-            <KeepTogether>true</KeepTogether>
-            <Paragraphs>
-              <Paragraph>
-                <TextRuns>
-                  <TextRun>
-                    <Value>Daily Work Order Execution Performance</Value>
-                    <Style>
-                      <FontFamily>Segoe UI</FontFamily>
-                      <FontSize>16pt</FontSize>
-                      <FontWeight>Bold</FontWeight>
-                    </Style>
-                  </TextRun>
-                </TextRuns>
-                <Style />
-              </Paragraph>
-            </Paragraphs>
-            <Top>0cm</Top>
-            <Left>0cm</Left>
-            <Height>0.75cm</Height>
-            <Width>18cm</Width>
-            <Style>
-              <PaddingLeft>2pt</PaddingLeft>
-              <PaddingRight>2pt</PaddingRight>
-              <PaddingTop>2pt</PaddingTop>
-              <PaddingBottom>2pt</PaddingBottom>
-            </Style>
-          </Textbox>
-          <Textbox Name="ReportDate">
-            <CanGrow>true</CanGrow>
-            <KeepTogether>true</KeepTogether>
-            <Paragraphs>
-              <Paragraph>
-                <TextRuns>
-                  <TextRun>
-                    <Value>="Report Date: " &amp; First(Fields!ReportDateCaption.Value, "DataSet_Result")</Value>
-                    <Style>
-                      <FontFamily>Segoe UI</FontFamily>
-                      <FontSize>10pt</FontSize>
-                    </Style>
-                  </TextRun>
-                </TextRuns>
-                <Style />
-              </Paragraph>
-            </Paragraphs>
-            <Top>0.75cm</Top>
-            <Left>0cm</Left>
-            <Height>0.5cm</Height>
-            <Width>10cm</Width>
-            <Style>
-              <PaddingLeft>2pt</PaddingLeft>
-              <PaddingRight>2pt</PaddingRight>
-              <PaddingTop>2pt</PaddingTop>
-              <PaddingBottom>2pt</PaddingBottom>
-            </Style>
-          </Textbox>
           <Tablix Name="Tablix1">
             <TablixBody>
               <TablixColumns>
+                <TablixColumn>
+                  <Width>2.8cm</Width>
+                </TablixColumn>
                 <TablixColumn>
                   <Width>2.5cm</Width>
                 </TablixColumn>
@@ -81,31 +27,28 @@
                   <Width>2cm</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>1.5cm</Width>
+                  <Width>2cm</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>1.5cm</Width>
+                  <Width>2cm</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>1.5cm</Width>
+                  <Width>2cm</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>1.5cm</Width>
+                  <Width>2.2cm</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>1.5cm</Width>
+                  <Width>2cm</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>1.5cm</Width>
+                  <Width>2cm</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>1.5cm</Width>
+                  <Width>2.2cm</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>3cm</Width>
-                </TablixColumn>
-                <TablixColumn>
-                  <Width>3cm</Width>
+                  <Width>4cm</Width>
                 </TablixColumn>
               </TablixColumns>
               <TablixRows>
@@ -121,12 +64,12 @@
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Order No.</Value>
+                                  <Value>=First(Fields!OrderNoLbl.Value, "DataSet_Result")</Value>
                                   <Style>
                                     <FontFamily>Segoe UI</FontFamily>
                                     <FontSize>8pt</FontSize>
-                                    <FontWeight>Bold</FontWeight>
-                                    <Color>White</Color>
+                                    <FontWeight>SemiBold</FontWeight>
+                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -134,11 +77,12 @@
                             </Paragraph>
                           </Paragraphs>
                           <Style>
-                            <BackgroundColor>#4472C4</BackgroundColor>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
+                            <BackgroundColor>#F3F3F3</BackgroundColor>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>4pt</PaddingTop>
+                            <PaddingBottom>4pt</PaddingBottom>
                           </Style>
                         </Textbox>
                       </CellContents>
@@ -152,12 +96,12 @@
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Item No.</Value>
+                                  <Value>=First(Fields!ItemLbl.Value, "DataSet_Result")</Value>
                                   <Style>
                                     <FontFamily>Segoe UI</FontFamily>
                                     <FontSize>8pt</FontSize>
-                                    <FontWeight>Bold</FontWeight>
-                                    <Color>White</Color>
+                                    <FontWeight>SemiBold</FontWeight>
+                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -165,11 +109,12 @@
                             </Paragraph>
                           </Paragraphs>
                           <Style>
-                            <BackgroundColor>#4472C4</BackgroundColor>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
+                            <BackgroundColor>#F3F3F3</BackgroundColor>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>4pt</PaddingTop>
+                            <PaddingBottom>4pt</PaddingBottom>
                           </Style>
                         </Textbox>
                       </CellContents>
@@ -183,12 +128,12 @@
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Planned</Value>
+                                  <Value>=First(Fields!PlannedLbl.Value, "DataSet_Result")</Value>
                                   <Style>
                                     <FontFamily>Segoe UI</FontFamily>
                                     <FontSize>8pt</FontSize>
-                                    <FontWeight>Bold</FontWeight>
-                                    <Color>White</Color>
+                                    <FontWeight>SemiBold</FontWeight>
+                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -198,11 +143,12 @@
                             </Paragraph>
                           </Paragraphs>
                           <Style>
-                            <BackgroundColor>#4472C4</BackgroundColor>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
+                            <BackgroundColor>#F3F3F3</BackgroundColor>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>4pt</PaddingTop>
+                            <PaddingBottom>4pt</PaddingBottom>
                           </Style>
                         </Textbox>
                       </CellContents>
@@ -216,12 +162,12 @@
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Produced</Value>
+                                  <Value>=First(Fields!ProducedLbl.Value, "DataSet_Result")</Value>
                                   <Style>
                                     <FontFamily>Segoe UI</FontFamily>
                                     <FontSize>8pt</FontSize>
-                                    <FontWeight>Bold</FontWeight>
-                                    <Color>White</Color>
+                                    <FontWeight>SemiBold</FontWeight>
+                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -231,11 +177,12 @@
                             </Paragraph>
                           </Paragraphs>
                           <Style>
-                            <BackgroundColor>#4472C4</BackgroundColor>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
+                            <BackgroundColor>#F3F3F3</BackgroundColor>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>4pt</PaddingTop>
+                            <PaddingBottom>4pt</PaddingBottom>
                           </Style>
                         </Textbox>
                       </CellContents>
@@ -249,12 +196,12 @@
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Rejected</Value>
+                                  <Value>=First(Fields!RejectedLbl.Value, "DataSet_Result")</Value>
                                   <Style>
                                     <FontFamily>Segoe UI</FontFamily>
                                     <FontSize>8pt</FontSize>
-                                    <FontWeight>Bold</FontWeight>
-                                    <Color>White</Color>
+                                    <FontWeight>SemiBold</FontWeight>
+                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -264,11 +211,12 @@
                             </Paragraph>
                           </Paragraphs>
                           <Style>
-                            <BackgroundColor>#4472C4</BackgroundColor>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
+                            <BackgroundColor>#F3F3F3</BackgroundColor>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>4pt</PaddingTop>
+                            <PaddingBottom>4pt</PaddingBottom>
                           </Style>
                         </Textbox>
                       </CellContents>
@@ -282,12 +230,12 @@
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Good</Value>
+                                  <Value>=First(Fields!GoodLbl.Value, "DataSet_Result")</Value>
                                   <Style>
                                     <FontFamily>Segoe UI</FontFamily>
                                     <FontSize>8pt</FontSize>
-                                    <FontWeight>Bold</FontWeight>
-                                    <Color>White</Color>
+                                    <FontWeight>SemiBold</FontWeight>
+                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -297,11 +245,12 @@
                             </Paragraph>
                           </Paragraphs>
                           <Style>
-                            <BackgroundColor>#4472C4</BackgroundColor>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
+                            <BackgroundColor>#F3F3F3</BackgroundColor>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>4pt</PaddingTop>
+                            <PaddingBottom>4pt</PaddingBottom>
                           </Style>
                         </Textbox>
                       </CellContents>
@@ -315,12 +264,12 @@
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Progress</Value>
+                                  <Value>=First(Fields!ProgressLbl.Value, "DataSet_Result")</Value>
                                   <Style>
                                     <FontFamily>Segoe UI</FontFamily>
                                     <FontSize>8pt</FontSize>
-                                    <FontWeight>Bold</FontWeight>
-                                    <Color>White</Color>
+                                    <FontWeight>SemiBold</FontWeight>
+                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -330,11 +279,12 @@
                             </Paragraph>
                           </Paragraphs>
                           <Style>
-                            <BackgroundColor>#4472C4</BackgroundColor>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
+                            <BackgroundColor>#F3F3F3</BackgroundColor>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>4pt</PaddingTop>
+                            <PaddingBottom>4pt</PaddingBottom>
                           </Style>
                         </Textbox>
                       </CellContents>
@@ -348,12 +298,12 @@
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Avail.</Value>
+                                  <Value>=First(Fields!AvailLbl.Value, "DataSet_Result")</Value>
                                   <Style>
                                     <FontFamily>Segoe UI</FontFamily>
                                     <FontSize>8pt</FontSize>
-                                    <FontWeight>Bold</FontWeight>
-                                    <Color>White</Color>
+                                    <FontWeight>SemiBold</FontWeight>
+                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -363,11 +313,12 @@
                             </Paragraph>
                           </Paragraphs>
                           <Style>
-                            <BackgroundColor>#4472C4</BackgroundColor>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
+                            <BackgroundColor>#F3F3F3</BackgroundColor>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>4pt</PaddingTop>
+                            <PaddingBottom>4pt</PaddingBottom>
                           </Style>
                         </Textbox>
                       </CellContents>
@@ -381,12 +332,12 @@
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Prod.</Value>
+                                  <Value>=First(Fields!ProdLbl.Value, "DataSet_Result")</Value>
                                   <Style>
                                     <FontFamily>Segoe UI</FontFamily>
                                     <FontSize>8pt</FontSize>
-                                    <FontWeight>Bold</FontWeight>
-                                    <Color>White</Color>
+                                    <FontWeight>SemiBold</FontWeight>
+                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -396,11 +347,12 @@
                             </Paragraph>
                           </Paragraphs>
                           <Style>
-                            <BackgroundColor>#4472C4</BackgroundColor>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
+                            <BackgroundColor>#F3F3F3</BackgroundColor>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>4pt</PaddingTop>
+                            <PaddingBottom>4pt</PaddingBottom>
                           </Style>
                         </Textbox>
                       </CellContents>
@@ -414,12 +366,12 @@
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Last Update</Value>
+                                  <Value>=First(Fields!LastUpdateLbl.Value, "DataSet_Result")</Value>
                                   <Style>
                                     <FontFamily>Segoe UI</FontFamily>
                                     <FontSize>8pt</FontSize>
-                                    <FontWeight>Bold</FontWeight>
-                                    <Color>White</Color>
+                                    <FontWeight>SemiBold</FontWeight>
+                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -427,11 +379,12 @@
                             </Paragraph>
                           </Paragraphs>
                           <Style>
-                            <BackgroundColor>#4472C4</BackgroundColor>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
+                            <BackgroundColor>#F3F3F3</BackgroundColor>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>4pt</PaddingTop>
+                            <PaddingBottom>4pt</PaddingBottom>
                           </Style>
                         </Textbox>
                       </CellContents>
@@ -445,12 +398,12 @@
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Work Centers</Value>
+                                  <Value>=First(Fields!WorkCentersLbl.Value, "DataSet_Result")</Value>
                                   <Style>
                                     <FontFamily>Segoe UI</FontFamily>
                                     <FontSize>8pt</FontSize>
-                                    <FontWeight>Bold</FontWeight>
-                                    <Color>White</Color>
+                                    <FontWeight>SemiBold</FontWeight>
+                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -458,11 +411,12 @@
                             </Paragraph>
                           </Paragraphs>
                           <Style>
-                            <BackgroundColor>#4472C4</BackgroundColor>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
+                            <BackgroundColor>#F3F3F3</BackgroundColor>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>4pt</PaddingTop>
+                            <PaddingBottom>4pt</PaddingBottom>
                           </Style>
                         </Textbox>
                       </CellContents>
@@ -485,6 +439,7 @@
                                   <Style>
                                     <FontFamily>Segoe UI</FontFamily>
                                     <FontSize>8pt</FontSize>
+                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -493,14 +448,19 @@
                           </Paragraphs>
                           <Style>
                             <Border>
-                              <Color>#D9D9D9</Color>
+                              <Color>#E0E0E0</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <BottomBorder>
+                              <Color>#E0E0E0</Color>
                               <Style>Solid</Style>
                               <Width>0.5pt</Width>
-                            </Border>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
+                            </BottomBorder>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>4pt</PaddingTop>
+                            <PaddingBottom>4pt</PaddingBottom>
                           </Style>
                         </Textbox>
                       </CellContents>
@@ -518,6 +478,7 @@
                                   <Style>
                                     <FontFamily>Segoe UI</FontFamily>
                                     <FontSize>8pt</FontSize>
+                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -526,14 +487,19 @@
                           </Paragraphs>
                           <Style>
                             <Border>
-                              <Color>#D9D9D9</Color>
+                              <Color>#E0E0E0</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <BottomBorder>
+                              <Color>#E0E0E0</Color>
                               <Style>Solid</Style>
                               <Width>0.5pt</Width>
-                            </Border>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
+                            </BottomBorder>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>4pt</PaddingTop>
+                            <PaddingBottom>4pt</PaddingBottom>
                           </Style>
                         </Textbox>
                       </CellContents>
@@ -551,6 +517,7 @@
                                   <Style>
                                     <FontFamily>Segoe UI</FontFamily>
                                     <FontSize>8pt</FontSize>
+                                    <Color>#333333</Color>
                                     <Format>#,##0</Format>
                                   </Style>
                                 </TextRun>
@@ -562,14 +529,19 @@
                           </Paragraphs>
                           <Style>
                             <Border>
-                              <Color>#D9D9D9</Color>
+                              <Color>#E0E0E0</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <BottomBorder>
+                              <Color>#E0E0E0</Color>
                               <Style>Solid</Style>
                               <Width>0.5pt</Width>
-                            </Border>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
+                            </BottomBorder>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>4pt</PaddingTop>
+                            <PaddingBottom>4pt</PaddingBottom>
                           </Style>
                         </Textbox>
                       </CellContents>
@@ -587,6 +559,7 @@
                                   <Style>
                                     <FontFamily>Segoe UI</FontFamily>
                                     <FontSize>8pt</FontSize>
+                                    <Color>#333333</Color>
                                     <Format>#,##0</Format>
                                   </Style>
                                 </TextRun>
@@ -598,14 +571,19 @@
                           </Paragraphs>
                           <Style>
                             <Border>
-                              <Color>#D9D9D9</Color>
+                              <Color>#E0E0E0</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <BottomBorder>
+                              <Color>#E0E0E0</Color>
                               <Style>Solid</Style>
                               <Width>0.5pt</Width>
-                            </Border>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
+                            </BottomBorder>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>4pt</PaddingTop>
+                            <PaddingBottom>4pt</PaddingBottom>
                           </Style>
                         </Textbox>
                       </CellContents>
@@ -623,6 +601,7 @@
                                   <Style>
                                     <FontFamily>Segoe UI</FontFamily>
                                     <FontSize>8pt</FontSize>
+                                    <Color>=IIF(Fields!QtyRejected.Value &gt; 0, "#C00000", "#333333")</Color>
                                     <Format>#,##0</Format>
                                   </Style>
                                 </TextRun>
@@ -634,14 +613,19 @@
                           </Paragraphs>
                           <Style>
                             <Border>
-                              <Color>#D9D9D9</Color>
+                              <Color>#E0E0E0</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <BottomBorder>
+                              <Color>#E0E0E0</Color>
                               <Style>Solid</Style>
                               <Width>0.5pt</Width>
-                            </Border>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
+                            </BottomBorder>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>4pt</PaddingTop>
+                            <PaddingBottom>4pt</PaddingBottom>
                           </Style>
                         </Textbox>
                       </CellContents>
@@ -659,6 +643,8 @@
                                   <Style>
                                     <FontFamily>Segoe UI</FontFamily>
                                     <FontSize>8pt</FontSize>
+                                    <FontWeight>SemiBold</FontWeight>
+                                    <Color>#333333</Color>
                                     <Format>#,##0</Format>
                                   </Style>
                                 </TextRun>
@@ -670,14 +656,19 @@
                           </Paragraphs>
                           <Style>
                             <Border>
-                              <Color>#D9D9D9</Color>
+                              <Color>#E0E0E0</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <BottomBorder>
+                              <Color>#E0E0E0</Color>
                               <Style>Solid</Style>
                               <Width>0.5pt</Width>
-                            </Border>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
+                            </BottomBorder>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>4pt</PaddingTop>
+                            <PaddingBottom>4pt</PaddingBottom>
                           </Style>
                         </Textbox>
                       </CellContents>
@@ -695,7 +686,9 @@
                                   <Style>
                                     <FontFamily>Segoe UI</FontFamily>
                                     <FontSize>8pt</FontSize>
-                                    <Format>0.0%</Format>
+                                    <FontWeight>SemiBold</FontWeight>
+                                    <Color>=IIF(Fields!ProgressPct.Value &gt;= 1, "#107C10", IIF(Fields!ProgressPct.Value &gt;= 0.8, "#333333", "#C00000"))</Color>
+                                    <Format>0%</Format>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -706,14 +699,19 @@
                           </Paragraphs>
                           <Style>
                             <Border>
-                              <Color>#D9D9D9</Color>
+                              <Color>#E0E0E0</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <BottomBorder>
+                              <Color>#E0E0E0</Color>
                               <Style>Solid</Style>
                               <Width>0.5pt</Width>
-                            </Border>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
+                            </BottomBorder>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>4pt</PaddingTop>
+                            <PaddingBottom>4pt</PaddingBottom>
                           </Style>
                         </Textbox>
                       </CellContents>
@@ -731,7 +729,8 @@
                                   <Style>
                                     <FontFamily>Segoe UI</FontFamily>
                                     <FontSize>8pt</FontSize>
-                                    <Format>0.0%</Format>
+                                    <Color>#333333</Color>
+                                    <Format>0%</Format>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -742,14 +741,19 @@
                           </Paragraphs>
                           <Style>
                             <Border>
-                              <Color>#D9D9D9</Color>
+                              <Color>#E0E0E0</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <BottomBorder>
+                              <Color>#E0E0E0</Color>
                               <Style>Solid</Style>
                               <Width>0.5pt</Width>
-                            </Border>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
+                            </BottomBorder>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>4pt</PaddingTop>
+                            <PaddingBottom>4pt</PaddingBottom>
                           </Style>
                         </Textbox>
                       </CellContents>
@@ -767,7 +771,8 @@
                                   <Style>
                                     <FontFamily>Segoe UI</FontFamily>
                                     <FontSize>8pt</FontSize>
-                                    <Format>0.0%</Format>
+                                    <Color>#333333</Color>
+                                    <Format>0%</Format>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -778,14 +783,19 @@
                           </Paragraphs>
                           <Style>
                             <Border>
-                              <Color>#D9D9D9</Color>
+                              <Color>#E0E0E0</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <BottomBorder>
+                              <Color>#E0E0E0</Color>
                               <Style>Solid</Style>
                               <Width>0.5pt</Width>
-                            </Border>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
+                            </BottomBorder>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>4pt</PaddingTop>
+                            <PaddingBottom>4pt</PaddingBottom>
                           </Style>
                         </Textbox>
                       </CellContents>
@@ -803,7 +813,8 @@
                                   <Style>
                                     <FontFamily>Segoe UI</FontFamily>
                                     <FontSize>8pt</FontSize>
-                                    <Format>HH:mm:ss</Format>
+                                    <Color>#666666</Color>
+                                    <Format>HH:mm</Format>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -812,14 +823,19 @@
                           </Paragraphs>
                           <Style>
                             <Border>
-                              <Color>#D9D9D9</Color>
+                              <Color>#E0E0E0</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <BottomBorder>
+                              <Color>#E0E0E0</Color>
                               <Style>Solid</Style>
                               <Width>0.5pt</Width>
-                            </Border>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
+                            </BottomBorder>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>4pt</PaddingTop>
+                            <PaddingBottom>4pt</PaddingBottom>
                           </Style>
                         </Textbox>
                       </CellContents>
@@ -837,6 +853,7 @@
                                   <Style>
                                     <FontFamily>Segoe UI</FontFamily>
                                     <FontSize>8pt</FontSize>
+                                    <Color>#666666</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -845,14 +862,19 @@
                           </Paragraphs>
                           <Style>
                             <Border>
-                              <Color>#D9D9D9</Color>
+                              <Color>#E0E0E0</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <BottomBorder>
+                              <Color>#E0E0E0</Color>
                               <Style>Solid</Style>
                               <Width>0.5pt</Width>
-                            </Border>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
+                            </BottomBorder>
+                            <VerticalAlign>Middle</VerticalAlign>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>4pt</PaddingTop>
+                            <PaddingBottom>4pt</PaddingBottom>
                           </Style>
                         </Textbox>
                       </CellContents>
@@ -894,27 +916,209 @@
               </TablixMembers>
             </TablixRowHierarchy>
             <DataSetName>DataSet_Result</DataSetName>
-            <Top>1.5cm</Top>
+            <Top>0cm</Top>
             <Left>0cm</Left>
             <Height>1.1cm</Height>
-            <Width>21cm</Width>
+            <Width>27.7cm</Width>
           </Tablix>
         </ReportItems>
-        <Height>3cm</Height>
+        <Height>1.3cm</Height>
         <Style />
       </Body>
-      <Width>21cm</Width>
+      <Width>27.7cm</Width>
       <Page>
         <PageHeader>
-          <Height>0cm</Height>
-          <PrintOnFirstPage>true</PrintOnFirstPage>
-          <PrintOnLastPage>true</PrintOnLastPage>
-        </PageHeader>
-        <PageFooter>
-          <Height>1cm</Height>
+          <Height>1.8cm</Height>
           <PrintOnFirstPage>true</PrintOnFirstPage>
           <PrintOnLastPage>true</PrintOnLastPage>
           <ReportItems>
+            <Image Name="CompanyLogo">
+              <Source>Embedded</Source>
+              <Value>AlpamayoLogo</Value>
+              <Sizing>FitProportional</Sizing>
+              <Top>0.2cm</Top>
+              <Left>0cm</Left>
+              <Height>1.4cm</Height>
+              <Width>1.4cm</Width>
+            </Image>
+            <Textbox Name="HeaderTitle">
+              <CanGrow>true</CanGrow>
+              <KeepTogether>true</KeepTogether>
+              <Paragraphs>
+                <Paragraph>
+                  <TextRuns>
+                    <TextRun>
+                      <Value>=First(Fields!ReportTitleLbl.Value, "DataSet_Result")</Value>
+                      <Style>
+                        <FontFamily>Segoe UI</FontFamily>
+                        <FontSize>14pt</FontSize>
+                        <FontWeight>Bold</FontWeight>
+                        <Color>#333333</Color>
+                      </Style>
+                    </TextRun>
+                  </TextRuns>
+                  <Style />
+                </Paragraph>
+              </Paragraphs>
+              <Top>0.2cm</Top>
+              <Left>1.8cm</Left>
+              <Height>0.6cm</Height>
+              <Width>15cm</Width>
+              <Style>
+                <VerticalAlign>Middle</VerticalAlign>
+                <PaddingLeft>4pt</PaddingLeft>
+              </Style>
+            </Textbox>
+            <Textbox Name="HeaderDate">
+              <CanGrow>true</CanGrow>
+              <KeepTogether>true</KeepTogether>
+              <Paragraphs>
+                <Paragraph>
+                  <TextRuns>
+                    <TextRun>
+                      <Value>=First(Fields!ReportDateLbl.Value, "DataSet_Result") &amp; " " &amp; First(Fields!ReportDateCaption.Value, "DataSet_Result")</Value>
+                      <Style>
+                        <FontFamily>Segoe UI</FontFamily>
+                        <FontSize>9pt</FontSize>
+                        <Color>#666666</Color>
+                      </Style>
+                    </TextRun>
+                  </TextRuns>
+                  <Style />
+                </Paragraph>
+              </Paragraphs>
+              <Top>0.9cm</Top>
+              <Left>1.8cm</Left>
+              <Height>0.5cm</Height>
+              <Width>10cm</Width>
+              <Style>
+                <VerticalAlign>Middle</VerticalAlign>
+                <PaddingLeft>4pt</PaddingLeft>
+              </Style>
+            </Textbox>
+            <Textbox Name="HeaderCompany">
+              <CanGrow>true</CanGrow>
+              <KeepTogether>true</KeepTogether>
+              <Paragraphs>
+                <Paragraph>
+                  <TextRuns>
+                    <TextRun>
+                      <Value>=First(Fields!CompanyName.Value, "DataSet_Result")</Value>
+                      <Style>
+                        <FontFamily>Segoe UI</FontFamily>
+                        <FontSize>9pt</FontSize>
+                        <FontWeight>SemiBold</FontWeight>
+                        <Color>#333333</Color>
+                      </Style>
+                    </TextRun>
+                  </TextRuns>
+                  <Style>
+                    <TextAlign>Right</TextAlign>
+                  </Style>
+                </Paragraph>
+              </Paragraphs>
+              <Top>0.2cm</Top>
+              <Left>17cm</Left>
+              <Height>0.5cm</Height>
+              <Width>10.7cm</Width>
+              <Style>
+                <VerticalAlign>Middle</VerticalAlign>
+                <PaddingRight>4pt</PaddingRight>
+              </Style>
+            </Textbox>
+            <Textbox Name="HeaderExportedBy">
+              <CanGrow>true</CanGrow>
+              <KeepTogether>true</KeepTogether>
+              <Paragraphs>
+                <Paragraph>
+                  <TextRuns>
+                    <TextRun>
+                      <Value>=First(Fields!ExportedLbl.Value, "DataSet_Result") &amp; " " &amp; Format(Now(), "yyyy-MM-dd HH:mm")</Value>
+                      <Style>
+                        <FontFamily>Segoe UI</FontFamily>
+                        <FontSize>8pt</FontSize>
+                        <Color>#999999</Color>
+                      </Style>
+                    </TextRun>
+                  </TextRuns>
+                  <Style>
+                    <TextAlign>Right</TextAlign>
+                  </Style>
+                </Paragraph>
+              </Paragraphs>
+              <Top>0.8cm</Top>
+              <Left>17cm</Left>
+              <Height>0.5cm</Height>
+              <Width>10.7cm</Width>
+              <Style>
+                <VerticalAlign>Middle</VerticalAlign>
+                <PaddingRight>4pt</PaddingRight>
+              </Style>
+            </Textbox>
+          </ReportItems>
+          <Style>
+            <Border>
+              <Style>None</Style>
+            </Border>
+            <BottomBorder>
+              <Color>#f55632</Color>
+              <Style>Solid</Style>
+              <Width>2pt</Width>
+            </BottomBorder>
+          </Style>
+        </PageHeader>
+        <PageFooter>
+          <Height>0.6cm</Height>
+          <PrintOnFirstPage>true</PrintOnFirstPage>
+          <PrintOnLastPage>true</PrintOnLastPage>
+          <ReportItems>
+            <Textbox Name="AlpamayoBranding">
+              <CanGrow>true</CanGrow>
+              <KeepTogether>true</KeepTogether>
+              <Paragraphs>
+                <Paragraph>
+                  <TextRuns>
+                    <TextRun>
+                      <Value>=First(Fields!BroughtToYouByLbl.Value, "DataSet_Result") &amp; " "</Value>
+                      <Style>
+                        <FontFamily>Segoe UI</FontFamily>
+                        <FontSize>8pt</FontSize>
+                        <Color>#999999</Color>
+                      </Style>
+                    </TextRun>
+                    <TextRun>
+                      <Value>=First(Fields!AlpamayoLbl.Value, "DataSet_Result")</Value>
+                      <Style>
+                        <FontFamily>Segoe UI</FontFamily>
+                        <FontSize>8pt</FontSize>
+                        <FontWeight>SemiBold</FontWeight>
+                        <Color>#f55632</Color>
+                      </Style>
+                    </TextRun>
+                    <TextRun>
+                      <Value>=" · " &amp; First(Fields!AlpamayoUrlLbl.Value, "DataSet_Result")</Value>
+                      <Style>
+                        <FontFamily>Segoe UI</FontFamily>
+                        <FontSize>8pt</FontSize>
+                        <Color>#999999</Color>
+                      </Style>
+                    </TextRun>
+                  </TextRuns>
+                  <Style />
+                </Paragraph>
+              </Paragraphs>
+              <Top>0cm</Top>
+              <Left>0cm</Left>
+              <Height>0.5cm</Height>
+              <Width>12cm</Width>
+              <Style>
+                <VerticalAlign>Middle</VerticalAlign>
+                <PaddingLeft>2pt</PaddingLeft>
+                <PaddingRight>2pt</PaddingRight>
+                <PaddingTop>2pt</PaddingTop>
+                <PaddingBottom>2pt</PaddingBottom>
+              </Style>
+            </Textbox>
             <Textbox Name="PageNumber">
               <CanGrow>true</CanGrow>
               <KeepTogether>true</KeepTogether>
@@ -922,10 +1126,11 @@
                 <Paragraph>
                   <TextRuns>
                     <TextRun>
-                      <Value>="Page " &amp; Globals!PageNumber &amp; " of " &amp; Globals!TotalPages</Value>
+                      <Value>=First(Fields!PageLbl.Value, "DataSet_Result") &amp; " " &amp; Globals!PageNumber &amp; " " &amp; First(Fields!OfLbl.Value, "DataSet_Result") &amp; " " &amp; Globals!TotalPages</Value>
                       <Style>
                         <FontFamily>Segoe UI</FontFamily>
                         <FontSize>8pt</FontSize>
+                        <Color>#666666</Color>
                       </Style>
                     </TextRun>
                   </TextRuns>
@@ -935,10 +1140,11 @@
                 </Paragraph>
               </Paragraphs>
               <Top>0cm</Top>
-              <Left>16cm</Left>
+              <Left>22.7cm</Left>
               <Height>0.5cm</Height>
               <Width>5cm</Width>
               <Style>
+                <VerticalAlign>Middle</VerticalAlign>
                 <PaddingLeft>2pt</PaddingLeft>
                 <PaddingRight>2pt</PaddingRight>
                 <PaddingTop>2pt</PaddingTop>
@@ -946,10 +1152,19 @@
               </Style>
             </Textbox>
           </ReportItems>
-          <Style />
+          <Style>
+            <Border>
+              <Style>None</Style>
+            </Border>
+            <TopBorder>
+              <Color>#f55632</Color>
+              <Style>Solid</Style>
+              <Width>1pt</Width>
+            </TopBorder>
+          </Style>
         </PageFooter>
-        <PageHeight>29.7cm</PageHeight>
-        <PageWidth>21cm</PageWidth>
+        <PageHeight>21cm</PageHeight>
+        <PageWidth>29.7cm</PageWidth>
         <LeftMargin>1cm</LeftMargin>
         <RightMargin>1cm</RightMargin>
         <TopMargin>1cm</TopMargin>
@@ -958,6 +1173,12 @@
       </Page>
     </ReportSection>
   </ReportSections>
+  <EmbeddedImages>
+    <EmbeddedImage Name="AlpamayoLogo">
+      <MIMEType>image/png</MIMEType>
+      <ImageData>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</ImageData>
+    </EmbeddedImage>
+  </EmbeddedImages>
   <Language>en-US</Language>
   <ConsumeContainerWhitespace>true</ConsumeContainerWhitespace>
   <rd:ReportUnitType>Cm</rd:ReportUnitType>
@@ -1018,6 +1239,66 @@
         </Field>
         <Field Name="ReportDateCaption">
           <DataField>ReportDateCaption</DataField>
+        </Field>
+        <Field Name="CompanyName">
+          <DataField>CompanyName</DataField>
+        </Field>
+        <Field Name="ReportTitleLbl">
+          <DataField>ReportTitleLbl</DataField>
+        </Field>
+        <Field Name="ReportDateLbl">
+          <DataField>ReportDateLbl</DataField>
+        </Field>
+        <Field Name="ExportedLbl">
+          <DataField>ExportedLbl</DataField>
+        </Field>
+        <Field Name="BroughtToYouByLbl">
+          <DataField>BroughtToYouByLbl</DataField>
+        </Field>
+        <Field Name="AlpamayoLbl">
+          <DataField>AlpamayoLbl</DataField>
+        </Field>
+        <Field Name="AlpamayoUrlLbl">
+          <DataField>AlpamayoUrlLbl</DataField>
+        </Field>
+        <Field Name="PageLbl">
+          <DataField>PageLbl</DataField>
+        </Field>
+        <Field Name="OfLbl">
+          <DataField>OfLbl</DataField>
+        </Field>
+        <Field Name="OrderNoLbl">
+          <DataField>OrderNoLbl</DataField>
+        </Field>
+        <Field Name="ItemLbl">
+          <DataField>ItemLbl</DataField>
+        </Field>
+        <Field Name="PlannedLbl">
+          <DataField>PlannedLbl</DataField>
+        </Field>
+        <Field Name="ProducedLbl">
+          <DataField>ProducedLbl</DataField>
+        </Field>
+        <Field Name="RejectedLbl">
+          <DataField>RejectedLbl</DataField>
+        </Field>
+        <Field Name="GoodLbl">
+          <DataField>GoodLbl</DataField>
+        </Field>
+        <Field Name="ProgressLbl">
+          <DataField>ProgressLbl</DataField>
+        </Field>
+        <Field Name="AvailLbl">
+          <DataField>AvailLbl</DataField>
+        </Field>
+        <Field Name="ProdLbl">
+          <DataField>ProdLbl</DataField>
+        </Field>
+        <Field Name="LastUpdateLbl">
+          <DataField>LastUpdateLbl</DataField>
+        </Field>
+        <Field Name="WorkCentersLbl">
+          <DataField>WorkCentersLbl</DataField>
         </Field>
       </Fields>
       <Query>

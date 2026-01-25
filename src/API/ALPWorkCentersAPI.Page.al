@@ -61,18 +61,20 @@ page 50031 "ALP Work Centers API"
 
     var
         EnvironmentInfo: Codeunit "Environment Information";
+        SandboxOnlyCreateErr: Label 'Work center creation is only allowed in Sandbox environments.', Comment = 'Error when trying to create work center in non-sandbox environment';
+        SandboxOnlyModifyErr: Label 'Work center modification is only allowed in Sandbox environments.', Comment = 'Error when trying to modify work center in non-sandbox environment';
 
     trigger OnInsertRecord(BelowxRec: Boolean): Boolean
     begin
         if not EnvironmentInfo.IsSandbox() then
-            Error('Work center creation is only allowed in Sandbox environments.');
+            Error(SandboxOnlyCreateErr);
         exit(true);
     end;
 
     trigger OnModifyRecord(): Boolean
     begin
         if not EnvironmentInfo.IsSandbox() then
-            Error('Work center modification is only allowed in Sandbox environments.');
+            Error(SandboxOnlyModifyErr);
         exit(true);
     end;
 }

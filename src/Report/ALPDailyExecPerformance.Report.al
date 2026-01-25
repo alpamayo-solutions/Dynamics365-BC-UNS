@@ -26,6 +26,28 @@ report 50051 "ALP Daily Exec Performance"
             column(LastUpdateAt; LastUpdateAt) { }
             column(WorkCenters; WorkCenters) { }
             column(ReportDateCaption; ReportDateCaption) { }
+            column(CompanyName; CompanyName()) { }
+
+            // i18n labels for report layout
+            column(ReportTitleLbl; ReportTitleLbl) { }
+            column(ReportDateLbl; ReportDateLbl) { }
+            column(ExportedLbl; ExportedLbl) { }
+            column(BroughtToYouByLbl; BroughtToYouByLbl) { }
+            column(AlpamayoLbl; AlpamayoLbl) { }
+            column(AlpamayoUrlLbl; AlpamayoUrlLbl) { }
+            column(PageLbl; PageLbl) { }
+            column(OfLbl; OfLbl) { }
+            column(OrderNoLbl; OrderNoLbl) { }
+            column(ItemLbl; ItemLbl) { }
+            column(PlannedLbl; PlannedLbl) { }
+            column(ProducedLbl; ProducedLbl) { }
+            column(RejectedLbl; RejectedLbl) { }
+            column(GoodLbl; GoodLbl) { }
+            column(ProgressLbl; ProgressLbl) { }
+            column(AvailLbl; AvailLbl) { }
+            column(ProdLbl; ProdLbl) { }
+            column(LastUpdateLbl; LastUpdateLbl) { }
+            column(WorkCentersLbl; WorkCentersLbl) { }
 
             trigger OnPreDataItem()
             var
@@ -102,6 +124,27 @@ report 50051 "ALP Daily Exec Performance"
         LastUpdateAt: DateTime;
         WorkCenters: Text[250];
         ReportDateCaption: Text;
+
+        // i18n labels
+        ReportTitleLbl: Label 'Daily Work Order Execution Performance', Comment = 'Report title shown in header';
+        ReportDateLbl: Label 'Report Date:', Comment = 'Label prefix for the report date';
+        ExportedLbl: Label 'Exported:', Comment = 'Label prefix for export timestamp';
+        BroughtToYouByLbl: Label 'Brought to you by', Comment = 'Footer branding text before company name';
+        AlpamayoLbl: Label 'Alpamayo', Comment = 'Company name in footer, locked', Locked = true;
+        AlpamayoUrlLbl: Label 'alpamayo-solutions.com', Comment = 'Company URL in footer, locked', Locked = true;
+        PageLbl: Label 'Page', Comment = 'Page number prefix';
+        OfLbl: Label 'of', Comment = 'Page X of Y separator';
+        OrderNoLbl: Label 'Order No.', Comment = 'Column header for production order number';
+        ItemLbl: Label 'Item', Comment = 'Column header for item/source number';
+        PlannedLbl: Label 'Planned', Comment = 'Column header for planned quantity';
+        ProducedLbl: Label 'Produced', Comment = 'Column header for produced quantity';
+        RejectedLbl: Label 'Rejected', Comment = 'Column header for rejected quantity';
+        GoodLbl: Label 'Good', Comment = 'Column header for good quantity (produced minus rejected)';
+        ProgressLbl: Label 'Progress', Comment = 'Column header for progress percentage';
+        AvailLbl: Label 'Avail.', Comment = 'Column header for availability percentage (abbreviated)';
+        ProdLbl: Label 'Prod.', Comment = 'Column header for productivity percentage (abbreviated)';
+        LastUpdateLbl: Label 'Last Update', Comment = 'Column header for last update timestamp';
+        WorkCentersLbl: Label 'Work Centers', Comment = 'Column header for work centers list';
 
     local procedure BuildAggregatesAndGetOrderFilter(): Text
     var

@@ -427,6 +427,15 @@ d365_uns_app/
 | Shopfloor Device (SCADA/MES) | View + Exec |
 | Integration Service Account | View + Exec |
 
+## Supported Languages
+
+| Language | Locale Code | Status |
+|----------|-------------|--------|
+| English | en-US | Base language |
+| German | de-DE | Fully translated |
+
+Language selection is automatic based on user profile settings in Business Central (Settings > My Settings > Language).
+
 ## License
 
 MIT License - see [LICENSE](LICENSE) file.

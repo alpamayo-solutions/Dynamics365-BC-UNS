@@ -1,0 +1,1188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en-US" target-language="de-DE" original="ShopfloorExecutionBridge">
+    <body>
+      <!-- ============================================= -->
+      <!-- Enum 50000 - ALP Integration Status -->
+      <!-- ============================================= -->
+      <group id="Enum 50000 - ALP Integration Status">
+        <trans-unit id="Enum 50000 - Value Received - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Received</source>
+          <target>Empfangen</target>
+          <note from="Developer" annotates="general" priority="2">Status when message is received</note>
+        </trans-unit>
+        <trans-unit id="Enum 50000 - Value Processed - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Processed</source>
+          <target>Verarbeitet</target>
+          <note from="Developer" annotates="general" priority="2">Status when message is processed</note>
+        </trans-unit>
+        <trans-unit id="Enum 50000 - Value Failed - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Failed</source>
+          <target>Fehlgeschlagen</target>
+          <note from="Developer" annotates="general" priority="2">Status when message processing failed</note>
+        </trans-unit>
+      </group>
+
+      <!-- ============================================= -->
+      <!-- Table 50001 - ALP Integration Inbox -->
+      <!-- ============================================= -->
+      <group id="Table 50001 - ALP Integration Inbox">
+        <trans-unit id="Table 50001 - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>ALP Integration Inbox</source>
+          <target>ALP Integrationseingang</target>
+          <note from="Developer" annotates="general" priority="2">Table caption</note>
+        </trans-unit>
+        <trans-unit id="Table 50001 - Field 1 - Message Id - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Message Id</source>
+          <target>Nachrichten-ID</target>
+          <note from="Developer" annotates="general" priority="2">Unique message identifier</note>
+        </trans-unit>
+        <trans-unit id="Table 50001 - Field 2 - Message Type - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Message Type</source>
+          <target>Nachrichtentyp</target>
+          <note from="Developer" annotates="general" priority="2">Type of message</note>
+        </trans-unit>
+        <trans-unit id="Table 50001 - Field 3 - Order No. - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Order No.</source>
+          <target>Auftragsnr.</target>
+          <note from="Developer" annotates="general" priority="2">Production Order number</note>
+        </trans-unit>
+        <trans-unit id="Table 50001 - Field 4 - Operation No. - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Operation No.</source>
+          <target>Arbeitsgangnr.</target>
+          <note from="Developer" annotates="general" priority="2">Operation number</note>
+        </trans-unit>
+        <trans-unit id="Table 50001 - Field 5 - Received At - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Received At</source>
+          <target>Empfangen am</target>
+          <note from="Developer" annotates="general" priority="2">Timestamp when message was received</note>
+        </trans-unit>
+        <trans-unit id="Table 50001 - Field 6 - Processed At - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Processed At</source>
+          <target>Verarbeitet am</target>
+          <note from="Developer" annotates="general" priority="2">Timestamp when message was processed</note>
+        </trans-unit>
+        <trans-unit id="Table 50001 - Field 7 - Status - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Status</source>
+          <target>Status</target>
+          <note from="Developer" annotates="general" priority="2">Message processing status</note>
+        </trans-unit>
+        <trans-unit id="Table 50001 - Field 8 - Error - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Error</source>
+          <target>Fehler</target>
+          <note from="Developer" annotates="general" priority="2">Error message</note>
+        </trans-unit>
+        <trans-unit id="Table 50001 - Field 9 - Warning - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Warning</source>
+          <target>Warnung</target>
+          <note from="Developer" annotates="general" priority="2">Warning message</note>
+        </trans-unit>
+      </group>
+
+      <!-- ============================================= -->
+      <!-- Table 50002 - ALP Operation Execution -->
+      <!-- ============================================= -->
+      <group id="Table 50002 - ALP Operation Execution">
+        <trans-unit id="Table 50002 - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>ALP Operation Execution</source>
+          <target>ALP Arbeitsgang-Ausf&#xFC;hrung</target>
+          <note from="Developer" annotates="general" priority="2">Table caption</note>
+        </trans-unit>
+        <trans-unit id="Table 50002 - Field 1 - Order No. - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Order No.</source>
+          <target>Auftragsnr.</target>
+          <note from="Developer" annotates="general" priority="2">Production Order number</note>
+        </trans-unit>
+        <trans-unit id="Table 50002 - Field 2 - Operation No. - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Operation No.</source>
+          <target>Arbeitsgangnr.</target>
+          <note from="Developer" annotates="general" priority="2">Operation number</note>
+        </trans-unit>
+        <trans-unit id="Table 50002 - Field 3 - Work Center No. - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Work Center No.</source>
+          <target>Arbeitsplatznr.</target>
+          <note from="Developer" annotates="general" priority="2">Work Center number</note>
+        </trans-unit>
+        <trans-unit id="Table 50002 - Field 10 - Qty. Produced - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Quantity Produced</source>
+          <target>Produzierte Menge</target>
+          <note from="Developer" annotates="general" priority="2">Quantity produced</note>
+        </trans-unit>
+        <trans-unit id="Table 50002 - Field 11 - Qty. Rejected - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Quantity Rejected</source>
+          <target>Ausschussmenge</target>
+          <note from="Developer" annotates="general" priority="2">Quantity rejected</note>
+        </trans-unit>
+        <trans-unit id="Table 50002 - Field 12 - Runtime Sec - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Runtime (Seconds)</source>
+          <target>Laufzeit (Sekunden)</target>
+          <note from="Developer" annotates="general" priority="2">Runtime in seconds</note>
+        </trans-unit>
+        <trans-unit id="Table 50002 - Field 13 - Downtime Sec - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Downtime (Seconds)</source>
+          <target>Stillstandzeit (Sekunden)</target>
+          <note from="Developer" annotates="general" priority="2">Downtime in seconds</note>
+        </trans-unit>
+        <trans-unit id="Table 50002 - Field 20 - Availability - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Availability</source>
+          <target>Verf&#xFC;gbarkeit</target>
+          <note from="Developer" annotates="general" priority="2">Availability ratio</note>
+        </trans-unit>
+        <trans-unit id="Table 50002 - Field 21 - Productivity - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Productivity</source>
+          <target>Produktivit&#xE4;t</target>
+          <note from="Developer" annotates="general" priority="2">Productivity ratio</note>
+        </trans-unit>
+        <trans-unit id="Table 50002 - Field 22 - Actual Cycle Time Sec - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Actual Cycle Time (Seconds)</source>
+          <target>Tats&#xE4;chliche Taktzeit (Sekunden)</target>
+          <note from="Developer" annotates="general" priority="2">Actual cycle time in seconds</note>
+        </trans-unit>
+        <trans-unit id="Table 50002 - Field 30 - Source Timestamp - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Source Timestamp</source>
+          <target>Quellzeitstempel</target>
+          <note from="Developer" annotates="general" priority="2">Timestamp from source system</note>
+        </trans-unit>
+        <trans-unit id="Table 50002 - Field 31 - Last Update At - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Last Update At</source>
+          <target>Letzte Aktualisierung</target>
+          <note from="Developer" annotates="general" priority="2">Last update timestamp</note>
+        </trans-unit>
+        <trans-unit id="Table 50002 - Field 32 - Source - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Source</source>
+          <target>Quelle</target>
+          <note from="Developer" annotates="general" priority="2">Source system identifier</note>
+        </trans-unit>
+      </group>
+
+      <!-- ============================================= -->
+      <!-- TableExt 50003 - ALP Production Order Ext -->
+      <!-- ============================================= -->
+      <group id="TableExt 50003 - ALP Production Order Ext">
+        <trans-unit id="TableExt 50003 - Field 50000 - ALP Last Exec Update At - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Last Execution Update At</source>
+          <target>Letzte Ausf&#xFC;hrungsaktualisierung</target>
+          <note from="Developer" annotates="general" priority="2">Timestamp of last execution update</note>
+        </trans-unit>
+        <trans-unit id="TableExt 50003 - Field 50001 - ALP Execution Source - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Execution Source</source>
+          <target>Ausf&#xFC;hrungsquelle</target>
+          <note from="Developer" annotates="general" priority="2">Source system of execution data</note>
+        </trans-unit>
+        <trans-unit id="TableExt 50003 - Field 50006 - ALP Exec Qty. Produced - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Execution Quantity Produced</source>
+          <target>Produzierte Ausf&#xFC;hrungsmenge</target>
+          <note from="Developer" annotates="general" priority="2">Total quantity produced from execution</note>
+        </trans-unit>
+        <trans-unit id="TableExt 50003 - Field 50007 - ALP Exec Qty. Rejected - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Execution Quantity Rejected</source>
+          <target>Ausschussmenge Ausf&#xFC;hrung</target>
+          <note from="Developer" annotates="general" priority="2">Total quantity rejected from execution</note>
+        </trans-unit>
+        <trans-unit id="TableExt 50003 - Field 50008 - ALP Exec Weighted Avail - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Weighted Availability</source>
+          <target>Gewichtete Verf&#xFC;gbarkeit</target>
+          <note from="Developer" annotates="general" priority="2">Quantity-weighted average availability</note>
+        </trans-unit>
+        <trans-unit id="TableExt 50003 - Field 50009 - ALP Exec Weighted Prod - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Weighted Productivity</source>
+          <target>Gewichtete Produktivit&#xE4;t</target>
+          <note from="Developer" annotates="general" priority="2">Quantity-weighted average productivity</note>
+        </trans-unit>
+      </group>
+
+      <!-- ============================================= -->
+      <!-- TableExt 50004 - ALP Prod Order Rtng Line Ext -->
+      <!-- ============================================= -->
+      <group id="TableExt 50004 - ALP Prod Order Rtng Line Ext">
+        <trans-unit id="TableExt 50004 - Field 50000 - ALP Actual Availability - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Actual Availability</source>
+          <target>Tats&#xE4;chliche Verf&#xFC;gbarkeit</target>
+          <note from="Developer" annotates="general" priority="2">Actual availability from execution</note>
+        </trans-unit>
+        <trans-unit id="TableExt 50004 - Field 50001 - ALP Actual Productivity - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Actual Productivity</source>
+          <target>Tats&#xE4;chliche Produktivit&#xE4;t</target>
+          <note from="Developer" annotates="general" priority="2">Actual productivity from execution</note>
+        </trans-unit>
+        <trans-unit id="TableExt 50004 - Field 50002 - ALP Qty. Produced - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Quantity Produced</source>
+          <target>Produzierte Menge</target>
+          <note from="Developer" annotates="general" priority="2">Quantity produced at operation</note>
+        </trans-unit>
+        <trans-unit id="TableExt 50004 - Field 50003 - ALP Qty. Rejected - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Quantity Rejected</source>
+          <target>Ausschussmenge</target>
+          <note from="Developer" annotates="general" priority="2">Quantity rejected at operation</note>
+        </trans-unit>
+        <trans-unit id="TableExt 50004 - Field 50004 - ALP Source Timestamp - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Execution Source Timestamp</source>
+          <target>Ausf&#xFC;hrungsquellen-Zeitstempel</target>
+          <note from="Developer" annotates="general" priority="2">Source timestamp of execution data</note>
+        </trans-unit>
+      </group>
+
+      <!-- ============================================= -->
+      <!-- PermissionSet 50040 - ALP Shopfloor View -->
+      <!-- ============================================= -->
+      <group id="PermissionSet 50040 - ALP Shopfloor View">
+        <trans-unit id="PermissionSet 50040 - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>ALP Shopfloor View</source>
+          <target>ALP Fertigung Anzeige</target>
+          <note from="Developer" annotates="general" priority="2">Permission set for viewing shopfloor data</note>
+        </trans-unit>
+      </group>
+
+      <!-- ============================================= -->
+      <!-- PermissionSet 50041 - ALP Shopfloor Exec -->
+      <!-- ============================================= -->
+      <group id="PermissionSet 50041 - ALP Shopfloor Exec">
+        <trans-unit id="PermissionSet 50041 - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>ALP Shopfloor Exec</source>
+          <target>ALP Fertigung Ausf&#xFC;hrung</target>
+          <note from="Developer" annotates="general" priority="2">Permission set for execution operations</note>
+        </trans-unit>
+      </group>
+
+      <!-- ============================================= -->
+      <!-- Codeunit 50010 - ALP Execution Ingestion Svc -->
+      <!-- ============================================= -->
+      <group id="Codeunit 50010 - ALP Execution Ingestion Svc">
+        <trans-unit id="Codeunit 50010 - Label ProdOrderNotFoundErr" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Production Order %1 not found or not in Released status</source>
+          <target>Fertigungsauftrag %1 nicht gefunden oder nicht im Status Freigegeben</target>
+          <note from="Developer" annotates="general" priority="2">%1 = Order No.</note>
+        </trans-unit>
+        <trans-unit id="Codeunit 50010 - Label RoutingLineNotFoundErr" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Routing line not found for Order %1, Operation %2</source>
+          <target>Arbeitsgangzeile nicht gefunden f&#xFC;r Auftrag %1, Arbeitsgang %2</target>
+          <note from="Developer" annotates="general" priority="2">%1 = Order No., %2 = Operation No.</note>
+        </trans-unit>
+        <trans-unit id="Codeunit 50010 - Label WorkCenterMismatchLbl" size-unit="char" translate="yes" xml:space="preserve">
+          <source>WorkCenter mismatch: payload has %1, routing line has %2</source>
+          <target>Arbeitsplatz-Abweichung: Payload hat %1, Arbeitsgangzeile hat %2</target>
+          <note from="Developer" annotates="general" priority="2">%1 = Payload WC, %2 = Routing WC</note>
+        </trans-unit>
+        <trans-unit id="Codeunit 50010 - Label RejectedExceedsProducedErr" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Qty. Rejected (%1) cannot exceed Qty. Produced (%2)</source>
+          <target>Ausschussmenge (%1) darf die produzierte Menge (%2) nicht &#xFC;berschreiten</target>
+          <note from="Developer" annotates="general" priority="2">%1 = Qty. Rejected, %2 = Qty. Produced</note>
+        </trans-unit>
+        <trans-unit id="Codeunit 50010 - Label AvailabilityOutOfRangeErr" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Availability (%1) must be between 0 and 1</source>
+          <target>Verf&#xFC;gbarkeit (%1) muss zwischen 0 und 1 liegen</target>
+          <note from="Developer" annotates="general" priority="2">%1 = Availability value</note>
+        </trans-unit>
+        <trans-unit id="Codeunit 50010 - Label ProductivityOutOfRangeErr" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Productivity (%1) must be between 0 and 1</source>
+          <target>Produktivit&#xE4;t (%1) muss zwischen 0 und 1 liegen</target>
+          <note from="Developer" annotates="general" priority="2">%1 = Productivity value</note>
+        </trans-unit>
+      </group>
+
+      <!-- ============================================= -->
+      <!-- Page 50020 - ALP Integration Inbox List -->
+      <!-- ============================================= -->
+      <group id="Page 50020 - ALP Integration Inbox List">
+        <trans-unit id="Page 50020 - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>ALP Integration Inbox</source>
+          <target>ALP Integrationseingang</target>
+          <note from="Developer" annotates="general" priority="2">Page caption</note>
+        </trans-unit>
+        <trans-unit id="Page 50020 - Control Message Id - Property ToolTip" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Unique identifier for the message</source>
+          <target>Eindeutige Kennung f&#xFC;r die Nachricht</target>
+          <note from="Developer" annotates="general" priority="2">ToolTip for Message Id field</note>
+        </trans-unit>
+        <trans-unit id="Page 50020 - Control Message Type - Property ToolTip" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Type of message received</source>
+          <target>Typ der empfangenen Nachricht</target>
+          <note from="Developer" annotates="general" priority="2">ToolTip for Message Type field</note>
+        </trans-unit>
+        <trans-unit id="Page 50020 - Control Order No. - Property ToolTip" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Production Order number</source>
+          <target>Fertigungsauftragsnummer</target>
+          <note from="Developer" annotates="general" priority="2">ToolTip for Order No. field</note>
+        </trans-unit>
+        <trans-unit id="Page 50020 - Control Operation No. - Property ToolTip" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Operation number within the routing</source>
+          <target>Arbeitsgangnummer innerhalb des Arbeitsplans</target>
+          <note from="Developer" annotates="general" priority="2">ToolTip for Operation No. field</note>
+        </trans-unit>
+        <trans-unit id="Page 50020 - Control Status - Property ToolTip" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Processing status of the message</source>
+          <target>Verarbeitungsstatus der Nachricht</target>
+          <note from="Developer" annotates="general" priority="2">ToolTip for Status field</note>
+        </trans-unit>
+        <trans-unit id="Page 50020 - Control Received At - Property ToolTip" size-unit="char" translate="yes" xml:space="preserve">
+          <source>When the message was received</source>
+          <target>Wann die Nachricht empfangen wurde</target>
+          <note from="Developer" annotates="general" priority="2">ToolTip for Received At field</note>
+        </trans-unit>
+        <trans-unit id="Page 50020 - Control Processed At - Property ToolTip" size-unit="char" translate="yes" xml:space="preserve">
+          <source>When the message was processed</source>
+          <target>Wann die Nachricht verarbeitet wurde</target>
+          <note from="Developer" annotates="general" priority="2">ToolTip for Processed At field</note>
+        </trans-unit>
+        <trans-unit id="Page 50020 - Control Error - Property ToolTip" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Error message if processing failed</source>
+          <target>Fehlermeldung, wenn die Verarbeitung fehlgeschlagen ist</target>
+          <note from="Developer" annotates="general" priority="2">ToolTip for Error field</note>
+        </trans-unit>
+        <trans-unit id="Page 50020 - Control Warning - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Warning</source>
+          <target>Warnung</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Warning field</note>
+        </trans-unit>
+        <trans-unit id="Page 50020 - Control Warning - Property ToolTip" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Warning message (e.g., WorkCenter mismatch)</source>
+          <target>Warnmeldung (z.B. Arbeitsplatz-Abweichung)</target>
+          <note from="Developer" annotates="general" priority="2">ToolTip for Warning field</note>
+        </trans-unit>
+        <trans-unit id="Page 50020 - Action ViewExecutionData - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>View Execution Data</source>
+          <target>Ausf&#xFC;hrungsdaten anzeigen</target>
+          <note from="Developer" annotates="general" priority="2">Action caption</note>
+        </trans-unit>
+        <trans-unit id="Page 50020 - Action ViewExecutionData - Property ToolTip" size-unit="char" translate="yes" xml:space="preserve">
+          <source>View the execution data for this message</source>
+          <target>Die Ausf&#xFC;hrungsdaten f&#xFC;r diese Nachricht anzeigen</target>
+          <note from="Developer" annotates="general" priority="2">Action tooltip</note>
+        </trans-unit>
+        <trans-unit id="Page 50020 - ActionGroup Category_Process - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Process</source>
+          <target>Verarbeiten</target>
+          <note from="Developer" annotates="general" priority="2">Action group caption</note>
+        </trans-unit>
+      </group>
+
+      <!-- ============================================= -->
+      <!-- PageExt 50021 - ALP Production Order Ext -->
+      <!-- ============================================= -->
+      <group id="PageExt 50021 - ALP Production Order Ext">
+        <trans-unit id="PageExt 50021 - Group ShopfloorExecution - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Shopfloor Execution</source>
+          <target>Fertigungsausf&#xFC;hrung</target>
+          <note from="Developer" annotates="general" priority="2">Group caption</note>
+        </trans-unit>
+        <trans-unit id="PageExt 50021 - Control ALP Last Exec Update At - Property ToolTip" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Timestamp of the last execution update received from the shopfloor system</source>
+          <target>Zeitstempel der letzten Ausf&#xFC;hrungsaktualisierung vom Fertigungssystem</target>
+          <note from="Developer" annotates="general" priority="2">ToolTip for Last Exec Update At field</note>
+        </trans-unit>
+        <trans-unit id="PageExt 50021 - Control ALP Execution Source - Property ToolTip" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Identifier of the shopfloor system that sent the last update</source>
+          <target>Kennung des Fertigungssystems, das die letzte Aktualisierung gesendet hat</target>
+          <note from="Developer" annotates="general" priority="2">ToolTip for Execution Source field</note>
+        </trans-unit>
+        <trans-unit id="PageExt 50021 - Group ShopfloorExecutionKPIs - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Execution KPIs</source>
+          <target>Ausf&#xFC;hrungs-KPIs</target>
+          <note from="Developer" annotates="general" priority="2">Group caption for KPIs section</note>
+        </trans-unit>
+        <trans-unit id="PageExt 50021 - Control ALP Exec Qty. Produced - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Qty. Produced</source>
+          <target>Menge produziert</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Qty. Produced field</note>
+        </trans-unit>
+        <trans-unit id="PageExt 50021 - Control ALP Exec Qty. Produced - Property ToolTip" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Total quantity produced across all operations</source>
+          <target>Gesamtmenge, die &#xFC;ber alle Arbeitsg&#xE4;nge produziert wurde</target>
+          <note from="Developer" annotates="general" priority="2">ToolTip for Qty. Produced field</note>
+        </trans-unit>
+        <trans-unit id="PageExt 50021 - Control ALP Exec Qty. Rejected - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Qty. Rejected</source>
+          <target>Ausschussmenge</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Qty. Rejected field</note>
+        </trans-unit>
+        <trans-unit id="PageExt 50021 - Control ALP Exec Qty. Rejected - Property ToolTip" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Total quantity rejected across all operations</source>
+          <target>Gesamtausschussmenge &#xFC;ber alle Arbeitsg&#xE4;nge</target>
+          <note from="Developer" annotates="general" priority="2">ToolTip for Qty. Rejected field</note>
+        </trans-unit>
+        <trans-unit id="PageExt 50021 - Control ALPQtyGood - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Qty. Good</source>
+          <target>Gutmenge</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Qty. Good field</note>
+        </trans-unit>
+        <trans-unit id="PageExt 50021 - Control ALPQtyGood - Property ToolTip" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Total quantity good (Produced - Rejected)</source>
+          <target>Gesamte Gutmenge (Produziert - Ausschuss)</target>
+          <note from="Developer" annotates="general" priority="2">ToolTip for Qty. Good field</note>
+        </trans-unit>
+        <trans-unit id="PageExt 50021 - Control ALPProgressPct - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Progress %</source>
+          <target>Fortschritt %</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Progress field</note>
+        </trans-unit>
+        <trans-unit id="PageExt 50021 - Control ALPProgressPct - Property ToolTip" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Completion percentage based on good quantity vs planned quantity</source>
+          <target>Fertigstellungsgrad basierend auf Gutmenge im Verh&#xE4;ltnis zur geplanten Menge</target>
+          <note from="Developer" annotates="general" priority="2">ToolTip for Progress field</note>
+        </trans-unit>
+        <trans-unit id="PageExt 50021 - Control ALP Exec Weighted Avail - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Availability</source>
+          <target>Verf&#xFC;gbarkeit</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Availability field</note>
+        </trans-unit>
+        <trans-unit id="PageExt 50021 - Control ALP Exec Weighted Avail - Property ToolTip" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Quantity-weighted average availability across operations</source>
+          <target>Mengengewichtete durchschnittliche Verf&#xFC;gbarkeit &#xFC;ber alle Arbeitsg&#xE4;nge</target>
+          <note from="Developer" annotates="general" priority="2">ToolTip for Availability field</note>
+        </trans-unit>
+        <trans-unit id="PageExt 50021 - Control ALP Exec Weighted Prod - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Productivity</source>
+          <target>Produktivit&#xE4;t</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Productivity field</note>
+        </trans-unit>
+        <trans-unit id="PageExt 50021 - Control ALP Exec Weighted Prod - Property ToolTip" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Quantity-weighted average productivity across operations</source>
+          <target>Mengengewichtete durchschnittliche Produktivit&#xE4;t &#xFC;ber alle Arbeitsg&#xE4;nge</target>
+          <note from="Developer" annotates="general" priority="2">ToolTip for Productivity field</note>
+        </trans-unit>
+        <trans-unit id="PageExt 50021 - ActionGroup ALPShopfloor - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Shopfloor</source>
+          <target>Fertigung</target>
+          <note from="Developer" annotates="general" priority="2">Action group caption</note>
+        </trans-unit>
+        <trans-unit id="PageExt 50021 - Action ALPViewIntegrationInbox - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Execution Events</source>
+          <target>Ausf&#xFC;hrungsereignisse</target>
+          <note from="Developer" annotates="general" priority="2">Action caption</note>
+        </trans-unit>
+        <trans-unit id="PageExt 50021 - Action ALPViewIntegrationInbox - Property ToolTip" size-unit="char" translate="yes" xml:space="preserve">
+          <source>View execution events (performance metrics) for this production order</source>
+          <target>Ausf&#xFC;hrungsereignisse (Leistungskennzahlen) f&#xFC;r diesen Fertigungsauftrag anzeigen</target>
+          <note from="Developer" annotates="general" priority="2">Action tooltip</note>
+        </trans-unit>
+        <trans-unit id="PageExt 50021 - ActionGroup Category_Shopfloor - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Shopfloor</source>
+          <target>Fertigung</target>
+          <note from="Developer" annotates="general" priority="2">Promoted action group caption</note>
+        </trans-unit>
+      </group>
+
+      <!-- ============================================= -->
+      <!-- PageExt 50022 - ALP Prod Order Rtng Lines Ext -->
+      <!-- ============================================= -->
+      <group id="PageExt 50022 - ALP Prod Order Rtng Lines Ext">
+        <trans-unit id="PageExt 50022 - Control ALP Qty. Produced - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Qty. Produced</source>
+          <target>Menge produziert</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Qty. Produced field</note>
+        </trans-unit>
+        <trans-unit id="PageExt 50022 - Control ALP Qty. Produced - Property ToolTip" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Quantity produced at this operation</source>
+          <target>An diesem Arbeitsgang produzierte Menge</target>
+          <note from="Developer" annotates="general" priority="2">ToolTip for Qty. Produced field</note>
+        </trans-unit>
+        <trans-unit id="PageExt 50022 - Control ALP Qty. Rejected - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Qty. Rejected</source>
+          <target>Ausschussmenge</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Qty. Rejected field</note>
+        </trans-unit>
+        <trans-unit id="PageExt 50022 - Control ALP Qty. Rejected - Property ToolTip" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Quantity rejected at this operation</source>
+          <target>An diesem Arbeitsgang ausgesonderte Menge</target>
+          <note from="Developer" annotates="general" priority="2">ToolTip for Qty. Rejected field</note>
+        </trans-unit>
+        <trans-unit id="PageExt 50022 - Control ALPQtyGood - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Qty. Good</source>
+          <target>Gutmenge</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Qty. Good field</note>
+        </trans-unit>
+        <trans-unit id="PageExt 50022 - Control ALPQtyGood - Property ToolTip" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Quantity good at this operation (produced minus rejected)</source>
+          <target>Gutmenge an diesem Arbeitsgang (produziert minus Ausschuss)</target>
+          <note from="Developer" annotates="general" priority="2">ToolTip for Qty. Good field</note>
+        </trans-unit>
+        <trans-unit id="PageExt 50022 - Control ALP Actual Availability - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Availability</source>
+          <target>Verf&#xFC;gbarkeit</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Availability field</note>
+        </trans-unit>
+        <trans-unit id="PageExt 50022 - Control ALP Actual Availability - Property ToolTip" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Actual availability ratio from shopfloor execution (0-1)</source>
+          <target>Tats&#xE4;chliche Verf&#xFC;gbarkeitsquote aus der Fertigungsausf&#xFC;hrung (0-1)</target>
+          <note from="Developer" annotates="general" priority="2">ToolTip for Availability field</note>
+        </trans-unit>
+        <trans-unit id="PageExt 50022 - Control ALP Actual Productivity - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Productivity</source>
+          <target>Produktivit&#xE4;t</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Productivity field</note>
+        </trans-unit>
+        <trans-unit id="PageExt 50022 - Control ALP Actual Productivity - Property ToolTip" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Actual productivity ratio from shopfloor execution (0-1)</source>
+          <target>Tats&#xE4;chliche Produktivit&#xE4;tsquote aus der Fertigungsausf&#xFC;hrung (0-1)</target>
+          <note from="Developer" annotates="general" priority="2">ToolTip for Productivity field</note>
+        </trans-unit>
+        <trans-unit id="PageExt 50022 - Control ALP Source Timestamp - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Last Update</source>
+          <target>Letzte Aktualisierung</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Last Update field</note>
+        </trans-unit>
+        <trans-unit id="PageExt 50022 - Control ALP Source Timestamp - Property ToolTip" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Timestamp of the last execution update from the shopfloor system</source>
+          <target>Zeitstempel der letzten Ausf&#xFC;hrungsaktualisierung vom Fertigungssystem</target>
+          <note from="Developer" annotates="general" priority="2">ToolTip for Last Update field</note>
+        </trans-unit>
+      </group>
+
+      <!-- ============================================= -->
+      <!-- Report 50051 - ALP Daily Exec Performance -->
+      <!-- ============================================= -->
+      <group id="Report 50051 - ALP Daily Exec Performance">
+        <trans-unit id="Report 50051 - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Daily Work Order Execution Performance</source>
+          <target>T&#xE4;gliche Fertigungsauftrags-Ausf&#xFC;hrungsleistung</target>
+          <note from="Developer" annotates="general" priority="2">Report caption</note>
+        </trans-unit>
+        <trans-unit id="Report 50051 - RequestPage Group Options - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Options</source>
+          <target>Optionen</target>
+          <note from="Developer" annotates="general" priority="2">Request page group caption</note>
+        </trans-unit>
+        <trans-unit id="Report 50051 - RequestPage Field ReportDate - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Report Date</source>
+          <target>Berichtsdatum</target>
+          <note from="Developer" annotates="general" priority="2">Report date field caption</note>
+        </trans-unit>
+        <trans-unit id="Report 50051 - RequestPage Field ReportDate - Property ToolTip" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Date to report on (default: today)</source>
+          <target>Datum f&#xFC;r den Bericht (Standard: heute)</target>
+          <note from="Developer" annotates="general" priority="2">Report date field tooltip</note>
+        </trans-unit>
+        <!-- Report Labels for i18n -->
+        <trans-unit id="Report 50051 - Label ReportTitleLbl" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Daily Work Order Execution Performance</source>
+          <target>T&#xE4;gliche Fertigungsauftrags-Ausf&#xFC;hrungsleistung</target>
+          <note from="Developer" annotates="general" priority="2">Report title shown in header</note>
+        </trans-unit>
+        <trans-unit id="Report 50051 - Label ReportDateLbl" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Report Date:</source>
+          <target>Berichtsdatum:</target>
+          <note from="Developer" annotates="general" priority="2">Label prefix for the report date</note>
+        </trans-unit>
+        <trans-unit id="Report 50051 - Label ExportedLbl" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Exported:</source>
+          <target>Exportiert:</target>
+          <note from="Developer" annotates="general" priority="2">Label prefix for export timestamp</note>
+        </trans-unit>
+        <trans-unit id="Report 50051 - Label BroughtToYouByLbl" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Brought to you by</source>
+          <target>Bereitgestellt von</target>
+          <note from="Developer" annotates="general" priority="2">Footer branding text before company name</note>
+        </trans-unit>
+        <trans-unit id="Report 50051 - Label PageLbl" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Page</source>
+          <target>Seite</target>
+          <note from="Developer" annotates="general" priority="2">Page number prefix</note>
+        </trans-unit>
+        <trans-unit id="Report 50051 - Label OfLbl" size-unit="char" translate="yes" xml:space="preserve">
+          <source>of</source>
+          <target>von</target>
+          <note from="Developer" annotates="general" priority="2">Page X of Y separator</note>
+        </trans-unit>
+        <trans-unit id="Report 50051 - Label OrderNoLbl" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Order No.</source>
+          <target>Auftragsnr.</target>
+          <note from="Developer" annotates="general" priority="2">Column header for production order number</note>
+        </trans-unit>
+        <trans-unit id="Report 50051 - Label ItemLbl" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Item</source>
+          <target>Artikel</target>
+          <note from="Developer" annotates="general" priority="2">Column header for item/source number</note>
+        </trans-unit>
+        <trans-unit id="Report 50051 - Label PlannedLbl" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Planned</source>
+          <target>Geplant</target>
+          <note from="Developer" annotates="general" priority="2">Column header for planned quantity</note>
+        </trans-unit>
+        <trans-unit id="Report 50051 - Label ProducedLbl" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Produced</source>
+          <target>Produziert</target>
+          <note from="Developer" annotates="general" priority="2">Column header for produced quantity</note>
+        </trans-unit>
+        <trans-unit id="Report 50051 - Label RejectedLbl" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Rejected</source>
+          <target>Ausschuss</target>
+          <note from="Developer" annotates="general" priority="2">Column header for rejected quantity</note>
+        </trans-unit>
+        <trans-unit id="Report 50051 - Label GoodLbl" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Good</source>
+          <target>Gut</target>
+          <note from="Developer" annotates="general" priority="2">Column header for good quantity</note>
+        </trans-unit>
+        <trans-unit id="Report 50051 - Label ProgressLbl" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Progress</source>
+          <target>Fortschritt</target>
+          <note from="Developer" annotates="general" priority="2">Column header for progress percentage</note>
+        </trans-unit>
+        <trans-unit id="Report 50051 - Label AvailLbl" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Avail.</source>
+          <target>Verf.</target>
+          <note from="Developer" annotates="general" priority="2">Column header for availability (abbreviated)</note>
+        </trans-unit>
+        <trans-unit id="Report 50051 - Label ProdLbl" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Prod.</source>
+          <target>Prod.</target>
+          <note from="Developer" annotates="general" priority="2">Column header for productivity (abbreviated)</note>
+        </trans-unit>
+        <trans-unit id="Report 50051 - Label LastUpdateLbl" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Last Update</source>
+          <target>Letzte Aktualisierung</target>
+          <note from="Developer" annotates="general" priority="2">Column header for last update timestamp</note>
+        </trans-unit>
+        <trans-unit id="Report 50051 - Label WorkCentersLbl" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Work Centers</source>
+          <target>Arbeitspl&#xE4;tze</target>
+          <note from="Developer" annotates="general" priority="2">Column header for work centers list</note>
+        </trans-unit>
+        <trans-unit id="Report 50051 - Layout ExcelLayoutDE - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Excel (German)</source>
+          <target>Excel (Deutsch)</target>
+          <note from="Developer" annotates="general" priority="2">German Excel layout caption</note>
+        </trans-unit>
+      </group>
+
+      <!-- ============================================= -->
+      <!-- API Page 50030 - ALP Execution Events API -->
+      <!-- ============================================= -->
+      <group id="Page 50030 - ALP Execution Events API">
+        <trans-unit id="Page 50030 - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Execution Events API</source>
+          <target>Ausf&#xFC;hrungsereignisse-API</target>
+          <note from="Developer" annotates="general" priority="2">Page caption</note>
+        </trans-unit>
+        <trans-unit id="Page 50030 - Control messageId - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Message ID</source>
+          <target>Nachrichten-ID</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Message ID field</note>
+        </trans-unit>
+        <trans-unit id="Page 50030 - Control orderNo - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Order No.</source>
+          <target>Auftragsnr.</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Order No. field</note>
+        </trans-unit>
+        <trans-unit id="Page 50030 - Control operationNo - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Operation No.</source>
+          <target>Arbeitsgangnr.</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Operation No. field</note>
+        </trans-unit>
+        <trans-unit id="Page 50030 - Control workCenter - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Work Center</source>
+          <target>Arbeitsplatz</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Work Center field</note>
+        </trans-unit>
+        <trans-unit id="Page 50030 - Control qtyProduced - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Quantity Produced</source>
+          <target>Produzierte Menge</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Quantity Produced field</note>
+        </trans-unit>
+        <trans-unit id="Page 50030 - Control qtyRejected - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Quantity Rejected</source>
+          <target>Ausschussmenge</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Quantity Rejected field</note>
+        </trans-unit>
+        <trans-unit id="Page 50030 - Control runtimeSec - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Runtime (Seconds)</source>
+          <target>Laufzeit (Sekunden)</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Runtime field</note>
+        </trans-unit>
+        <trans-unit id="Page 50030 - Control downtimeSec - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Downtime (Seconds)</source>
+          <target>Stillstandzeit (Sekunden)</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Downtime field</note>
+        </trans-unit>
+        <trans-unit id="Page 50030 - Control availability - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Availability</source>
+          <target>Verf&#xFC;gbarkeit</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Availability field</note>
+        </trans-unit>
+        <trans-unit id="Page 50030 - Control productivity - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Productivity</source>
+          <target>Produktivit&#xE4;t</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Productivity field</note>
+        </trans-unit>
+        <trans-unit id="Page 50030 - Control actualCycleTimeSec - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Actual Cycle Time (Seconds)</source>
+          <target>Tats&#xE4;chliche Taktzeit (Sekunden)</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Actual Cycle Time field</note>
+        </trans-unit>
+        <trans-unit id="Page 50030 - Control sourceTimestamp - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Source Timestamp</source>
+          <target>Quellzeitstempel</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Source Timestamp field</note>
+        </trans-unit>
+        <trans-unit id="Page 50030 - Control source - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Source</source>
+          <target>Quelle</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Source field</note>
+        </trans-unit>
+        <trans-unit id="Page 50030 - Label InvalidMessageIdErr" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Invalid messageId format. Expected a valid GUID.</source>
+          <target>Ung&#xFC;ltiges messageId-Format. Eine g&#xFC;ltige GUID wird erwartet.</target>
+          <note from="Developer" annotates="general" priority="2">Error when API receives malformed GUID</note>
+        </trans-unit>
+        <trans-unit id="Page 50030 - Label ProcessingFailedErr" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Failed to process execution event. Check Integration Inbox for details.</source>
+          <target>Ausf&#xFC;hrungsereignis konnte nicht verarbeitet werden. Pr&#xFC;fen Sie den Integrationseingang f&#xFC;r Details.</target>
+          <note from="Developer" annotates="general" priority="2">Error when event processing fails</note>
+        </trans-unit>
+      </group>
+
+      <!-- ============================================= -->
+      <!-- API Page 50031 - ALP Work Centers API -->
+      <!-- ============================================= -->
+      <group id="Page 50031 - ALP Work Centers API">
+        <trans-unit id="Page 50031 - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Work Centers API</source>
+          <target>Arbeitspl&#xE4;tze-API</target>
+          <note from="Developer" annotates="general" priority="2">Page caption</note>
+        </trans-unit>
+        <trans-unit id="Page 50031 - Control number - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>No.</source>
+          <target>Nr.</target>
+          <note from="Developer" annotates="general" priority="2">Caption for No. field</note>
+        </trans-unit>
+        <trans-unit id="Page 50031 - Control name - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Name</source>
+          <target>Name</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Name field</note>
+        </trans-unit>
+        <trans-unit id="Page 50031 - Control workCenterGroupCode - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Work Center Group Code</source>
+          <target>Arbeitsplatzgruppencode</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Work Center Group Code field</note>
+        </trans-unit>
+        <trans-unit id="Page 50031 - Control unitOfMeasureCode - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Unit of Measure Code</source>
+          <target>Einheitencode</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Unit of Measure Code field</note>
+        </trans-unit>
+        <trans-unit id="Page 50031 - Control capacity - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Capacity</source>
+          <target>Kapazit&#xE4;t</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Capacity field</note>
+        </trans-unit>
+        <trans-unit id="Page 50031 - Control efficiency - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Efficiency</source>
+          <target>Effizienz</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Efficiency field</note>
+        </trans-unit>
+        <trans-unit id="Page 50031 - Control directUnitCost - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Direct Unit Cost</source>
+          <target>EK-Preis (direkt)</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Direct Unit Cost field</note>
+        </trans-unit>
+        <trans-unit id="Page 50031 - Control indirectCostPercent - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Indirect Cost %</source>
+          <target>Gemeinkostensatz %</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Indirect Cost % field</note>
+        </trans-unit>
+        <trans-unit id="Page 50031 - Control blocked - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Blocked</source>
+          <target>Gesperrt</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Blocked field</note>
+        </trans-unit>
+        <trans-unit id="Page 50031 - Label SandboxOnlyCreateErr" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Work center creation is only allowed in Sandbox environments.</source>
+          <target>Die Erstellung von Arbeitspl&#xE4;tzen ist nur in Sandbox-Umgebungen erlaubt.</target>
+          <note from="Developer" annotates="general" priority="2">Error when trying to create work center in non-sandbox environment</note>
+        </trans-unit>
+        <trans-unit id="Page 50031 - Label SandboxOnlyModifyErr" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Work center modification is only allowed in Sandbox environments.</source>
+          <target>Die &#xC4;nderung von Arbeitspl&#xE4;tzen ist nur in Sandbox-Umgebungen erlaubt.</target>
+          <note from="Developer" annotates="general" priority="2">Error when trying to modify work center in non-sandbox environment</note>
+        </trans-unit>
+      </group>
+
+      <!-- ============================================= -->
+      <!-- API Page 50032 - ALP Production Orders API -->
+      <!-- ============================================= -->
+      <group id="Page 50032 - ALP Production Orders API">
+        <trans-unit id="Page 50032 - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Production Orders API</source>
+          <target>Fertigungsauftr&#xE4;ge-API</target>
+          <note from="Developer" annotates="general" priority="2">Page caption</note>
+        </trans-unit>
+        <trans-unit id="Page 50032 - Control id - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Id</source>
+          <target>ID</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Id field</note>
+        </trans-unit>
+        <trans-unit id="Page 50032 - Control status - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Status</source>
+          <target>Status</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Status field</note>
+        </trans-unit>
+        <trans-unit id="Page 50032 - Control number - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>No.</source>
+          <target>Nr.</target>
+          <note from="Developer" annotates="general" priority="2">Caption for No. field</note>
+        </trans-unit>
+        <trans-unit id="Page 50032 - Control description - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Description</source>
+          <target>Beschreibung</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Description field</note>
+        </trans-unit>
+        <trans-unit id="Page 50032 - Control sourceType - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Source Type</source>
+          <target>Herkunftsart</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Source Type field</note>
+        </trans-unit>
+        <trans-unit id="Page 50032 - Control sourceNo - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Source No.</source>
+          <target>Herkunftsnr.</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Source No. field</note>
+        </trans-unit>
+        <trans-unit id="Page 50032 - Control quantity - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Quantity</source>
+          <target>Menge</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Quantity field</note>
+        </trans-unit>
+        <trans-unit id="Page 50032 - Control dueDate - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Due Date</source>
+          <target>F&#xE4;lligkeitsdatum</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Due Date field</note>
+        </trans-unit>
+        <trans-unit id="Page 50032 - Control startingDate - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Starting Date</source>
+          <target>Startdatum</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Starting Date field</note>
+        </trans-unit>
+        <trans-unit id="Page 50032 - Control endingDate - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Ending Date</source>
+          <target>Enddatum</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Ending Date field</note>
+        </trans-unit>
+        <trans-unit id="Page 50032 - Control locationCode - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Location Code</source>
+          <target>Lagerortcode</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Location Code field</note>
+        </trans-unit>
+        <trans-unit id="Page 50032 - Control systemModifiedAt - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>System Modified At</source>
+          <target>System&#xE4;nderung am</target>
+          <note from="Developer" annotates="general" priority="2">Caption for System Modified At field</note>
+        </trans-unit>
+        <trans-unit id="Page 50032 - Label SandboxOnlyCreateErr" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Production order creation via API is only allowed in Sandbox environments.</source>
+          <target>Die Erstellung von Fertigungsauftr&#xE4;gen &#xFC;ber die API ist nur in Sandbox-Umgebungen erlaubt.</target>
+          <note from="Developer" annotates="general" priority="2">Error when trying to create production order in non-sandbox environment</note>
+        </trans-unit>
+        <trans-unit id="Page 50032 - Label SandboxOnlyModifyErr" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Production order modification via API is only allowed in Sandbox environments.</source>
+          <target>Die &#xC4;nderung von Fertigungsauftr&#xE4;gen &#xFC;ber die API ist nur in Sandbox-Umgebungen erlaubt.</target>
+          <note from="Developer" annotates="general" priority="2">Error when trying to modify production order in non-sandbox environment</note>
+        </trans-unit>
+        <trans-unit id="Page 50032 - Label SandboxOnlyDeleteErr" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Production order deletion via API is only allowed in Sandbox environments.</source>
+          <target>Das L&#xF6;schen von Fertigungsauftr&#xE4;gen &#xFC;ber die API ist nur in Sandbox-Umgebungen erlaubt.</target>
+          <note from="Developer" annotates="general" priority="2">Error when trying to delete production order in non-sandbox environment</note>
+        </trans-unit>
+        <trans-unit id="Page 50032 - Label SandboxOnlyRefreshErr" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Production order refresh via API is only allowed in Sandbox environments.</source>
+          <target>Die Aktualisierung von Fertigungsauftr&#xE4;gen &#xFC;ber die API ist nur in Sandbox-Umgebungen erlaubt.</target>
+          <note from="Developer" annotates="general" priority="2">Error when trying to refresh production order in non-sandbox environment</note>
+        </trans-unit>
+      </group>
+
+      <!-- ============================================= -->
+      <!-- API Page 50033 - ALP Prod Order Routing API -->
+      <!-- ============================================= -->
+      <group id="Page 50033 - ALP Prod Order Routing API">
+        <trans-unit id="Page 50033 - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Production Order Routing Lines API</source>
+          <target>FA-Arbeitsgangzeilen-API</target>
+          <note from="Developer" annotates="general" priority="2">Page caption</note>
+        </trans-unit>
+        <trans-unit id="Page 50033 - Control status - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Status</source>
+          <target>Status</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Status field</note>
+        </trans-unit>
+        <trans-unit id="Page 50033 - Control prodOrderNo - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Prod. Order No.</source>
+          <target>FA-Nr.</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Prod. Order No. field</note>
+        </trans-unit>
+        <trans-unit id="Page 50033 - Control routingReferenceNo - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Routing Reference No.</source>
+          <target>Arbeitsplan-Referenznr.</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Routing Reference No. field</note>
+        </trans-unit>
+        <trans-unit id="Page 50033 - Control operationNo - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Operation No.</source>
+          <target>Arbeitsgangnr.</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Operation No. field</note>
+        </trans-unit>
+        <trans-unit id="Page 50033 - Control type - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Type</source>
+          <target>Art</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Type field</note>
+        </trans-unit>
+        <trans-unit id="Page 50033 - Control no - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>No.</source>
+          <target>Nr.</target>
+          <note from="Developer" annotates="general" priority="2">Caption for No. field</note>
+        </trans-unit>
+        <trans-unit id="Page 50033 - Control description - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Description</source>
+          <target>Beschreibung</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Description field</note>
+        </trans-unit>
+        <trans-unit id="Page 50033 - Control setupTime - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Setup Time</source>
+          <target>R&#xFC;stzeit</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Setup Time field</note>
+        </trans-unit>
+        <trans-unit id="Page 50033 - Control runTime - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Run Time</source>
+          <target>Bearbeitungszeit</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Run Time field</note>
+        </trans-unit>
+        <trans-unit id="Page 50033 - Control waitTime - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Wait Time</source>
+          <target>Wartezeit</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Wait Time field</note>
+        </trans-unit>
+        <trans-unit id="Page 50033 - Control moveTime - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Move Time</source>
+          <target>Transportzeit</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Move Time field</note>
+        </trans-unit>
+        <trans-unit id="Page 50033 - Control inputQuantity - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Input Quantity</source>
+          <target>Eingabemenge</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Input Quantity field</note>
+        </trans-unit>
+      </group>
+
+      <!-- ============================================= -->
+      <!-- API Page 50034 - ALP Prod Order Components API -->
+      <!-- ============================================= -->
+      <group id="Page 50034 - ALP Prod Order Components API">
+        <trans-unit id="Page 50034 - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Production Order Components API</source>
+          <target>FA-Komponenten-API</target>
+          <note from="Developer" annotates="general" priority="2">Page caption</note>
+        </trans-unit>
+        <trans-unit id="Page 50034 - Control status - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Status</source>
+          <target>Status</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Status field</note>
+        </trans-unit>
+        <trans-unit id="Page 50034 - Control prodOrderNo - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Prod. Order No.</source>
+          <target>FA-Nr.</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Prod. Order No. field</note>
+        </trans-unit>
+        <trans-unit id="Page 50034 - Control prodOrderLineNo - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Prod. Order Line No.</source>
+          <target>FA-Zeilennr.</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Prod. Order Line No. field</note>
+        </trans-unit>
+        <trans-unit id="Page 50034 - Control lineNo - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Line No.</source>
+          <target>Zeilennr.</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Line No. field</note>
+        </trans-unit>
+        <trans-unit id="Page 50034 - Control itemNo - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Item No.</source>
+          <target>Artikelnr.</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Item No. field</note>
+        </trans-unit>
+        <trans-unit id="Page 50034 - Control description - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Description</source>
+          <target>Beschreibung</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Description field</note>
+        </trans-unit>
+        <trans-unit id="Page 50034 - Control unitOfMeasureCode - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Unit of Measure Code</source>
+          <target>Einheitencode</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Unit of Measure Code field</note>
+        </trans-unit>
+        <trans-unit id="Page 50034 - Control quantityPer - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Quantity Per</source>
+          <target>Komponentenmenge</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Quantity Per field</note>
+        </trans-unit>
+        <trans-unit id="Page 50034 - Control expectedQuantity - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Expected Quantity</source>
+          <target>Erwartete Menge</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Expected Quantity field</note>
+        </trans-unit>
+        <trans-unit id="Page 50034 - Control remainingQuantity - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Remaining Quantity</source>
+          <target>Restmenge</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Remaining Quantity field</note>
+        </trans-unit>
+        <trans-unit id="Page 50034 - Control locationCode - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Location Code</source>
+          <target>Lagerortcode</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Location Code field</note>
+        </trans-unit>
+        <trans-unit id="Page 50034 - Control binCode - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Bin Code</source>
+          <target>Lagerplatzcode</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Bin Code field</note>
+        </trans-unit>
+        <trans-unit id="Page 50034 - Control flushingMethod - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Flushing Method</source>
+          <target>Buchungsmethode</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Flushing Method field</note>
+        </trans-unit>
+        <trans-unit id="Page 50034 - Control routingLinkCode - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Routing Link Code</source>
+          <target>Arbeitsplanverkn&#xFC;pfungscode</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Routing Link Code field</note>
+        </trans-unit>
+        <trans-unit id="Page 50034 - Control dueDate - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Due Date</source>
+          <target>F&#xE4;lligkeitsdatum</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Due Date field</note>
+        </trans-unit>
+      </group>
+
+      <!-- ============================================= -->
+      <!-- API Page 50036 - ALP Integration Inbox API -->
+      <!-- ============================================= -->
+      <group id="Page 50036 - ALP Integration Inbox API">
+        <trans-unit id="Page 50036 - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Integration Inbox API</source>
+          <target>Integrationseingang-API</target>
+          <note from="Developer" annotates="general" priority="2">Page caption</note>
+        </trans-unit>
+        <trans-unit id="Page 50036 - Control messageId - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Message ID</source>
+          <target>Nachrichten-ID</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Message ID field</note>
+        </trans-unit>
+        <trans-unit id="Page 50036 - Control messageType - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Message Type</source>
+          <target>Nachrichtentyp</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Message Type field</note>
+        </trans-unit>
+        <trans-unit id="Page 50036 - Control orderNo - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Order No.</source>
+          <target>Auftragsnr.</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Order No. field</note>
+        </trans-unit>
+        <trans-unit id="Page 50036 - Control operationNo - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Operation No.</source>
+          <target>Arbeitsgangnr.</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Operation No. field</note>
+        </trans-unit>
+        <trans-unit id="Page 50036 - Control status - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Status</source>
+          <target>Status</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Status field</note>
+        </trans-unit>
+        <trans-unit id="Page 50036 - Control receivedAt - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Received At</source>
+          <target>Empfangen am</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Received At field</note>
+        </trans-unit>
+        <trans-unit id="Page 50036 - Control processedAt - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Processed At</source>
+          <target>Verarbeitet am</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Processed At field</note>
+        </trans-unit>
+        <trans-unit id="Page 50036 - Control error - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Error</source>
+          <target>Fehler</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Error field</note>
+        </trans-unit>
+      </group>
+
+      <!-- ============================================= -->
+      <!-- API Page 50037 - ALP Routings API -->
+      <!-- ============================================= -->
+      <group id="Page 50037 - ALP Routings API">
+        <trans-unit id="Page 50037 - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Routings API</source>
+          <target>Arbeitspl&#xE4;ne-API</target>
+          <note from="Developer" annotates="general" priority="2">Page caption</note>
+        </trans-unit>
+        <trans-unit id="Page 50037 - Control number - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>No.</source>
+          <target>Nr.</target>
+          <note from="Developer" annotates="general" priority="2">Caption for No. field</note>
+        </trans-unit>
+        <trans-unit id="Page 50037 - Control description - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Description</source>
+          <target>Beschreibung</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Description field</note>
+        </trans-unit>
+        <trans-unit id="Page 50037 - Control status - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Status</source>
+          <target>Status</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Status field</note>
+        </trans-unit>
+        <trans-unit id="Page 50037 - Control type - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Type</source>
+          <target>Art</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Type field</note>
+        </trans-unit>
+      </group>
+
+      <!-- ============================================= -->
+      <!-- API Page 50038 - ALP Items API -->
+      <!-- ============================================= -->
+      <group id="Page 50038 - ALP Items API">
+        <trans-unit id="Page 50038 - Control id - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Id</source>
+          <target>ID</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Id field</note>
+        </trans-unit>
+        <trans-unit id="Page 50038 - Control number - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Number</source>
+          <target>Nummer</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Number field</note>
+        </trans-unit>
+        <trans-unit id="Page 50038 - Control description - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Description</source>
+          <target>Beschreibung</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Description field</note>
+        </trans-unit>
+        <trans-unit id="Page 50038 - Control type - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Type</source>
+          <target>Art</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Type field</note>
+        </trans-unit>
+        <trans-unit id="Page 50038 - Control baseUnitOfMeasure - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Base Unit of Measure</source>
+          <target>Basiseinheit</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Base Unit of Measure field</note>
+        </trans-unit>
+        <trans-unit id="Page 50038 - Control itemCategoryCode - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Item Category Code</source>
+          <target>Artikelkategoriencode</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Item Category Code field</note>
+        </trans-unit>
+        <trans-unit id="Page 50038 - Control routingNumber - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Routing Number</source>
+          <target>Arbeitsplannr.</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Routing Number field</note>
+        </trans-unit>
+        <trans-unit id="Page 50038 - Control productionBOMNumber - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Production BOM Number</source>
+          <target>Fertigungsst&#xFC;cklistennr.</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Production BOM Number field</note>
+        </trans-unit>
+        <trans-unit id="Page 50038 - Control replenishmentSystem - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Replenishment System</source>
+          <target>Beschaffungsmethode</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Replenishment System field</note>
+        </trans-unit>
+        <trans-unit id="Page 50038 - Control manufacturingPolicy - Property Caption" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Manufacturing Policy</source>
+          <target>Produktionsart</target>
+          <note from="Developer" annotates="general" priority="2">Caption for Manufacturing Policy field</note>
+        </trans-unit>
+      </group>
+
+    </body>
+  </file>
+</xliff>

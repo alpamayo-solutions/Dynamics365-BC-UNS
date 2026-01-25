@@ -79,16 +79,18 @@ page 50030 "ALP Execution Events API"
     var
         IngestionSvc: Codeunit "ALP Execution Ingestion Svc";
         MessageIdText: Text[50];
+        InvalidMessageIdErr: Label 'Invalid messageId format. Expected a valid GUID.', Comment = 'Error when API receives malformed GUID';
+        ProcessingFailedErr: Label 'Failed to process execution event. Check Integration Inbox for details.', Comment = 'Error when event processing fails';
 
     trigger OnInsertRecord(BelowxRec: Boolean): Boolean
     var
         MessageGuid: Guid;
     begin
         if not Evaluate(MessageGuid, MessageIdText) then
-            Error('Invalid messageId format. Expected a valid GUID.');
+            Error(InvalidMessageIdErr);
 
         if not IngestionSvc.ProcessExecutionEvent(Rec, MessageGuid) then
-            Error('Failed to process execution event. Check Integration Inbox for details.');
+            Error(ProcessingFailedErr);
 
         exit(false); // We handle the insert in the codeunit
     end;
