@@ -174,7 +174,7 @@ GET /api/alpamayo/shopfloor/v1.0/companies({companyId})/unsTopicMappings
 | Field | Type | Description |
 |-------|------|-------------|
 | unsTopic | Text[250] | UNS topic path (e.g., `mb/v1/nw/edge/filling/k5/assembly`) |
-| workCenterNo | Code[20] | Target Work Center in Business Central |
+| workCenterNo | Code[20] | Target Work Center in Business Central (optional) |
 | status | Enum | Active or Inactive |
 | description | Text[100] | Human-readable description |
 | sourceSystem | Code[20] | Source system identifier |
@@ -182,6 +182,16 @@ GET /api/alpamayo/shopfloor/v1.0/companies({companyId})/unsTopicMappings
 | validTo | Date | End validity date (0D = no end) |
 | createdAt | DateTime | Audit timestamp |
 | createdBy | Code[50] | Audit user |
+
+### Nullable Work Center (Auto-Discovery)
+
+The `workCenterNo` field is optional to support auto-discovery workflows:
+
+1. **Bridge discovers new UNS topics** automatically from MQTT broker
+2. **Bridge registers topics** in the mapping table without Work Center assignment
+3. **Users assign Work Centers** later via admin UI or API
+
+Mappings without a Work Center are considered "discovered but unmapped" and are displayed with an **Attention** style (yellow) in the UI. The bridge must skip unmapped topics when resolving execution events.
 
 ### Example Mapping
 

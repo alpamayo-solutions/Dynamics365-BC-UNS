@@ -1,5 +1,6 @@
 // This table stores STATIC integration configuration only.
 // It maps UNS topic paths to ERP Work Centers.
+// Work Center No. may be empty for discovered-but-unmapped topics.
 // Operation No. is resolved DYNAMICALLY at execution time based on Production Order context.
 table 50005 "ALP UNS Topic Mapping"
 {
@@ -18,7 +19,6 @@ table 50005 "ALP UNS Topic Mapping"
         {
             Caption = 'Work Center No.';
             DataClassification = CustomerContent;
-            NotBlank = true;
             TableRelation = "Work Center"."No.";
 
             trigger OnValidate()

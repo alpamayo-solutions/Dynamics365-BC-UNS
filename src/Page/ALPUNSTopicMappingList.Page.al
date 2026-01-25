@@ -25,7 +25,7 @@ page 50023 "ALP UNS Topic Mapping List"
                 field("Work Center No."; Rec."Work Center No.")
                 {
                     ApplicationArea = Manufacturing;
-                    ToolTip = 'Target Work Center in Business Central';
+                    ToolTip = 'Target Work Center in Business Central. Leave empty for discovered topics pending mapping.';
                     StyleExpr = StatusStyle;
                 }
                 field(Status; Rec.Status)
@@ -151,12 +151,15 @@ page 50023 "ALP UNS Topic Mapping List"
 
     trigger OnAfterGetRecord()
     begin
-        case Rec.Status of
-            Rec.Status::Active:
-                StatusStyle := 'Favorable';
-            Rec.Status::Inactive:
-                StatusStyle := 'Subordinate';
-        end;
+        if Rec."Work Center No." = '' then
+            StatusStyle := 'Attention'
+        else
+            case Rec.Status of
+                Rec.Status::Active:
+                    StatusStyle := 'Favorable';
+                Rec.Status::Inactive:
+                    StatusStyle := 'Subordinate';
+            end;
 
         CanActivate := Rec.Status = Rec.Status::Inactive;
         CanDeactivate := Rec.Status = Rec.Status::Active;
