@@ -11,7 +11,7 @@ pageextension 50023 "ALP Released Prod. Orders Ext" extends "Released Production
                 ToolTip = 'Total quantity produced as reported from shopfloor';
                 Editable = false;
                 Style = Favorable;
-                StyleExpr = Rec."ALP Exec Qty. Produced" > 0;
+                StyleExpr = Rec."ALP Exec Qty. Produced" >= Rec.Quantity;
             }
         }
     }
