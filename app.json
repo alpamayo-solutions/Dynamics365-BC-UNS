@@ -26,5 +26,5 @@
     "includeSourceInSymbolFile": true
   },
 
-  "features": ["NoImplicitWith"]
+  "features": ["NoImplicitWith", "TranslationFile"]
 }
