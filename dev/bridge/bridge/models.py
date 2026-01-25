@@ -158,3 +158,19 @@ class InboxEntry(BaseModel):
     warning: str | None = None
 
     model_config = {"populate_by_name": True}
+
+
+class UNSTopicMapping(BaseModel):
+    """UNS topic to work center mapping from BC API."""
+
+    uns_topic: str = Field(alias="unsTopic")
+    work_center_no: str | None = Field(default=None, alias="workCenterNo")
+    status: str = "Active"
+    description: str | None = None
+    source_system: str | None = Field(default=None, alias="sourceSystem")
+    valid_from: date | None = Field(default=None, alias="validFrom")
+    valid_to: date | None = Field(default=None, alias="validTo")
+    created_at: datetime | None = Field(default=None, alias="createdAt")
+    created_by: str | None = Field(default=None, alias="createdBy")
+
+    model_config = {"populate_by_name": True}

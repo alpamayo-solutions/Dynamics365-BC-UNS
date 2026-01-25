@@ -5,6 +5,13 @@ from rich.console import Console
 
 from .commands.events import post_event
 from .commands.inbox import get_inbox
+from .commands.mappings import (
+    create_mapping,
+    delete_mapping,
+    get_mapping,
+    get_mappings,
+    update_mapping,
+)
 from .commands.orders import get_components, get_items, get_order, get_orders, get_routing, get_routings, get_work_centers
 from .commands.setup import setup
 
@@ -118,3 +125,10 @@ cli.add_command(get_work_centers)
 cli.add_command(get_items)
 cli.add_command(get_inbox)
 cli.add_command(setup)
+
+# Mapping commands
+cli.add_command(get_mappings)
+cli.add_command(get_mapping)
+cli.add_command(create_mapping)
+cli.add_command(update_mapping)
+cli.add_command(delete_mapping)

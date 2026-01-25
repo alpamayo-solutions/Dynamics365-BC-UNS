@@ -14,6 +14,7 @@ from .models import (
     ProductionOrderComponent,
     ProductionOrderDetail,
     RoutingLine,
+    UNSTopicMapping,
     WorkCenter,
 )
 
@@ -259,6 +260,50 @@ class BCClient:
         params = {"$filter": f"status eq '{status}'"} if status else {}
         result = self._request("GET", url, params=params)
         return result.get("value", [])
+
+    # UNS Topic Mapping methods
+
+    def get_uns_topic_mappings(
+        self, status: str | None = None, top: int = 100
+    ) -> list[UNSTopicMapping]:
+        """Get UNS topic mappings via custom API."""
+        url = f"{self.config.custom_api_url}/unsTopicMappings"
+        params: dict[str, str] = {"$top": str(top)}
+        if status:
+            params["$filter"] = f"status eq '{status}'"
+        result = self._request("GET", url, params=params)
+        return [UNSTopicMapping.model_validate(m) for m in result.get("value", [])]
+
+    def get_uns_topic_mapping(self, uns_topic: str) -> UNSTopicMapping | None:
+        """Get a single UNS topic mapping by topic."""
+        url = f"{self.config.custom_api_url}/unsTopicMappings"
+        params = {"$filter": f"unsTopic eq '{uns_topic}'"}
+        result = self._request("GET", url, params=params)
+        mappings = result.get("value", [])
+        return UNSTopicMapping.model_validate(mappings[0]) if mappings else None
+
+    def create_uns_topic_mapping(self, mapping: UNSTopicMapping) -> dict[str, Any]:
+        """Create a new UNS topic mapping via custom API."""
+        url = f"{self.config.custom_api_url}/unsTopicMappings"
+        payload = mapping.model_dump(mode="json", by_alias=True, exclude_none=True)
+        return self._request("POST", url, json=payload)
+
+    def update_uns_topic_mapping(
+        self, uns_topic: str, updates: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Update a UNS topic mapping via custom API."""
+        # First get the mapping to find its systemId
+        existing = self.get_uns_topic_mapping(uns_topic)
+        if not existing:
+            raise BCApiError(404, f"UNS topic mapping '{uns_topic}' not found")
+        # Use the topic as the key for the PATCH
+        url = f"{self.config.custom_api_url}/unsTopicMappings('{uns_topic}')"
+        return self._request("PATCH", url, json=updates)
+
+    def delete_uns_topic_mapping(self, uns_topic: str) -> None:
+        """Delete a UNS topic mapping via custom API."""
+        url = f"{self.config.custom_api_url}/unsTopicMappings('{uns_topic}')"
+        self._request("DELETE", url)
 
     def close(self):
         """Close the HTTP client."""
