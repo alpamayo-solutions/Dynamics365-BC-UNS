@@ -1,0 +1,86 @@
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#fff', 'primaryBorderColor': '#333'}}}%%
+erDiagram
+    PRODUCTION_ORDER ||--o{ PROD_ORDER_ROUTING_LINE : "has routing"
+    PRODUCTION_ORDER ||--o| ALP_OPERATION_EXECUTION : "aggregates from"
+    PROD_ORDER_ROUTING_LINE ||--o| ALP_OPERATION_EXECUTION : "receives KPIs"
+    ALP_INTEGRATION_INBOX ||--o| ALP_OPERATION_EXECUTION : "creates/updates"
+    ALP_UNS_TOPIC_MAPPING }o--|| WORK_CENTER : "maps to"
+    PROD_ORDER_ROUTING_LINE }o--|| WORK_CENTER : "assigned to"
+
+    PRODUCTION_ORDER {
+        Code20 No PK
+        Enum Status "Simulated|Planned|Firm Planned|Released|Finished"
+        Code20 SourceNo
+        Integer Quantity
+        DateTime ALP_Last_Exec_Update_At "Extension field"
+        Code20 ALP_Execution_Source "Extension field"
+        Integer ALP_Exec_Qty_Produced "Extension field"
+        Integer ALP_Exec_Qty_Rejected "Extension field"
+        Decimal ALP_Exec_Weighted_Avail "Extension field"
+        Decimal ALP_Exec_Weighted_Prod "Extension field"
+    }
+
+    PROD_ORDER_ROUTING_LINE {
+        Enum Status PK
+        Code20 Prod_Order_No PK
+        Integer Routing_Reference_No PK
+        Code10 Operation_No PK
+        Code20 No "Work Center No."
+        Text100 Description
+        Decimal Setup_Time
+        Decimal Run_Time
+        Integer ALP_Qty_Produced "Extension field"
+        Integer ALP_Qty_Rejected "Extension field"
+        Decimal ALP_Actual_Availability "Extension field"
+        Decimal ALP_Actual_Productivity "Extension field"
+        DateTime ALP_Source_Timestamp "Extension field"
+    }
+
+    ALP_INTEGRATION_INBOX {
+        GUID Message_Id PK
+        Enum Message_Type "Execution"
+        Code20 Order_No
+        Code10 Operation_No
+        Enum Status "Received|Processed|Failed"
+        DateTime Received_At
+        DateTime Processed_At
+        Text250 Error
+        Text250 Raw_Payload
+    }
+
+    ALP_OPERATION_EXECUTION {
+        Code20 Order_No PK
+        Code10 Operation_No PK
+        Code20 Work_Center_No
+        Integer Qty_Produced
+        Integer Qty_Rejected
+        Decimal Runtime_Sec
+        Decimal Downtime_Sec
+        Decimal Availability "0.0-1.0"
+        Decimal Productivity "0.0-1.0"
+        Decimal Actual_Cycle_Time_Sec
+        DateTime Source_Timestamp
+        Code20 Source
+    }
+
+    ALP_UNS_TOPIC_MAPPING {
+        Text250 UNS_Topic PK "e.g. mb/v1/nw/edge/filling/k5/assembly"
+        Code20 Work_Center_No FK "Optional for auto-discovery"
+        Enum Status "Active|Inactive"
+        Text100 Description
+        Code20 Source_System
+        Date Valid_From
+        Date Valid_To
+        DateTime Created_At
+        Code50 Created_By
+        DateTime Modified_At
+        Code50 Modified_By
+    }
+
+    WORK_CENTER {
+        Code20 No PK
+        Text100 Name
+        Boolean Blocked
+        Decimal Capacity
+        Decimal Efficiency
+    }

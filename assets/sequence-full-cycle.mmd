@@ -1,0 +1,48 @@
+sequenceDiagram
+    autonumber
+    participant BC as Microsoft Dynamics 365<br/>Business Central
+    participant API as BC API Layer
+    participant Bridge as ERP–UNS Bridge
+    participant UNS as MQTT Broker (UNS)
+    participant Edge as PREKIT Edge Node<br/>(nw/edge/filling/k5)
+
+    note over BC,Edge: Phase 1: Bridge Reads ERP Reference Data
+
+    Bridge->>API: GET /productionOrders<br/>$filter=status eq 'Released'
+    API-->>Bridge: 200 OK<br/>[{ orderNo: "PO-4711", status: "Released", itemNo: "FG-1001" }]
+
+    Bridge->>API: GET /prodOrderRoutingLines<br/>$filter=prodOrderNo eq 'PO-4711'
+    API-->>Bridge: 200 OK<br/>[{ operationNo: "10", workCenterNo: "FILL-K5", description: "Filling" }]
+
+    Bridge->>API: GET /unsTopicMappings<br/>$filter=status eq 'Active'
+    API-->>Bridge: 200 OK<br/>[{ unsTopic: "mb/v1/nw/edge/filling/k5", workCenterNo: "FILL-K5" }]
+
+    note over BC,Edge: Phase 2: Bridge Publishes ERP State to UNS
+
+    Bridge->>UNS: PUBLISH (retained)<br/>Topic: mb/v1/nw/edge/filling/k5/erp/production-orders/PO-4711/state<br/>{ orderNo: "PO-4711", status: "Released",<br/>itemNo: "FG-1001", qtyPlanned: 1200 }
+
+    UNS-->>Edge: DELIVER retained state<br/>PO-4711 Released, qty: 1200
+
+    note over BC,Edge: Phase 3: Edge Collects Execution Data
+
+    Edge->>UNS: PUBLISH<br/>Topic: mb/v1/nw/edge/filling/k5/execution<br/>{ orderNo: "PO-4711", operationNo: "10",<br/>qtyProduced: 300, qtyRejected: 5,<br/>availability: 0.94, productivity: 0.89 }
+
+    UNS-->>Bridge: DELIVER execution update
+
+    note over BC,Edge: Phase 4: Bridge Writes KPIs to ERP
+
+    Bridge->>API: POST /executionEvents<br/>{ messageId: "uuid-1", orderNo: "PO-4711",<br/>operationNo: "10", qtyProduced: 300,<br/>qtyRejected: 5, availability: 0.94,<br/>productivity: 0.89, sourceTimestamp: "..." }
+    API-->>Bridge: 200 OK<br/>{ processed: true }
+
+    note over BC,Edge: Phase 5: Operation Completes
+
+    Edge->>UNS: PUBLISH<br/>Topic: mb/v1/nw/edge/filling/k5/execution<br/>{ orderNo: "PO-4711", operationNo: "10",<br/>qtyProduced: 1200, qtyRejected: 25,<br/>availability: 0.91, productivity: 0.87 }
+
+    UNS-->>Bridge: DELIVER final execution
+
+    Bridge->>API: POST /executionEvents<br/>{ messageId: "uuid-2", orderNo: "PO-4711",<br/>operationNo: "10", qtyProduced: 1200,<br/>qtyRejected: 25, availability: 0.91,<br/>productivity: 0.87, sourceTimestamp: "..." }
+    API-->>Bridge: 200 OK<br/>{ processed: true }
+
+    note over BC,Edge: Phase 6: Bridge Publishes Updated State
+
+    Bridge->>UNS: PUBLISH (retained)<br/>Topic: mb/v1/nw/edge/filling/k5/erp/production-orders/PO-4711/state<br/>{ orderNo: "PO-4711", status: "Released",<br/>qtyCompleted: 1200, qtyRejected: 25,<br/>availability: 0.91, productivity: 0.87 }

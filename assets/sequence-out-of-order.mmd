@@ -1,0 +1,37 @@
+sequenceDiagram
+    autonumber
+    participant Edge as Edge Node
+    participant UNS as MQTT Broker
+    participant Bridge as ERP–UNS Bridge
+    participant API as BC API Layer
+    participant Exec as Operation Execution
+
+    note over Edge,Exec: Scenario: Messages Arrive Out of Order
+
+    Edge->>UNS: PUBLISH (T1)<br/>qtyProduced: 100
+    Edge->>UNS: PUBLISH (T2)<br/>qtyProduced: 200
+    Edge->>UNS: PUBLISH (T3)<br/>qtyProduced: 300
+
+    note over UNS,Bridge: Network delivers T3 first, then T1
+
+    UNS-->>Bridge: DELIVER T3<br/>qtyProduced: 300, sourceTimestamp: "T3"
+
+    Bridge->>API: POST /executionEvents<br/>{ qtyProduced: 300, sourceTimestamp: "T3" }
+    API->>Exec: UPSERT<br/>qtyProduced = 300, sourceTimestamp = T3
+    API-->>Bridge: 200 OK
+
+    UNS-->>Bridge: DELIVER T1 (delayed)<br/>qtyProduced: 100, sourceTimestamp: "T1"
+
+    Bridge->>API: POST /executionEvents<br/>{ qtyProduced: 100, sourceTimestamp: "T1" }
+
+    API->>Exec: Check sourceTimestamp
+    Exec-->>API: Current: T3
+
+    note over API: T1 < T3 – reject stale update
+
+    API->>Inbox: INSERT record<br/>Status = "Skipped"<br/>Note = "Stale timestamp"
+
+    API-->>Bridge: 200 OK<br/>{ processed: false,<br/>reason: "Stale: newer data exists" }
+
+    note over Edge,Exec: Result: Latest data (T3) preserved
+

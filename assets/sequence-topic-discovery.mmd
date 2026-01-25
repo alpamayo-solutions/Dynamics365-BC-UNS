@@ -1,0 +1,40 @@
+sequenceDiagram
+    autonumber
+    participant Admin as BC Administrator
+    participant BC as Business Central
+    participant API as BC API Layer
+    participant Bridge as ERP–UNS Bridge
+    participant UNS as MQTT Broker (UNS)
+
+    note over Admin,UNS: Scenario: New Edge Node Comes Online
+
+    Bridge->>UNS: SUBSCRIBE<br/>mb/v1/+/+/+/+/execution
+
+    UNS-->>Bridge: MESSAGE<br/>Topic: mb/v1/nw/edge/packaging/p1/execution<br/>{ orderNo: "PO-5000", operationNo: "20", ... }
+
+    Bridge->>API: GET /unsTopicMappings<br/>$filter=unsTopic eq 'mb/v1/nw/edge/packaging/p1'
+    API-->>Bridge: 200 OK<br/>[] (empty – topic not mapped)
+
+    note over Bridge: Topic unknown – auto-discovery flow
+
+    Bridge->>API: POST /unsTopicMappings<br/>{ unsTopic: "mb/v1/nw/edge/packaging/p1",<br/>status: "Inactive", description: "Auto-discovered",<br/>sourceSystem: "UNS-Bridge" }
+    API-->>Bridge: 201 Created
+
+    note over Admin,UNS: Administrator Reviews New Topic
+
+    Admin->>BC: Open UNS Topic Mapping List
+    BC-->>Admin: Shows new Inactive mapping
+
+    Admin->>BC: Assign Work Center "PACK-P1"<br/>Set Status = Active
+    BC-->>Admin: Mapping saved
+
+    note over Admin,UNS: Next Message is Processed
+
+    UNS-->>Bridge: MESSAGE<br/>Topic: mb/v1/nw/edge/packaging/p1/execution<br/>{ orderNo: "PO-5000", operationNo: "20", ... }
+
+    Bridge->>API: GET /unsTopicMappings<br/>$filter=unsTopic eq 'mb/v1/nw/edge/packaging/p1'
+    API-->>Bridge: 200 OK<br/>[{ workCenterNo: "PACK-P1", status: "Active" }]
+
+    Bridge->>API: POST /executionEvents<br/>{ workCenterNo: "PACK-P1", ... }
+    API-->>Bridge: 200 OK
+

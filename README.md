@@ -1,41 +1,83 @@
 # UNS Bridge Connector
 
-A Dynamics 365 Business Central AL extension that connects Business Central to the Unified Namespace (UNS) for aggregated shopfloor execution KPIs.
+A Dynamics 365 Business Central AL extension that connects Business Central to the Unified Namespace (UNS) for bidirectional shopfloor integration.
 
 ## Overview
 
-This extension ingests aggregated shopfloor execution metrics via REST API, stores them safely with idempotency guarantees, and displays them in read-only pages within Business Central.
+This extension provides the ERP side of a UNS (Unified Namespace) architecture, enabling bidirectional communication between Business Central and shopfloor systems via an external Bridge service. The Bridge connects to both the MQTT broker (UNS) and the BC REST APIs.
 
-```
-┌─────────────────┐     REST API      ┌──────────────────────────────────────┐
-│  MES / SCADA    │ ──────────────►   │  Business Central                    │
-│  Shopfloor Sys  │   POST /events    │  ┌─────────────────────────────────┐ │
-└─────────────────┘                   │  │ ALP Integration Inbox           │ │
-                                      │  │ (idempotency + audit trail)     │ │
-                                      │  └───────────────┬─────────────────┘ │
-                                      │                  │                   │
-                                      │                  ▼                   │
-                                      │  ┌─────────────────────────────────┐ │
-                                      │  │ ALP Operation Execution         │ │
-                                      │  │ (KPI storage w/ OOO protection) │ │
-                                      │  └───────────────┬─────────────────┘ │
-                                      │                  │                   │
-                                      │                  ▼                   │
-                                      │  ┌─────────────────────────────────┐ │
-                                      │  │ Production Order / Routing Line │ │
-                                      │  │ (summary fields, read-only)     │ │
-                                      │  └─────────────────────────────────┘ │
-                                      └──────────────────────────────────────┘
-```
+![Architecture Overview](assets/architecture-overview.svg)
+
+### How It Works
+
+1. **Bridge reads ERP reference data** via REST APIs (Production Orders, Routings, Work Centers, Items)
+2. **Bridge publishes ERP state** to the UNS for edge nodes to consume
+3. **Edge nodes publish execution events** to the UNS
+4. **Bridge subscribes to execution events** and writes KPIs back to BC via REST API
+5. **BC stores and aggregates KPIs** with idempotency and out-of-order protection
 
 ## Features
 
-- REST API endpoint for KPI ingestion
+**APIs (Write)**
+- REST API endpoint for KPI ingestion (`/executionEvents`)
+- UNS Topic Mapping API for ERP-hosted configuration (`/unsTopicMappings`)
+
+**APIs (Read-Only Reference Data)**
+- Production Orders, Routing Lines, Components
+- Work Centers, Routings, Items
+
+**Data Integrity**
 - Idempotent API with message-level deduplication
 - Out-of-order protection via source timestamps
 - Integration inbox for audit trail and troubleshooting
-- Read-only pages for KPI viewing
-- Granularity at Production Order Operation level
+
+**Configuration**
+- UNS Topic Mapping with auto-discovery support
+- Dynamic operation resolution from Work Center
+
+**Reporting**
+- Daily Execution Performance Report
+- Read-only KPI pages on Production Orders and Routing Lines
+
+## Data Model
+
+The extension adds three new tables and extends two standard tables:
+
+![Data Model](assets/data-model.svg)
+
+| Table | Purpose |
+|-------|---------|
+| **ALP Integration Inbox** | Audit trail of all received messages (idempotency key) |
+| **ALP Operation Execution** | KPI storage per Order + Operation |
+| **ALP UNS Topic Mapping** | Configuration: UNS Topic → Work Center |
+| Production Order (ext) | Aggregated execution fields |
+| Prod. Order Routing Line (ext) | Per-operation KPI fields |
+
+## Bridge Communication Patterns
+
+### Full Production Cycle
+
+This sequence shows a complete production cycle from order release to completion:
+
+![Full Cycle Sequence](assets/sequence-full-cycle.svg)
+
+### Topic Auto-Discovery
+
+When the Bridge encounters unknown UNS topics, it can register them for later mapping:
+
+![Topic Discovery Sequence](assets/sequence-topic-discovery.svg)
+
+### Idempotency Handling
+
+The API safely handles duplicate messages (e.g., network retries):
+
+![Idempotency Sequence](assets/sequence-idempotency.svg)
+
+### Out-of-Order Protection
+
+Messages arriving out of order do not corrupt the latest state:
+
+![Out-of-Order Sequence](assets/sequence-out-of-order.svg)
 
 ## Scope and Non-Goals
 
@@ -44,13 +86,15 @@ This extension ingests aggregated shopfloor execution metrics via REST API, stor
 - Storing execution metrics safely
 - Displaying metrics in BC UI (read-only)
 - Idempotency and out-of-order handling
+- UNS Topic → Work Center mapping (ERP-hosted configuration)
+- Reference data APIs for Bridge consumption
 
 ### Out of Scope (Non-Goals)
 - Posting journal entries or transactions
 - Cost calculations or variance analysis
 - MES business logic or scheduling
 - Real-time data streaming
-- Bi-directional sync
+- The Bridge service itself (this is app-side only)
 
 ## Object ID Allocation
 

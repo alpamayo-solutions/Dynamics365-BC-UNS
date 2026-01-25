@@ -1,0 +1,33 @@
+sequenceDiagram
+    autonumber
+    participant Bridge as ERP–UNS Bridge
+    participant API as BC API Layer
+    participant Inbox as Integration Inbox
+    participant Exec as Operation Execution
+
+    note over Bridge,Exec: Scenario: Duplicate Message (Network Retry)
+
+    Bridge->>API: POST /executionEvents<br/>{ messageId: "uuid-abc-123",<br/>orderNo: "PO-4711", operationNo: "10",<br/>qtyProduced: 500, sourceTimestamp: "T1" }
+
+    API->>Inbox: Check messageId exists?
+    Inbox-->>API: Not found
+
+    API->>Inbox: INSERT record<br/>Status = "Received"
+    API->>Exec: UPSERT execution KPIs
+    API->>Inbox: UPDATE Status = "Processed"
+
+    API-->>Bridge: 200 OK<br/>{ processed: true, isNew: true }
+
+    note over Bridge,Exec: Network timeout – Bridge retries same message
+
+    Bridge->>API: POST /executionEvents<br/>{ messageId: "uuid-abc-123",<br/>orderNo: "PO-4711", operationNo: "10",<br/>qtyProduced: 500, sourceTimestamp: "T1" }
+
+    API->>Inbox: Check messageId exists?
+    Inbox-->>API: Found (Status = "Processed")
+
+    note over API: Skip processing –<br/>already handled
+
+    API-->>Bridge: 200 OK<br/>{ processed: true, isNew: false,<br/>note: "Duplicate messageId" }
+
+    note over Bridge,Exec: Result: No duplicate records created
+

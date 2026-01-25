@@ -1,0 +1,96 @@
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#e8f4f8', 'primaryBorderColor': '#0078d4', 'lineColor': '#333', 'secondaryColor': '#fff3cd', 'tertiaryColor': '#d4edda'}}}%%
+flowchart TB
+    subgraph Shopfloor["Shopfloor Layer"]
+        direction LR
+        PLC["PLC / Machine<br/>Controllers"]
+        SCADA["SCADA /<br/>Historian"]
+        MES["MES /<br/>Execution System"]
+        HMI["Operator<br/>Terminals"]
+    end
+
+    subgraph Edge["Edge Layer"]
+        direction LR
+        PREKIT["PREKIT Edge Nodes<br/>(Data Collection & Normalization)"]
+    end
+
+    subgraph UNS["Unified Namespace (MQTT Broker)"]
+        direction TB
+        Topics["Topic Hierarchy<br/>mb/v1/{site}/{area}/{line}/{cell}/*"]
+        Retained["Retained State<br/>(Production Orders, Work Centers)"]
+        Events["Event Streams<br/>(Progress, Completions)"]
+    end
+
+    subgraph Bridge["ERP–UNS Bridge Service"]
+        direction TB
+        Sub["MQTT Subscriber<br/>(Execution Events)"]
+        Pub["MQTT Publisher<br/>(ERP State)"]
+        Resolver["Topic → Work Center<br/>Resolver"]
+        APIClient["BC API Client"]
+    end
+
+    subgraph BC["Microsoft Dynamics 365 Business Central"]
+        direction TB
+        subgraph APIs["REST APIs (Read/Write)"]
+            ExecAPI["Execution Events API<br/>(POST KPIs)"]
+            MappingAPI["UNS Topic Mapping API<br/>(GET/POST Mappings)"]
+        end
+        subgraph RefAPIs["Reference Data APIs (Read-Only)"]
+            ProdAPI["Production Orders API"]
+            WCApi["Work Centers API"]
+            RoutingAPI["Routing Lines API"]
+            ItemsAPI["Items API"]
+        end
+        subgraph Tables["Extension Tables"]
+            Inbox["Integration Inbox<br/>(Audit Trail)"]
+            Exec["Operation Execution<br/>(KPI Storage)"]
+            Mapping["UNS Topic Mapping<br/>(Configuration)"]
+        end
+        subgraph Extensions["Table Extensions"]
+            ProdOrd["Production Order<br/>(+Execution Fields)"]
+            RoutLine["Routing Line<br/>(+KPI Fields)"]
+        end
+        subgraph Reports["Reports & Views"]
+            InboxPage["Integration Inbox List"]
+            MappingPage["UNS Topic Mapping List"]
+            DailyReport["Daily Exec Performance<br/>Report"]
+        end
+    end
+
+    PLC --> PREKIT
+    SCADA --> PREKIT
+    MES --> PREKIT
+    HMI --> PREKIT
+
+    PREKIT <--> UNS
+
+    UNS <--> Bridge
+
+    Bridge <--> APIs
+    Bridge --> RefAPIs
+
+    ExecAPI --> Inbox
+    Inbox --> Exec
+    Exec --> ProdOrd
+    Exec --> RoutLine
+    MappingAPI <--> Mapping
+
+    Inbox --> InboxPage
+    Mapping --> MappingPage
+    Exec --> DailyReport
+
+    classDef shopfloor fill:#e3f2fd,stroke:#1565c0
+    classDef edge fill:#fff3e0,stroke:#ef6c00
+    classDef uns fill:#f3e5f5,stroke:#7b1fa2
+    classDef bridge fill:#e8f5e9,stroke:#2e7d32
+    classDef bc fill:#fce4ec,stroke:#c2185b
+    classDef api fill:#e0f7fa,stroke:#00838f
+    classDef table fill:#fff8e1,stroke:#f9a825
+    classDef report fill:#f1f8e9,stroke:#558b2f
+
+    class PLC,SCADA,MES,HMI shopfloor
+    class PREKIT edge
+    class Topics,Retained,Events uns
+    class Sub,Pub,Resolver,APIClient bridge
+    class ExecAPI,MappingAPI,ProdAPI,WCApi,RoutingAPI,ItemsAPI api
+    class Inbox,Exec,Mapping,ProdOrd,RoutLine table
+    class InboxPage,MappingPage,DailyReport report
