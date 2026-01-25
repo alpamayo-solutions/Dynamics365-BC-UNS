@@ -7,6 +7,9 @@ codeunit 50010 "ALP Execution Ingestion Svc"
         RejectedExceedsProducedErr: Label 'Qty. Rejected (%1) cannot exceed Qty. Produced (%2)', Comment = '%1 = Qty. Rejected, %2 = Qty. Produced';
         AvailabilityOutOfRangeErr: Label 'Availability (%1) must be between 0 and 1', Comment = '%1 = Availability value';
         ProductivityOutOfRangeErr: Label 'Productivity (%1) must be between 0 and 1', Comment = '%1 = Productivity value';
+        OperationNotFoundForWCErr: Label 'No routing line found for Order %1, Work Center %2', Comment = '%1 = Order No., %2 = Work Center No.';
+        MultipleOperationsForWCErr: Label 'Multiple routing lines found for Order %1, Work Center %2. Operation No. must be specified.', Comment = '%1 = Order No., %2 = Work Center No.';
+        WorkCenterRequiredErr: Label 'Work Center No. is required when Operation No. is not specified';
 
     procedure ProcessExecutionEvent(var Exec: Record "ALP Operation Execution"; MessageId: Guid): Boolean
     var
@@ -16,7 +19,6 @@ codeunit 50010 "ALP Execution Ingestion Svc"
         ProdOrderRoutingLine: Record "Prod. Order Routing Line";
         ExecCalcSvc: Codeunit "ALP Execution Calc Svc";
         ErrorText: Text;
-        WarningText: Text;
         IsNew: Boolean;
     begin
         // Step 1: Idempotency check
@@ -69,21 +71,56 @@ codeunit 50010 "ALP Execution Ingestion Svc"
             exit(false);
         end;
 
-        // Step 3c: Validate Routing Line exists for (OrderNo, OperationNo)
-        ProdOrderRoutingLine.SetRange(Status, ProdOrderRoutingLine.Status::Released);
-        ProdOrderRoutingLine.SetRange("Prod. Order No.", Exec."Order No.");
-        ProdOrderRoutingLine.SetRange("Operation No.", Exec."Operation No.");
-        if not ProdOrderRoutingLine.FindFirst() then begin
-            ErrorText := StrSubstNo(RoutingLineNotFoundErr, Exec."Order No.", Exec."Operation No.");
-            MarkInboxFailed(Inbox, ErrorText);
-            exit(false);
-        end;
+        // Step 3c: Resolve Operation No. dynamically
+        if Exec."Operation No." = '' then begin
+            // Operation not provided - resolve from Work Center
+            if Exec."Work Center No." = '' then begin
+                ErrorText := WorkCenterRequiredErr;
+                MarkInboxFailed(Inbox, ErrorText);
+                exit(false);
+            end;
 
-        // Step 3d: Check WorkCenter mismatch (warning only, don't fail)
-        if (Exec."Work Center No." <> '') and
-           (ProdOrderRoutingLine.Type = ProdOrderRoutingLine.Type::"Work Center") and
-           (ProdOrderRoutingLine."No." <> Exec."Work Center No.") then
-            WarningText := StrSubstNo(WorkCenterMismatchLbl, Exec."Work Center No.", ProdOrderRoutingLine."No.");
+            ProdOrderRoutingLine.SetRange(Status, ProdOrderRoutingLine.Status::Released);
+            ProdOrderRoutingLine.SetRange("Prod. Order No.", Exec."Order No.");
+            ProdOrderRoutingLine.SetRange(Type, ProdOrderRoutingLine.Type::"Work Center");
+            ProdOrderRoutingLine.SetRange("No.", Exec."Work Center No.");
+
+            if ProdOrderRoutingLine.Count() = 0 then begin
+                ErrorText := StrSubstNo(OperationNotFoundForWCErr, Exec."Order No.", Exec."Work Center No.");
+                MarkInboxFailed(Inbox, ErrorText);
+                exit(false);
+            end;
+
+            if ProdOrderRoutingLine.Count() > 1 then begin
+                // Multiple matches - ambiguous
+                ErrorText := StrSubstNo(MultipleOperationsForWCErr, Exec."Order No.", Exec."Work Center No.");
+                MarkInboxFailed(Inbox, ErrorText);
+                exit(false);
+            end;
+
+            // Exactly one match - use it
+            ProdOrderRoutingLine.FindFirst();
+            Exec."Operation No." := ProdOrderRoutingLine."Operation No.";
+        end else begin
+            // Operation provided - validate it exists
+            ProdOrderRoutingLine.SetRange(Status, ProdOrderRoutingLine.Status::Released);
+            ProdOrderRoutingLine.SetRange("Prod. Order No.", Exec."Order No.");
+            ProdOrderRoutingLine.SetRange("Operation No.", Exec."Operation No.");
+            if not ProdOrderRoutingLine.FindFirst() then begin
+                ErrorText := StrSubstNo(RoutingLineNotFoundErr, Exec."Order No.", Exec."Operation No.");
+                MarkInboxFailed(Inbox, ErrorText);
+                exit(false);
+            end;
+
+            // Step 3d: Check WorkCenter mismatch (hard failure)
+            if (Exec."Work Center No." <> '') and
+               (ProdOrderRoutingLine.Type = ProdOrderRoutingLine.Type::"Work Center") and
+               (ProdOrderRoutingLine."No." <> Exec."Work Center No.") then begin
+                ErrorText := StrSubstNo(WorkCenterMismatchLbl, Exec."Work Center No.", ProdOrderRoutingLine."No.");
+                MarkInboxFailed(Inbox, ErrorText);
+                exit(false);
+            end;
+        end;
 
         // Step 4: Out-of-order guard
         IsNew := not ExistingExec.Get(Exec."Order No.", Exec."Operation No.");
@@ -125,11 +162,7 @@ codeunit 50010 "ALP Execution Ingestion Svc"
         // Step 6c: Update Production Order aggregates (weighted averages)
         ExecCalcSvc.UpdateProductionOrderAggregates(ProdOrder);
 
-        // Step 7: Mark inbox as processed (include warning if any)
-        if WarningText <> '' then begin
-            Inbox.Warning := CopyStr(WarningText, 1, MaxStrLen(Inbox.Warning));
-            Inbox.Modify(true);
-        end;
+        // Step 7: Mark inbox as processed
         MarkInboxProcessed(Inbox);
         exit(true);
     end;

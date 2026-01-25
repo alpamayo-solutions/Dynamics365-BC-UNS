@@ -6,8 +6,10 @@ permissionset 50041 "ALP Shopfloor Exec"
     Permissions =
         tabledata "ALP Integration Inbox" = IMD,
         tabledata "ALP Operation Execution" = IMD,
+        tabledata "ALP UNS Topic Mapping" = RIMD,
         tabledata "Prod. Order Routing Line" = M,
         codeunit "ALP Execution Ingestion Svc" = X,
         codeunit "ALP Execution Calc Svc" = X,
-        page "ALP Execution Events API" = X;
+        page "ALP Execution Events API" = X,
+        page "ALP UNS Topic Mapping API" = X;
 }

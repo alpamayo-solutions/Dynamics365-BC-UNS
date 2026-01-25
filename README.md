@@ -57,15 +57,18 @@ This extension ingests aggregated shopfloor execution metrics via REST API, stor
 | ID | Type | Name |
 |----|------|------|
 | 50000 | Enum | ALP Integration Status |
+| 50001 | Enum | ALP UNS Mapping Status |
 | 50001 | Table | ALP Integration Inbox |
 | 50002 | Table | ALP Operation Execution |
 | 50003 | TableExt | ALP Production Order Ext |
 | 50004 | TableExt | ALP Prod Order Rtng Line Ext |
+| 50005 | Table | ALP UNS Topic Mapping |
 | 50010 | Codeunit | ALP Execution Ingestion Svc |
 | 50012 | Codeunit | ALP Execution Calc Svc |
 | 50020 | Page | ALP Integration Inbox List |
 | 50021 | PageExt | ALP Production Order Ext |
 | 50022 | PageExt | ALP Prod Order Rtng Lines Ext |
+| 50023 | Page | ALP UNS Topic Mapping List |
 | 50030 | API Page | ALP Execution Events API |
 | 50031 | API Page | ALP Production Orders API |
 | 50032 | API Page | ALP Prod Order Routing API |
@@ -73,6 +76,7 @@ This extension ingests aggregated shopfloor execution metrics via REST API, stor
 | 50034 | API Page | ALP Prod Order Components API |
 | 50036 | API Page | ALP Routings API |
 | 50037 | API Page | ALP Integration Inbox API |
+| 50039 | API Page | ALP UNS Topic Mapping API |
 | 50040 | PermissionSet | ALP Shopfloor View |
 | 50041 | PermissionSet | ALP Shopfloor Exec |
 | 50051 | Report | ALP Daily Exec Performance |
@@ -123,8 +127,8 @@ OAuth 2.0 Bearer token with `https://api.businesscentral.dynamics.com` resource.
 |-------|------|----------|-------------|
 | messageId | GUID | Yes | Unique message ID for idempotency |
 | orderNo | Code[20] | Yes | Production Order number |
-| operationNo | Code[10] | Yes | Operation number in routing |
-| workCenter | Code[20] | No | Work Center code |
+| operationNo | Code[10] | No* | Operation number in routing (*Required if Work Center has multiple operations on the order) |
+| workCenter | Code[20] | No* | Work Center code (*Required if operationNo is not specified) |
 | qtyProduced | Integer | No | Quantity produced (total) |
 | qtyRejected | Integer | No | Quantity rejected (must be <= qtyProduced) |
 | runtimeSec | Decimal | No | Runtime in seconds |
@@ -139,6 +143,79 @@ OAuth 2.0 Bearer token with `https://api.businesscentral.dynamics.com` resource.
 
 - **200 OK**: Message processed successfully (or already processed)
 - **400 Bad Request**: Validation failed (check error message)
+
+## UNS Topic Mapping
+
+The UNS Topic Mapping feature provides **static integration configuration** for mapping UNS (Unified Namespace) topics to ERP Work Centers. Operation No. is resolved **dynamically at execution time** based on Production Order context.
+
+### Architecture
+
+- **Mappings are configuration-only**: UNS Topic → Work Center
+- **Mappings stored in ERP**: Auditable, configurable via BC admin UI
+- **Bridge fetches mappings**: Bridge service calls the API and resolves locally
+- **Bridge sends Work Center**: Existing API contract unchanged
+- **ERP resolves Operation dynamically**: Based on Production Order routing
+
+### Admin UI
+
+Open **UNS Topic Mappings** page in Business Central (under Administration) to:
+- Create, edit, and delete mappings
+- Activate/deactivate mappings
+- View Work Center details in the FactBox
+
+### API Endpoint
+
+```
+GET /api/alpamayo/shopfloor/v1.0/companies({companyId})/unsTopicMappings
+```
+
+### Mapping Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| unsTopic | Text[250] | UNS topic path (e.g., `mb/v1/nw/edge/filling/k5/assembly`) |
+| workCenterNo | Code[20] | Target Work Center in Business Central |
+| status | Enum | Active or Inactive |
+| description | Text[100] | Human-readable description |
+| sourceSystem | Code[20] | Source system identifier |
+| validFrom | Date | Start validity date |
+| validTo | Date | End validity date (0D = no end) |
+| createdAt | DateTime | Audit timestamp |
+| createdBy | Code[50] | Audit user |
+
+### Example Mapping
+
+| UNS Topic | Work Center | Description |
+|-----------|-------------|-------------|
+| `mb/v1/nw/edge/filling/k5/assembly` | MACH0001 | K5 Assembly Station |
+| `mb/v1/nw/edge/filling/k5/testing` | MACH0002 | K5 Testing Station |
+
+### Bridge Resolution Flow
+
+1. Bridge receives MQTT message on UNS topic
+2. Bridge fetches mappings: `GET /unsTopicMappings?$filter=status eq 'Active'`
+3. Bridge resolves UNS topic → Work Center
+4. Bridge sends execution event with resolved `workCenter` (and optionally `operationNo`)
+5. Bridge provides `orderNo` from context (e.g., active order on the machine)
+
+### Dynamic Operation Resolution
+
+When the bridge sends an execution event **without** `operationNo`, the ERP dynamically resolves it:
+
+1. Filter Production Order Routing Lines by Order No. and Work Center
+2. **Exactly 1 match**: Use that Operation No.
+3. **0 matches**: Fail with error "No routing line found for Order X, Work Center Y"
+4. **Multiple matches**: Fail with error "Multiple routing lines found... Operation No. must be specified"
+
+This approach:
+- Keeps mapping configuration simple (UNS Topic → Work Center only)
+- Supports the same UNS topic across multiple operations without configuration changes
+- Validates against actual Production Order data at runtime
+- Fails explicitly and safely when ambiguous
+
+### WorkCenter Validation
+
+When `operationNo` **is** provided in the payload, the ERP validates that the routing line's Work Center matches the payload's `workCenter`. A mismatch results in a **hard failure** and the event is rejected.
 
 ## Test Harness
 

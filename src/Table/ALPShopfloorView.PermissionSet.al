@@ -6,6 +6,7 @@ permissionset 50040 "ALP Shopfloor View"
     Permissions =
         tabledata "ALP Integration Inbox" = R,
         tabledata "ALP Operation Execution" = R,
+        tabledata "ALP UNS Topic Mapping" = R,
         tabledata "Production Order" = R,
         tabledata "Prod. Order Routing Line" = R,
         tabledata "Prod. Order Component" = R,
@@ -20,5 +21,7 @@ permissionset 50040 "ALP Shopfloor View"
         page "ALP Routings API" = X,
         page "ALP Work Centers API" = X,
         page "ALP Items API" = X,
+        page "ALP UNS Topic Mapping List" = X,
+        page "ALP UNS Topic Mapping API" = X,
         report "ALP Daily Exec Performance" = X;
 }
