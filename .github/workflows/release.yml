@@ -1,0 +1,147 @@
+name: Release
+
+on:
+  release:
+    types: [created]
+
+permissions:
+  contents: write
+
+jobs:
+  update-version:
+    runs-on: ubuntu-latest
+
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+          # Remove 'v' prefix if present
+          VERSION="${TAG#v}"
+          # Append .0 for BC version format (X.Y.Z -> X.Y.Z.0)
+          if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            VERSION="${VERSION}.0"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Extracted version: $VERSION"
+
+      - name: Update app.json version
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          # Update version in app.json using jq
+          jq --arg v "$VERSION" '.version = $v' app.json > app.json.tmp
+          mv app.json.tmp app.json
+          echo "Updated app.json to version $VERSION"
+          cat app.json | grep version
+
+      - name: Commit version update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add app.json
+          git commit -m "chore: bump version to ${{ steps.version.outputs.version }}" || echo "No changes to commit"
+          git push origin main
+
+  build:
+    needs: update-version
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Read app.json
+        id: app-info
+        shell: pwsh
+        run: |
+          $appJson = Get-Content -Path "app.json" -Raw | ConvertFrom-Json
+          $version = $appJson.version
+          $name = $appJson.name
+          $publisher = $appJson.publisher
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+          echo "name=$name" >> $env:GITHUB_OUTPUT
+          echo "publisher=$publisher" >> $env:GITHUB_OUTPUT
+          Write-Host "App: $publisher - $name v$version"
+
+      - name: Install BcContainerHelper
+        shell: pwsh
+        run: |
+          Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+          Install-Module -Name BcContainerHelper -Force -AllowClobber
+          Import-Module BcContainerHelper
+
+      - name: Create BC Container
+        shell: pwsh
+        run: |
+          Import-Module BcContainerHelper
+
+          $appJson = Get-Content -Path "app.json" -Raw | ConvertFrom-Json
+          $bcVersion = $appJson.platform -replace '\.0\.0$', ''
+
+          $containerName = "bcbuild"
+          $artifactUrl = Get-BcArtifactUrl -type OnPrem -version $bcVersion -country w1 -select Latest
+
+          Write-Host "Creating container with artifact: $artifactUrl"
+
+          New-BcContainer `
+            -accept_eula `
+            -containerName $containerName `
+            -artifactUrl $artifactUrl `
+            -auth NavUserPassword `
+            -credential (New-Object PSCredential "admin", (ConvertTo-SecureString -String "P@ssw0rd" -AsPlainText -Force)) `
+            -updateHosts `
+            -accept_outdated
+
+      - name: Compile AL App
+        id: compile
+        shell: pwsh
+        run: |
+          Import-Module BcContainerHelper
+
+          $containerName = "bcbuild"
+
+          $appFile = Compile-AppInBcContainer `
+            -containerName $containerName `
+            -appProjectFolder $env:GITHUB_WORKSPACE `
+            -appOutputFolder $env:GITHUB_WORKSPACE `
+            -EnableCodeCop `
+            -EnableUICop
+
+          $appFileName = Split-Path $appFile -Leaf
+          echo "app-file=$appFileName" >> $env:GITHUB_OUTPUT
+          Write-Host "Built: $appFileName"
+
+      - name: Remove BC Container
+        if: always()
+        shell: pwsh
+        run: |
+          Import-Module BcContainerHelper
+          Remove-BcContainer -containerName "bcbuild" -ErrorAction SilentlyContinue
+
+      - name: Create zip and upload to release
+        shell: pwsh
+        run: |
+          $appFile = Get-ChildItem -Path "*.app" | Select-Object -First 1
+          $zipName = $appFile.BaseName + ".zip"
+          Compress-Archive -Path $appFile.FullName -DestinationPath $zipName
+          gh release upload ${{ github.event.release.tag_name }} $zipName --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: al-app-${{ steps.app-info.outputs.version }}
+          path: "*.app"
+          if-no-files-found: error

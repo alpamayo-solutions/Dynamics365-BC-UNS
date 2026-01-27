@@ -4,6 +4,7 @@
 
 # Build outputs
 *.app
+*.zip
 
 # VS Code
 .vscode/*.code-workspace

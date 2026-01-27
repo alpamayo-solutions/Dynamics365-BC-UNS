@@ -2,94 +2,93 @@
 
 This document describes how to create releases for the UNS Bridge Connector app.
 
-## Prerequisites
+## Automated Release Process (Recommended)
 
-- VS Code with AL Language extension
-- GitHub CLI (`gh`) installed and authenticated
-- Access to the GitHub repository
+The repository uses GitHub Actions to automatically handle releases:
 
-## Build Process
+1. **Create a release on GitHub** with a version tag (e.g., `v1.1.0`)
+2. The workflow automatically:
+   - Extracts the version from the tag
+   - Updates `app.json` with the new version
+   - Commits the version bump to `main`
+   - Builds the app in a BC container
+   - Uploads the zip file to the release
 
-1. **Update version in `app.json`**
+### Creating a Release
 
-   Increment the version number following semantic versioning:
+#### Option 1: GitHub Web UI
 
-   ```json
-   {
-     "version": "X.Y.Z.0"
-   }
-   ```
+1. Go to [Releases](https://github.com/alpamayo-solutions/Dynamics365-BC-UNS/releases)
+2. Click **Draft a new release**
+3. Create a new tag (e.g., `v1.1.0`)
+4. Add a title and release notes
+5. Click **Publish release**
 
-   - **Major (X):** Breaking changes or major feature additions
-   - **Minor (Y):** New features, backward compatible
-   - **Patch (Z):** Bug fixes, backward compatible
-   - **Build (0):** Always 0 for releases
+The workflow will handle versioning and building automatically.
 
-2. **Build the app package**
+#### Option 2: GitHub CLI
 
-   In VS Code:
-   - Press `Cmd+Shift+B` (macOS) or `Ctrl+Shift+B` (Windows/Linux)
-   - Select **AL: Package**
+```bash
+gh release create v1.1.0 \
+  --title "UNS Bridge Connector v1.1.0" \
+  --notes "## Changes
+- Feature X
+- Bug fix Y
 
-   This creates `alpamayo_UNS Bridge Connector_X.Y.Z.0.app` in the project root.
+## Requirements
+- Business Central 26.0+
+- Cloud target"
+```
 
-3. **Verify the build**
+### What Happens Automatically
 
-   Ensure the `.app` file exists and the version matches `app.json`.
+1. **Version extraction:** `v1.1.0` → `1.1.0.0` in `app.json`
+2. **Commit:** Version bump committed to `main`
+3. **Build:** App compiled in BC 26 container with CodeCop and UICop
+4. **Upload:** Zip file attached to the release
 
-## Creating a GitHub Release
+## CI/CD Workflows
 
-1. **Create the release with the app file**
-
-   ```bash
-   gh release create vX.Y.Z \
-     --title "UNS Bridge Connector vX.Y.Z" \
-     --notes "Release notes here..." \
-     "alpamayo_UNS Bridge Connector_X.Y.Z.0.app"
-   ```
-
-   Replace `X.Y.Z` with the actual version number.
-
-2. **Example for v1.0.0**
-
-   ```bash
-   gh release create v1.0.0 \
-     --title "UNS Bridge Connector v1.0.0" \
-     --notes "Initial release of UNS Bridge Connector for Business Central 26.x
-
-   ## Features
-   - Observe shopfloor execution data in Business Central
-   - Anchor execution facts to production orders and routing operations
-   - Observer-only integration (no posting, no inventory changes)
-
-   ## Requirements
-   - Microsoft Dynamics 365 Business Central 26.0+
-   - Cloud target deployment" \
-     "alpamayo_UNS Bridge Connector_1.0.0.0.app"
-   ```
+| Workflow | Trigger | Purpose |
+|----------|---------|---------|
+| `build.yml` | Push to main, PRs | Validates builds compile successfully |
+| `release.yml` | Release created | Bumps version, builds, uploads artifact |
 
 ## Version Convention
 
-- **Git tag:** `vX.Y.Z` (e.g., `v1.0.0`)
-- **App version:** `X.Y.Z.0` (e.g., `1.0.0.0`)
+- **Git tag:** `vX.Y.Z` (e.g., `v1.0.0`, `v1.1.0`, `v2.0.0`)
+- **App version:** `X.Y.Z.0` (automatically set from tag)
 
-The git tag should match the first three components of the app.json version.
+Semantic versioning:
+- **Major (X):** Breaking changes
+- **Minor (Y):** New features, backward compatible
+- **Patch (Z):** Bug fixes
 
-## Post-Release
+## Manual Build (Local Development)
 
-After creating a release:
+For local testing without creating a release:
 
-1. Verify the release appears at: https://github.com/alpamayo-solutions/Dynamics365-BC-UNS-Workorders/releases
-2. Test the download link works
-3. Verify the website picks up the new release (may take a few minutes due to caching)
+1. In VS Code, press `Cmd+Shift+B` / `Ctrl+Shift+B`
+2. Select **AL: Package**
+3. The `.app` file is created in the project root
+
+## Post-Release Verification
+
+1. Check the release at: https://github.com/alpamayo-solutions/Dynamics365-BC-UNS/releases
+2. Verify the zip file is attached
+3. Check that `app.json` on `main` has the updated version
+4. Website should show new version (may take a few minutes)
 
 ## Troubleshooting
 
-**"command not found: gh"**
-Install GitHub CLI: https://cli.github.com/
+**Build failed in CI**
+- Check the Actions tab for error details
+- Common issues: syntax errors, missing dependencies, CodeCop violations
 
-**Authentication errors**
-Run `gh auth login` to authenticate with GitHub.
+**Version not updated**
+- Ensure the tag follows the `vX.Y.Z` format
+- Check if the workflow had permission to push to `main`
 
-**File not found**
-Ensure you're in the project root directory and the `.app` file exists.
+**Release has no artifact**
+- The build job may have failed after version update
+- Check the release workflow run for errors

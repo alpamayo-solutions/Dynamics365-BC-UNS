@@ -1,0 +1,91 @@
+name: Build AL App
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Read app.json
+        id: app-info
+        shell: pwsh
+        run: |
+          $appJson = Get-Content -Path "app.json" -Raw | ConvertFrom-Json
+          $version = $appJson.version
+          $name = $appJson.name
+          $publisher = $appJson.publisher
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+          echo "name=$name" >> $env:GITHUB_OUTPUT
+          echo "publisher=$publisher" >> $env:GITHUB_OUTPUT
+          Write-Host "App: $publisher - $name v$version"
+
+      - name: Install BcContainerHelper
+        shell: pwsh
+        run: |
+          Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+          Install-Module -Name BcContainerHelper -Force -AllowClobber
+          Import-Module BcContainerHelper
+
+      - name: Create BC Container
+        shell: pwsh
+        run: |
+          Import-Module BcContainerHelper
+
+          $appJson = Get-Content -Path "app.json" -Raw | ConvertFrom-Json
+          $bcVersion = $appJson.platform -replace '\.0\.0$', ''
+
+          $containerName = "bcbuild"
+          $artifactUrl = Get-BcArtifactUrl -type OnPrem -version $bcVersion -country w1 -select Latest
+
+          Write-Host "Creating container with artifact: $artifactUrl"
+
+          New-BcContainer `
+            -accept_eula `
+            -containerName $containerName `
+            -artifactUrl $artifactUrl `
+            -auth NavUserPassword `
+            -credential (New-Object PSCredential "admin", (ConvertTo-SecureString -String "P@ssw0rd" -AsPlainText -Force)) `
+            -updateHosts `
+            -accept_outdated
+
+      - name: Compile AL App
+        id: compile
+        shell: pwsh
+        run: |
+          Import-Module BcContainerHelper
+
+          $containerName = "bcbuild"
+
+          $appFile = Compile-AppInBcContainer `
+            -containerName $containerName `
+            -appProjectFolder $env:GITHUB_WORKSPACE `
+            -appOutputFolder $env:GITHUB_WORKSPACE `
+            -EnableCodeCop `
+            -EnableUICop
+
+          $appFileName = Split-Path $appFile -Leaf
+          echo "app-file=$appFileName" >> $env:GITHUB_OUTPUT
+          Write-Host "Built: $appFileName"
+
+      - name: Remove BC Container
+        if: always()
+        shell: pwsh
+        run: |
+          Import-Module BcContainerHelper
+          Remove-BcContainer -containerName "bcbuild" -ErrorAction SilentlyContinue
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: al-app-${{ steps.app-info.outputs.version }}
+          path: "*.app"
+          if-no-files-found: error
