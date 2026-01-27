@@ -169,8 +169,10 @@ jobs:
             -containerName $containerName `
             -credential $credential `
             -extensionId "dbbe7042-978c-461f-abe3-5ce36a97d622" `
-            -XUnitResultFileName "$env:GITHUB_WORKSPACE\TestResults.xml"
+            -XUnitResultFileName "C:\src\TestResults.xml"
 
+          # Copy test results to workspace
+          Copy-Item -Path "C:\src\TestResults.xml" -Destination "$env:GITHUB_WORKSPACE\TestResults.xml" -Force
           Write-Host "Test results saved to TestResults.xml"
 
       - name: Publish Test Results
