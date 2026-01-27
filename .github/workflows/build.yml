@@ -165,12 +165,10 @@ jobs:
           $containerName = "bcbuild"
           $credential = New-Object PSCredential "admin", (ConvertTo-SecureString -String "P@ssw0rd" -AsPlainText -Force)
 
-          $testResults = Run-TestsInBcContainer `
+          Run-TestsInBcContainer `
             -containerName $containerName `
             -credential $credential `
-            -testSuite "DEFAULT" `
             -extensionId "dbbe7042-978c-461f-abe3-5ce36a97d622" `
-            -resultsFile "$env:GITHUB_WORKSPACE\TestResults.xml" `
             -XUnitResultFileName "$env:GITHUB_WORKSPACE\TestResults.xml"
 
           Write-Host "Test results saved to TestResults.xml"
