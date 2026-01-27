@@ -14,12 +14,20 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          path: app
+
+      - name: Checkout test repository
+        uses: actions/checkout@v4
+        with:
+          repository: alpamayo-solutions/Dynamics365-BC-UNS-Tests
+          path: tests
 
       - name: Read app.json
         id: app-info
         shell: pwsh
         run: |
-          $appJson = Get-Content -Path "app.json" -Raw | ConvertFrom-Json
+          $appJson = Get-Content -Path "app/app.json" -Raw | ConvertFrom-Json
           $version = $appJson.version
           $name = $appJson.name
           $publisher = $appJson.publisher
@@ -35,12 +43,24 @@ jobs:
           Install-Module -Name BcContainerHelper -Force -AllowClobber
           Import-Module BcContainerHelper
 
+      - name: Prepare source folder
+        shell: pwsh
+        run: |
+          # Copy source to C: drive for container sharing
+          $sourceDir = "C:\src"
+          New-Item -ItemType Directory -Path "$sourceDir\app" -Force | Out-Null
+          New-Item -ItemType Directory -Path "$sourceDir\tests" -Force | Out-Null
+          Copy-Item -Path "app\*" -Destination "$sourceDir\app" -Recurse -Force
+          Copy-Item -Path "tests\*" -Destination "$sourceDir\tests" -Recurse -Force
+          Write-Host "Copied source files to $sourceDir"
+          Get-ChildItem -Path $sourceDir -Recurse | Select-Object -First 20
+
       - name: Create BC Container
         shell: pwsh
         run: |
           Import-Module BcContainerHelper
 
-          $appJson = Get-Content -Path "app.json" -Raw | ConvertFrom-Json
+          $appJson = Get-Content -Path "C:\src\app\app.json" -Raw | ConvertFrom-Json
           $bcVersion = $appJson.platform -replace '\.0\.0$', ''
 
           $containerName = "bcbuild"
@@ -48,15 +68,19 @@ jobs:
 
           Write-Host "Creating container with artifact: $artifactUrl"
 
+          $credential = New-Object PSCredential "admin", (ConvertTo-SecureString -String "P@ssw0rd" -AsPlainText -Force)
+
           New-BcContainer `
             -accept_eula `
             -containerName $containerName `
             -artifactUrl $artifactUrl `
             -auth NavUserPassword `
-            -credential (New-Object PSCredential "admin", (ConvertTo-SecureString -String "P@ssw0rd" -AsPlainText -Force)) `
+            -credential $credential `
             -updateHosts `
             -accept_outdated `
-            -additionalParameters @("--volume", "$($env:GITHUB_WORKSPACE):C:\sources")
+            -includeTestToolkit `
+            -includeTestLibrariesOnly `
+            -additionalParameters @("--volume", "C:\src:C:\src")
 
       - name: Compile AL App
         id: compile
@@ -68,15 +92,100 @@ jobs:
 
           $appFile = Compile-AppInBcContainer `
             -containerName $containerName `
-            -appProjectFolder "C:\sources" `
-            -appOutputFolder "C:\sources" `
+            -appProjectFolder "C:\src\app" `
+            -appOutputFolder "C:\src\app" `
             -EnableCodeCop `
             -EnableUICop
 
-          # The .app file is written to C:\sources in the container, which maps to $env:GITHUB_WORKSPACE
           $appFileName = Split-Path $appFile -Leaf
           echo "app-file=$appFileName" >> $env:GITHUB_OUTPUT
           Write-Host "Built: $appFileName"
+
+      - name: Publish AL App
+        shell: pwsh
+        run: |
+          Import-Module BcContainerHelper
+
+          $containerName = "bcbuild"
+          $appFile = Get-ChildItem -Path "C:\src\app\*.app" | Select-Object -First 1
+
+          Publish-BcContainerApp `
+            -containerName $containerName `
+            -appFile $appFile.FullName `
+            -skipVerification `
+            -install `
+            -sync
+
+          Write-Host "Published and installed: $($appFile.Name)"
+
+      - name: Compile Test App
+        id: compile-tests
+        shell: pwsh
+        run: |
+          Import-Module BcContainerHelper
+
+          $containerName = "bcbuild"
+
+          $testAppFile = Compile-AppInBcContainer `
+            -containerName $containerName `
+            -appProjectFolder "C:\src\tests" `
+            -appOutputFolder "C:\src\tests" `
+            -appSymbolsFolder "C:\src\app"
+
+          $testAppFileName = Split-Path $testAppFile -Leaf
+          echo "test-app-file=$testAppFileName" >> $env:GITHUB_OUTPUT
+          Write-Host "Built test app: $testAppFileName"
+
+      - name: Publish Test App
+        shell: pwsh
+        run: |
+          Import-Module BcContainerHelper
+
+          $containerName = "bcbuild"
+          $testAppFile = Get-ChildItem -Path "C:\src\tests\*.app" | Select-Object -First 1
+
+          Publish-BcContainerApp `
+            -containerName $containerName `
+            -appFile $testAppFile.FullName `
+            -skipVerification `
+            -install `
+            -sync
+
+          Write-Host "Published and installed test app: $($testAppFile.Name)"
+
+      - name: Run Tests
+        shell: pwsh
+        run: |
+          Import-Module BcContainerHelper
+
+          $containerName = "bcbuild"
+          $credential = New-Object PSCredential "admin", (ConvertTo-SecureString -String "P@ssw0rd" -AsPlainText -Force)
+
+          $testResults = Run-TestsInBcContainer `
+            -containerName $containerName `
+            -credential $credential `
+            -testSuite "DEFAULT" `
+            -extensionId "dbbe7042-978c-461f-abe3-5ce36a97d622" `
+            -resultsFile "$env:GITHUB_WORKSPACE\TestResults.xml" `
+            -XUnitResultFileName "$env:GITHUB_WORKSPACE\TestResults.xml"
+
+          Write-Host "Test results saved to TestResults.xml"
+
+      - name: Publish Test Results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: AL Tests
+          path: TestResults.xml
+          reporter: java-junit
+          fail-on-error: true
+
+      - name: Copy artifacts to workspace
+        if: success()
+        shell: pwsh
+        run: |
+          Copy-Item -Path "C:\src\app\*.app" -Destination "$env:GITHUB_WORKSPACE" -Force
+          Write-Host "Copied .app files to workspace"
 
       - name: Remove BC Container
         if: always()
@@ -86,6 +195,7 @@ jobs:
           Remove-BcContainer -containerName "bcbuild" -ErrorAction SilentlyContinue
 
       - name: Upload artifact
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: al-app-${{ steps.app-info.outputs.version }}
