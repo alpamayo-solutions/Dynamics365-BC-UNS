@@ -1,5 +1,7 @@
 # UNS Bridge Connector
 
+[![Build AL App](https://github.com/alpamayo-solutions/Dynamics365-BC-UNS/actions/workflows/build.yml/badge.svg)](https://github.com/alpamayo-solutions/Dynamics365-BC-UNS/actions/workflows/build.yml)
+
 A Dynamics 365 Business Central AL extension that connects Business Central to the Unified Namespace (UNS) for bidirectional shopfloor integration.
 
 ## Overview
