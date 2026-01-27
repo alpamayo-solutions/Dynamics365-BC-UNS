@@ -55,7 +55,8 @@ jobs:
             -auth NavUserPassword `
             -credential (New-Object PSCredential "admin", (ConvertTo-SecureString -String "P@ssw0rd" -AsPlainText -Force)) `
             -updateHosts `
-            -accept_outdated
+            -accept_outdated `
+            -additionalParameters @("--volume", "$($env:GITHUB_WORKSPACE):C:\sources")
 
       - name: Compile AL App
         id: compile
@@ -67,11 +68,12 @@ jobs:
 
           $appFile = Compile-AppInBcContainer `
             -containerName $containerName `
-            -appProjectFolder $env:GITHUB_WORKSPACE `
-            -appOutputFolder $env:GITHUB_WORKSPACE `
+            -appProjectFolder "C:\sources" `
+            -appOutputFolder "C:\sources" `
             -EnableCodeCop `
             -EnableUICop
 
+          # The .app file is written to C:\sources in the container, which maps to $env:GITHUB_WORKSPACE
           $appFileName = Split-Path $appFile -Leaf
           echo "app-file=$appFileName" >> $env:GITHUB_OUTPUT
           Write-Host "Built: $appFileName"
