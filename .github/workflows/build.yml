@@ -176,13 +176,13 @@ jobs:
           Write-Host "Test results saved to TestResults.xml"
 
       - name: Publish Test Results
-        uses: dorny/test-reporter@v1
+        uses: mikepenz/action-junit-report@v4
         if: always()
         with:
-          name: AL Tests
-          path: TestResults.xml
-          reporter: java-junit
-          fail-on-error: true
+          report_paths: TestResults.xml
+          fail_on_failure: true
+          include_passed: true
+          check_name: AL Tests
 
       - name: Copy artifacts to workspace
         if: success()
