@@ -134,9 +134,11 @@ jobs:
           Import-Module BcContainerHelper
 
           $containerName = "bcbuild"
+          $credential = New-Object PSCredential "admin", (ConvertTo-SecureString -String "P@ssw0rd" -AsPlainText -Force)
 
           $appFile = Compile-AppInBcContainer `
             -containerName $containerName `
+            -credential $credential `
             -appProjectFolder "C:\src\app" `
             -appOutputFolder "C:\src\app" `
             -EnableCodeCop `
@@ -170,9 +172,11 @@ jobs:
           Import-Module BcContainerHelper
 
           $containerName = "bcbuild"
+          $credential = New-Object PSCredential "admin", (ConvertTo-SecureString -String "P@ssw0rd" -AsPlainText -Force)
 
           $testAppFile = Compile-AppInBcContainer `
             -containerName $containerName `
+            -credential $credential `
             -appProjectFolder "C:\src\tests" `
             -appOutputFolder "C:\src\tests" `
             -appSymbolsFolder "C:\src\app"
