@@ -86,6 +86,16 @@ table 50002 "ALP Operation Execution"
             Caption = 'Source';
             DataClassification = CustomerContent;
         }
+        field(33; "Started At"; DateTime)
+        {
+            Caption = 'Started At';
+            DataClassification = CustomerContent;
+        }
+        field(34; "Operator Id"; Code[20])
+        {
+            Caption = 'Operator Id';
+            DataClassification = CustomerContent;
+        }
     }
 
     keys
