@@ -11,15 +11,25 @@ codeunit 50010 "ALP Execution Ingestion Svc"
         MultipleOperationsForWCErr: Label 'Multiple routing lines found for Order %1, Work Center %2. Operation No. must be specified.', Comment = '%1 = Order No., %2 = Work Center No.';
         WorkCenterRequiredErr: Label 'Work Center No. is required when Operation No. is not specified';
 
+    /// <summary>
+    /// Backward-compatible overload that defaults to End event behavior.
+    /// </summary>
     procedure ProcessExecutionEvent(var Exec: Record "ALP Operation Execution"; MessageId: Guid): Boolean
+    begin
+        exit(ProcessExecutionEvent(Exec, MessageId, '', '', ''));
+    end;
+
+    /// <summary>
+    /// Main entry point for execution event processing with v3 event type routing.
+    /// EventType: 'Start' creates execution record with StartedAt + work log entry, skips KPIs.
+    /// EventType: '' or 'End' uses existing KPI-based behavior + closes work log entry.
+    /// </summary>
+    procedure ProcessExecutionEvent(var Exec: Record "ALP Operation Execution"; MessageId: Guid; EventType: Text[10]; OperatorId: Code[20]; ShiftCode: Code[10]): Boolean
     var
         Inbox: Record "ALP Integration Inbox";
-        ExistingExec: Record "ALP Operation Execution";
         ProdOrder: Record "Production Order";
         ProdOrderRoutingLine: Record "Prod. Order Routing Line";
-        ExecCalcSvc: Codeunit "ALP Execution Calc Svc";
         ErrorText: Text;
-        IsNew: Boolean;
     begin
         if Inbox.Get(MessageId) then
             if Inbox.Status = Inbox.Status::Processed then
@@ -48,24 +58,31 @@ codeunit 50010 "ALP Execution Ingestion Svc"
             exit(false);
         end;
 
-        if Exec."Qty. Rejected" > Exec."Qty. Produced" then begin
-            ErrorText := StrSubstNo(RejectedExceedsProducedErr, Exec."Qty. Rejected", Exec."Qty. Produced");
-            MarkInboxFailed(Inbox, ErrorText);
+        // Resolve Operation No. from Work Center if not provided
+        if not ResolveOperationNo(Exec, Inbox) then
             exit(false);
+
+        // Route based on event type
+        if UpperCase(EventType) = 'START' then begin
+            IngestStartEvent(Exec, ProdOrder, MessageId, OperatorId, ShiftCode);
+            MarkInboxProcessed(Inbox);
+            exit(true);
         end;
 
-        if (Exec.Availability < 0) or (Exec.Availability > 1) then begin
-            ErrorText := StrSubstNo(AvailabilityOutOfRangeErr, Exec.Availability);
-            MarkInboxFailed(Inbox, ErrorText);
+        // End event (default): validate KPIs and process
+        if not ValidateEndEventKPIs(Exec, Inbox) then
             exit(false);
-        end;
 
-        if (Exec.Productivity < 0) or (Exec.Productivity > 1) then begin
-            ErrorText := StrSubstNo(ProductivityOutOfRangeErr, Exec.Productivity);
-            MarkInboxFailed(Inbox, ErrorText);
-            exit(false);
-        end;
+        IngestEndEvent(Exec, ProdOrder, OperatorId, ShiftCode);
+        MarkInboxProcessed(Inbox);
+        exit(true);
+    end;
 
+    local procedure ResolveOperationNo(var Exec: Record "ALP Operation Execution"; var Inbox: Record "ALP Integration Inbox"): Boolean
+    var
+        ProdOrderRoutingLine: Record "Prod. Order Routing Line";
+        ErrorText: Text;
+    begin
         if Exec."Operation No." = '' then begin
             if Exec."Work Center No." = '' then begin
                 ErrorText := WorkCenterRequiredErr;
@@ -111,13 +128,94 @@ codeunit 50010 "ALP Execution Ingestion Svc"
             end;
         end;
 
+        exit(true);
+    end;
+
+    local procedure ValidateEndEventKPIs(var Exec: Record "ALP Operation Execution"; var Inbox: Record "ALP Integration Inbox"): Boolean
+    var
+        ErrorText: Text;
+    begin
+        if Exec."Qty. Rejected" > Exec."Qty. Produced" then begin
+            ErrorText := StrSubstNo(RejectedExceedsProducedErr, Exec."Qty. Rejected", Exec."Qty. Produced");
+            MarkInboxFailed(Inbox, ErrorText);
+            exit(false);
+        end;
+
+        if (Exec.Availability < 0) or (Exec.Availability > 1) then begin
+            ErrorText := StrSubstNo(AvailabilityOutOfRangeErr, Exec.Availability);
+            MarkInboxFailed(Inbox, ErrorText);
+            exit(false);
+        end;
+
+        if (Exec.Productivity < 0) or (Exec.Productivity > 1) then begin
+            ErrorText := StrSubstNo(ProductivityOutOfRangeErr, Exec.Productivity);
+            MarkInboxFailed(Inbox, ErrorText);
+            exit(false);
+        end;
+
+        exit(true);
+    end;
+
+    local procedure IngestStartEvent(var Exec: Record "ALP Operation Execution"; var ProdOrder: Record "Production Order"; MessageId: Guid; OperatorId: Code[20]; ShiftCode: Code[10])
+    var
+        ExistingExec: Record "ALP Operation Execution";
+        WorkLogSvc: Codeunit "ALP Work Log Svc";
+        WorkLogEventType: Enum "ALP Work Log Event Type";
+        IsNew: Boolean;
+    begin
+        // Create or update OpExec record with StartedAt and OperatorId
+        IsNew := not ExistingExec.Get(Exec."Order No.", Exec."Operation No.");
+
+        Exec."Started At" := Exec."Source Timestamp";
+        Exec."Operator Id" := OperatorId;
+        Exec."Last Update At" := CurrentDateTime();
+
+        if IsNew then
+            Exec.Insert(true)
+        else begin
+            ExistingExec."Started At" := Exec."Source Timestamp";
+            ExistingExec."Operator Id" := OperatorId;
+            ExistingExec."Last Update At" := CurrentDateTime();
+            ExistingExec.Modify(true);
+        end;
+
+        ProdOrder."ALP Last Exec Update At" := CurrentDateTime();
+        ProdOrder."ALP Execution Source" := Exec.Source;
+        ProdOrder.Modify(true);
+
+        // Create work log entry — no KPI aggregation for Start events
+        WorkLogSvc.CreateWorkLogEntry(
+            Format(MessageId),
+            Exec."Order No.",
+            Exec."Operation No.",
+            Exec."Work Center No.",
+            OperatorId,
+            ProdOrder."Source No.",
+            ShiftCode,
+            WorkLogEventType::Execution,
+            '',
+            Exec."Source Timestamp",
+            Exec.Source);
+    end;
+
+    local procedure IngestEndEvent(var Exec: Record "ALP Operation Execution"; var ProdOrder: Record "Production Order"; OperatorId: Code[20]; ShiftCode: Code[10])
+    var
+        ExistingExec: Record "ALP Operation Execution";
+        ProdOrderRoutingLine: Record "Prod. Order Routing Line";
+        ExecCalcSvc: Codeunit "ALP Execution Calc Svc";
+        WorkLogSvc: Codeunit "ALP Work Log Svc";
+        WorkLogEventType: Enum "ALP Work Log Event Type";
+        IsNew: Boolean;
+    begin
         IsNew := not ExistingExec.Get(Exec."Order No.", Exec."Operation No.");
         if not IsNew then
-            if ExistingExec."Source Timestamp" >= Exec."Source Timestamp" then begin
-                // Older message arrived later - skip update but mark as processed
-                MarkInboxProcessed(Inbox);
-                exit(true);
-            end;
+            if ExistingExec."Source Timestamp" >= Exec."Source Timestamp" then
+                // Older message arrived later - skip update
+                exit;
+
+        // Preserve OperatorId if provided
+        if OperatorId <> '' then
+            Exec."Operator Id" := OperatorId;
 
         Exec."Last Update At" := CurrentDateTime();
         if IsNew then
@@ -146,8 +244,8 @@ codeunit 50010 "ALP Execution Ingestion Svc"
 
         ExecCalcSvc.UpdateProductionOrderAggregates(ProdOrder);
 
-        MarkInboxProcessed(Inbox);
-        exit(true);
+        // Close open work log entry for this operation
+        WorkLogSvc.CloseWorkLogEntry(Exec."Order No.", Exec."Operation No.", WorkLogEventType::Execution, Exec."Source Timestamp");
     end;
 
     local procedure MarkInboxProcessed(var Inbox: Record "ALP Integration Inbox")
