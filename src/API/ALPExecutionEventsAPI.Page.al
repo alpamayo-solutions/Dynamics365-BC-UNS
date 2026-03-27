@@ -72,6 +72,18 @@ page 50030 "ALP Execution Events API"
                 {
                     Caption = 'Source';
                 }
+                field(eventType; EventTypeText)
+                {
+                    Caption = 'Event Type';
+                }
+                field(operatorId; OperatorIdCode)
+                {
+                    Caption = 'Operator Id';
+                }
+                field(shiftCode; ShiftCodeValue)
+                {
+                    Caption = 'Shift Code';
+                }
             }
         }
     }
@@ -79,6 +91,9 @@ page 50030 "ALP Execution Events API"
     var
         IngestionSvc: Codeunit "ALP Execution Ingestion Svc";
         MessageIdText: Text[50];
+        EventTypeText: Text[10];
+        OperatorIdCode: Code[20];
+        ShiftCodeValue: Code[10];
         InvalidMessageIdErr: Label 'Invalid messageId format. Expected a valid GUID.', Comment = 'Error when API receives malformed GUID';
         ProcessingFailedErr: Label 'Failed to process execution event. Check Integration Inbox for details.', Comment = 'Error when event processing fails';
 
@@ -89,7 +104,7 @@ page 50030 "ALP Execution Events API"
         if not Evaluate(MessageGuid, MessageIdText) then
             Error(InvalidMessageIdErr);
 
-        if not IngestionSvc.ProcessExecutionEvent(Rec, MessageGuid) then
+        if not IngestionSvc.ProcessExecutionEvent(Rec, MessageGuid, EventTypeText, OperatorIdCode, ShiftCodeValue) then
             Error(ProcessingFailedErr);
 
         exit(false); // We handle the insert in the codeunit
