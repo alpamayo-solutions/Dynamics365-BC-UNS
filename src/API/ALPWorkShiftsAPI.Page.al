@@ -1,4 +1,4 @@
-page 50037 "ALP Work Shifts API"
+page 50041 "ALP Work Shifts API"
 {
     PageType = API;
     Caption = 'Work Shifts API';
@@ -26,14 +26,6 @@ page 50037 "ALP Work Shifts API"
                 field(description; Rec.Description)
                 {
                     Caption = 'Description';
-                }
-                field(startingTime; Rec."Starting Time")
-                {
-                    Caption = 'Starting Time';
-                }
-                field(endingTime; Rec."Ending Time")
-                {
-                    Caption = 'Ending Time';
                 }
             }
         }
