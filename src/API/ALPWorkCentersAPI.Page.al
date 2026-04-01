@@ -55,6 +55,10 @@ page 50031 "ALP Work Centers API"
                 {
                     Caption = 'Blocked';
                 }
+                field(shopCalendarCode; Rec."Shop Calendar Code")
+                {
+                    Caption = 'Shop Calendar Code';
+                }
             }
         }
     }
