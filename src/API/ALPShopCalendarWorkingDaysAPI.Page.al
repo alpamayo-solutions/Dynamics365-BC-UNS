@@ -1,4 +1,4 @@
-page 50039 "ALP Shop Calendar Working Days API"
+page 50043 "ALP Shop Cal Working Days API"
 {
     PageType = API;
     Caption = 'Shop Calendar Working Days API';

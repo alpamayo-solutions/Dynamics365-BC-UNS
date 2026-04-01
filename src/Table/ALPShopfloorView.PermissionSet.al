@@ -28,7 +28,7 @@ permissionset 50040 "ALP Shopfloor View"
         page "ALP Work Centers API" = X,
         page "ALP Work Shifts API" = X,
         page "ALP Shop Calendars API" = X,
-        page "ALP Shop Calendar Working Days API" = X,
+        page "ALP Shop Cal Working Days API" = X,
         page "ALP Work Log Entries API" = X,
         page "ALP Items API" = X,
         page "ALP UNS Topic Mapping List" = X,

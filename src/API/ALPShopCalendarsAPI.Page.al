@@ -1,4 +1,4 @@
-page 50038 "ALP Shop Calendars API"
+page 50042 "ALP Shop Calendars API"
 {
     PageType = API;
     Caption = 'Shop Calendars API';
