@@ -4,16 +4,13 @@
   "publisher": "alpamayo",
   "version": "1.1.0.0",
   "logo": "assets/logo.png",
-
   "brief": "Observe shopfloor execution and operator feedback in Business Central",
   "description": "UNS Bridge Connector is an observer-only integration add-on for Microsoft Dynamics 365 Business Central. It connects Business Central to a Unified Namespace (UNS) and makes shopfloor execution data visible in ERP context.\n\nThe app ingests non-authoritative execution facts and human feedback events (for example quantities produced, manual rejects, availability, productivity, or operator inputs) from a UNS and anchors them to production orders and routing operations in Business Central. This enables transparent, near-real-time insight into production progress without changing ERP posting, inventory, costing, or production control logic.\n\nThe app does not introduce MES functionality into the ERP. It does not control execution, enforce workflows, post output, or affect financial data. If the integration is disabled, production continues unchanged; only execution visibility is lost.\n\nUnified Namespaces can be implemented using different architectures and technologies. PREKIT Edge Nodes are one example of an edge-based technology that can be used to collect shopfloor data and publish it into a Unified Namespace.",
   "contextSensitiveHelpUrl": "https://alpamayo-solutions.com/docs/uns-bridge-connector",
-
   "platform": "26.0.0.0",
   "application": "26.0.0.0",
   "runtime": "15.0",
   "target": "Cloud",
-
   "idRanges": [
     {
       "from": 50000,
@@ -25,6 +22,8 @@
     "allowDownloadingSource": true,
     "includeSourceInSymbolFile": true
   },
-
-  "features": ["NoImplicitWith", "TranslationFile"]
+  "features": [
+    "NoImplicitWith",
+    "TranslationFile"
+  ]
 }
