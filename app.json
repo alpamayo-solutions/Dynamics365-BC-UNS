@@ -2,7 +2,7 @@
   "id": "dbbe7042-978c-461f-abe3-5ce36a97d621",
   "name": "UNS Bridge Connector",
   "publisher": "alpamayo",
-  "version": "1.0.0.0",
+  "version": "1.1.0.0",
   "logo": "assets/logo.png",
 
   "brief": "Observe shopfloor execution and operator feedback in Business Central",
