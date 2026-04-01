@@ -91,7 +91,7 @@ page 50030 "ALP Execution Events API"
     var
         IngestionSvc: Codeunit "ALP Execution Ingestion Svc";
         MessageIdText: Text[50];
-        EventTypeText: Text[10];
+        EventTypeText: Text[20];
         OperatorIdCode: Code[20];
         ShiftCodeValue: Code[10];
         InvalidMessageIdErr: Label 'Invalid messageId format. Expected a valid GUID.', Comment = 'Error when API receives malformed GUID';

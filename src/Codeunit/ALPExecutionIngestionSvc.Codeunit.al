@@ -10,6 +10,8 @@ codeunit 50010 "ALP Execution Ingestion Svc"
         OperationNotFoundForWCErr: Label 'No routing line found for Order %1, Work Center %2', Comment = '%1 = Order No., %2 = Work Center No.';
         MultipleOperationsForWCErr: Label 'Multiple routing lines found for Order %1, Work Center %2. Operation No. must be specified.', Comment = '%1 = Order No., %2 = Work Center No.';
         WorkCenterRequiredErr: Label 'Work Center No. is required when Operation No. is not specified';
+        DisruptionStartTok: Label 'DISRUPTIONSTART', Locked = true;
+        DisruptionEndTok: Label 'DISRUPTIONEND', Locked = true;
 
     /// <summary>
     /// Backward-compatible overload that defaults to End event behavior.
@@ -22,9 +24,11 @@ codeunit 50010 "ALP Execution Ingestion Svc"
     /// <summary>
     /// Main entry point for execution event processing with v3 event type routing.
     /// EventType: 'Start' creates execution record with StartedAt + work log entry, skips KPIs.
-    /// EventType: '' or 'End' uses existing KPI-based behavior + closes work log entry.
+    /// EventType: 'DisruptionStart' creates a disruption work log entry.
+    /// EventType: 'DisruptionEnd' closes the open disruption work log entry.
+    /// EventType: '' or 'End' uses existing KPI-based behavior + closes the execution work log entry.
     /// </summary>
-    procedure ProcessExecutionEvent(var Exec: Record "ALP Operation Execution"; MessageId: Guid; EventType: Text[10]; OperatorId: Code[20]; ShiftCode: Code[10]): Boolean
+    procedure ProcessExecutionEvent(var Exec: Record "ALP Operation Execution"; MessageId: Guid; EventType: Text[20]; OperatorId: Code[20]; ShiftCode: Code[10]): Boolean
     var
         Inbox: Record "ALP Integration Inbox";
         ProdOrder: Record "Production Order";
@@ -62,9 +66,23 @@ codeunit 50010 "ALP Execution Ingestion Svc"
         if not ResolveOperationNo(Exec, Inbox) then
             exit(false);
 
+        EventType := DelChr(UpperCase(EventType), '=', '_ ');
+
         // Route based on event type
-        if UpperCase(EventType) = 'START' then begin
+        if EventType = 'START' then begin
             IngestStartEvent(Exec, ProdOrder, MessageId, OperatorId, ShiftCode);
+            MarkInboxProcessed(Inbox);
+            exit(true);
+        end;
+
+        if EventType = DisruptionStartTok then begin
+            IngestDisruptionStartEvent(Exec, ProdOrder, MessageId, OperatorId, ShiftCode);
+            MarkInboxProcessed(Inbox);
+            exit(true);
+        end;
+
+        if EventType = DisruptionEndTok then begin
+            IngestDisruptionEndEvent(Exec);
             MarkInboxProcessed(Inbox);
             exit(true);
         end;
@@ -198,6 +216,25 @@ codeunit 50010 "ALP Execution Ingestion Svc"
             Exec.Source);
     end;
 
+    local procedure IngestDisruptionStartEvent(var Exec: Record "ALP Operation Execution"; var ProdOrder: Record "Production Order"; MessageId: Guid; OperatorId: Code[20]; ShiftCode: Code[10])
+    var
+        WorkLogSvc: Codeunit "ALP Work Log Svc";
+        WorkLogEventType: Enum "ALP Work Log Event Type";
+    begin
+        WorkLogSvc.CreateWorkLogEntry(
+            Format(MessageId),
+            Exec."Order No.",
+            Exec."Operation No.",
+            Exec."Work Center No.",
+            OperatorId,
+            ProdOrder."Source No.",
+            ShiftCode,
+            WorkLogEventType::Disruption,
+            '',
+            Exec."Source Timestamp",
+            Exec.Source);
+    end;
+
     local procedure IngestEndEvent(var Exec: Record "ALP Operation Execution"; var ProdOrder: Record "Production Order"; OperatorId: Code[20]; ShiftCode: Code[10])
     var
         ExistingExec: Record "ALP Operation Execution";
@@ -246,6 +283,18 @@ codeunit 50010 "ALP Execution Ingestion Svc"
 
         // Close open work log entry for this operation
         WorkLogSvc.CloseWorkLogEntry(Exec."Order No.", Exec."Operation No.", WorkLogEventType::Execution, Exec."Source Timestamp");
+    end;
+
+    local procedure IngestDisruptionEndEvent(var Exec: Record "ALP Operation Execution")
+    var
+        WorkLogSvc: Codeunit "ALP Work Log Svc";
+        WorkLogEventType: Enum "ALP Work Log Event Type";
+    begin
+        WorkLogSvc.CloseWorkLogEntry(
+            Exec."Order No.",
+            Exec."Operation No.",
+            WorkLogEventType::Disruption,
+            Exec."Source Timestamp");
     end;
 
     local procedure MarkInboxProcessed(var Inbox: Record "ALP Integration Inbox")
