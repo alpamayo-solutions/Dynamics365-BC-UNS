@@ -250,7 +250,7 @@ jobs:
           $appFile = Get-ChildItem -Path "*.app" | Select-Object -First 1
           $zipName = $appFile.BaseName + ".zip"
           Compress-Archive -Path $appFile.FullName -DestinationPath $zipName
-          gh release upload ${{ github.event.release.tag_name }} $zipName --clobber
+          gh release upload ${{ github.event.release.tag_name }} $zipName --clobber -R ${{ github.repository }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
