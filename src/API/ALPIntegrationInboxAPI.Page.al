@@ -1,4 +1,4 @@
-page 50036 "ALP Integration Inbox API"
+page 50044 "ALP Integration Inbox API"
 {
     PageType = API;
     Caption = 'Integration Inbox API';
