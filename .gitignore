@@ -31,3 +31,7 @@ Translations/*.g.xlf
 __pycache__/
 
 .claude/
+
+
+docs/implementation-plan-v3.md
+AGENTS.md
