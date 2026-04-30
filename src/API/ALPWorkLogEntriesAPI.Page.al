@@ -80,6 +80,22 @@ page 50036 "ALP Work Log Entries API"
                 {
                     Caption = 'Status';
                 }
+                field(endMessageId; Rec."End Message Id")
+                {
+                    Caption = 'End Message Id';
+                }
+                field(correctionId; Rec."Correction Id")
+                {
+                    Caption = 'Correction Id';
+                }
+                field(invalidatedByCorrectionId; Rec."Invalidated By Correction Id")
+                {
+                    Caption = 'Invalidated By Correction Id';
+                }
+                field(replacesEntryNo; Rec."Replaces Entry No.")
+                {
+                    Caption = 'Replaces Entry No.';
+                }
             }
         }
     }

@@ -22,6 +22,7 @@ This extension provides the ERP side of a UNS (Unified Namespace) architecture, 
 
 **APIs (Write)**
 - REST API endpoint for KPI ingestion (`/executionEvents`)
+- REST API endpoint for audited execution corrections (`/executionCorrections`)
 - UNS Topic Mapping API for ERP-hosted configuration (`/unsTopicMappings`)
 
 **APIs (Read-Only Reference Data)**
@@ -32,6 +33,7 @@ This extension provides the ERP side of a UNS (Unified Namespace) architecture, 
 - Idempotent API with message-level deduplication
 - Out-of-order protection via source timestamps
 - Integration inbox for audit trail and troubleshooting
+- Correction commands preserve original work-log intervals for auditability and create linked corrected intervals
 
 **Configuration**
 - UNS Topic Mapping with auto-discovery support
@@ -52,8 +54,21 @@ The extension adds three new tables and extends two standard tables:
 | **ALP Integration Inbox** | Audit trail of all received messages (idempotency key) |
 | **ALP Operation Execution** | KPI storage per Order + Operation |
 | **ALP UNS Topic Mapping** | Configuration: UNS Topic → Work Center |
+| **ALP Work Log Entry** | Time-bounded execution/disruption intervals, including correction links |
+| **ALP Execution Correction** | Audited correction commands and processing result |
 | Production Order (ext) | Aggregated execution fields |
 | Prod. Order Routing Line (ext) | Per-operation KPI fields |
+
+## Execution Corrections
+
+The `/executionCorrections` API accepts supervisor/admin correction commands for historical execution context. Supported actions are:
+
+- `cancel_event`: mark the targeted work-log interval as `Cancelled`
+- `insert_missing_event`: create a correction-backed work-log interval
+- `replace_interval`: mark the targeted interval as `Superseded` and create a linked replacement interval
+- `change_metadata`: mark the targeted interval as `Superseded` and create a linked interval with corrected metadata
+
+Targets are resolved from `targetEventIds` against both the start `messageId` and the stored `endMessageId`. Original work-log rows are not deleted or edited in place for corrective actions; they keep their audit trail through `invalidatedByCorrectionId`, while replacement rows store `correctionId` and `replacesEntryNo`.
 
 ## Bridge Communication Patterns
 

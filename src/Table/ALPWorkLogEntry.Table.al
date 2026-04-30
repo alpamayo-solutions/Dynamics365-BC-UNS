@@ -85,6 +85,26 @@ table 50006 "ALP Work Log Entry"
             Caption = 'Status';
             DataClassification = CustomerContent;
         }
+        field(16; "End Message Id"; Text[50])
+        {
+            Caption = 'End Message Id';
+            DataClassification = SystemMetadata;
+        }
+        field(17; "Correction Id"; Text[50])
+        {
+            Caption = 'Correction Id';
+            DataClassification = SystemMetadata;
+        }
+        field(18; "Invalidated By Correction Id"; Text[50])
+        {
+            Caption = 'Invalidated By Correction Id';
+            DataClassification = SystemMetadata;
+        }
+        field(19; "Replaces Entry No."; Integer)
+        {
+            Caption = 'Replaces Entry No.';
+            DataClassification = SystemMetadata;
+        }
     }
 
     keys
@@ -97,6 +117,12 @@ table 50006 "ALP Work Log Entry"
         {
         }
         key(MessageId; "Message Id")
+        {
+        }
+        key(EndMessageId; "End Message Id")
+        {
+        }
+        key(CorrectionId; "Correction Id")
         {
         }
     }

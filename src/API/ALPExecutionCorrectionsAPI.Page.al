@@ -43,10 +43,12 @@ page 50040 "ALP Execution Corrections API"
 
     var
         CorrectionSvc: Codeunit "ALP Execution Correction Svc";
+        CorrectionFailedErr: Label 'Failed to process execution correction: %1', Comment = '%1 = correction processing error';
 
     trigger OnInsertRecord(BelowxRec: Boolean): Boolean
     begin
-        CorrectionSvc.ProcessCorrection(Rec);
+        if not CorrectionSvc.ProcessCorrection(Rec) then
+            Error(CorrectionFailedErr, Rec.Error);
 
         exit(false);
     end;

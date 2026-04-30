@@ -11,4 +11,12 @@ enum 50003 "ALP Work Log Status"
     {
         Caption = 'Closed';
     }
+    value(2; Superseded)
+    {
+        Caption = 'Superseded';
+    }
+    value(3; Cancelled)
+    {
+        Caption = 'Cancelled';
+    }
 }

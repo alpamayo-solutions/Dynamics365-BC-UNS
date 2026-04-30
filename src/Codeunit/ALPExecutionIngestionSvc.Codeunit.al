@@ -82,7 +82,7 @@ codeunit 50010 "ALP Execution Ingestion Svc"
         end;
 
         if EventType = DisruptionEndTok then begin
-            IngestDisruptionEndEvent(Exec);
+            IngestDisruptionEndEvent(Exec, MessageId);
             MarkInboxProcessed(Inbox);
             exit(true);
         end;
@@ -91,7 +91,7 @@ codeunit 50010 "ALP Execution Ingestion Svc"
         if not ValidateEndEventKPIs(Exec, Inbox) then
             exit(false);
 
-        IngestEndEvent(Exec, ProdOrder, OperatorId, ShiftCode);
+        IngestEndEvent(Exec, ProdOrder, MessageId, OperatorId, ShiftCode);
         MarkInboxProcessed(Inbox);
         exit(true);
     end;
@@ -235,7 +235,7 @@ codeunit 50010 "ALP Execution Ingestion Svc"
             Exec.Source);
     end;
 
-    local procedure IngestEndEvent(var Exec: Record "ALP Operation Execution"; var ProdOrder: Record "Production Order"; OperatorId: Code[20]; ShiftCode: Code[10])
+    local procedure IngestEndEvent(var Exec: Record "ALP Operation Execution"; var ProdOrder: Record "Production Order"; MessageId: Guid; OperatorId: Code[20]; ShiftCode: Code[10])
     var
         ExistingExec: Record "ALP Operation Execution";
         ProdOrderRoutingLine: Record "Prod. Order Routing Line";
@@ -282,19 +282,20 @@ codeunit 50010 "ALP Execution Ingestion Svc"
         ExecCalcSvc.UpdateProductionOrderAggregates(ProdOrder);
 
         // Close open work log entry for this operation
-        WorkLogSvc.CloseWorkLogEntry(Exec."Order No.", Exec."Operation No.", WorkLogEventType::Execution, Exec."Source Timestamp");
+        WorkLogSvc.CloseWorkLogEntryWithEndMessageId(Exec."Order No.", Exec."Operation No.", WorkLogEventType::Execution, Exec."Source Timestamp", Format(MessageId));
     end;
 
-    local procedure IngestDisruptionEndEvent(var Exec: Record "ALP Operation Execution")
+    local procedure IngestDisruptionEndEvent(var Exec: Record "ALP Operation Execution"; MessageId: Guid)
     var
         WorkLogSvc: Codeunit "ALP Work Log Svc";
         WorkLogEventType: Enum "ALP Work Log Event Type";
     begin
-        WorkLogSvc.CloseWorkLogEntry(
+        WorkLogSvc.CloseWorkLogEntryWithEndMessageId(
             Exec."Order No.",
             Exec."Operation No.",
             WorkLogEventType::Disruption,
-            Exec."Source Timestamp");
+            Exec."Source Timestamp",
+            Format(MessageId));
     end;
 
     local procedure MarkInboxProcessed(var Inbox: Record "ALP Integration Inbox")

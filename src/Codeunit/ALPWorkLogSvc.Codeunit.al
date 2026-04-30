@@ -26,9 +26,13 @@ codeunit 50013 "ALP Work Log Svc"
     end;
 
     procedure CloseWorkLogEntry(OrderNo: Code[20]; OperationNo: Code[10]; EventType: Enum "ALP Work Log Event Type"; EndTime: DateTime)
+    begin
+        CloseWorkLogEntryWithEndMessageId(OrderNo, OperationNo, EventType, EndTime, '');
+    end;
+
+    procedure CloseWorkLogEntryWithEndMessageId(OrderNo: Code[20]; OperationNo: Code[10]; EventType: Enum "ALP Work Log Event Type"; EndTime: DateTime; EndMessageId: Text[50])
     var
         WorkLogEntry: Record "ALP Work Log Entry";
-        DurationMs: BigInteger;
     begin
         WorkLogEntry.SetRange("Order No.", OrderNo);
         WorkLogEntry.SetRange("Operation No.", OperationNo);
@@ -37,9 +41,49 @@ codeunit 50013 "ALP Work Log Svc"
         if not WorkLogEntry.FindLast() then
             exit;
 
-        WorkLogEntry."End Time" := EndTime;
+        WorkLogEntry."End Message Id" := EndMessageId;
+        ApplyEndTime(WorkLogEntry, EndTime);
+        WorkLogEntry.Modify(true);
+    end;
 
-        // Compute duration in seconds
+    procedure CreateCorrectionWorkLogEntry(MessageId: Text[50]; OrderNo: Code[20]; OperationNo: Code[10]; WorkCenterNo: Code[20]; OperatorId: Code[20]; ItemNo: Code[20]; ShiftCode: Code[10]; EventType: Enum "ALP Work Log Event Type"; DisruptionCode: Code[20]; StartTime: DateTime; EndTime: DateTime; Source: Text[50]; CorrectionId: Text[50]; ReplacesEntryNo: Integer): Integer
+    var
+        WorkLogEntry: Record "ALP Work Log Entry";
+    begin
+        WorkLogEntry.SetRange("Message Id", MessageId);
+        if WorkLogEntry.FindFirst() then
+            exit(WorkLogEntry."Entry No.");
+
+        WorkLogEntry.Init();
+        WorkLogEntry."Message Id" := MessageId;
+        WorkLogEntry."Order No." := OrderNo;
+        WorkLogEntry."Operation No." := OperationNo;
+        WorkLogEntry."Work Center No." := WorkCenterNo;
+        WorkLogEntry."Operator Id" := OperatorId;
+        WorkLogEntry."Item No." := ItemNo;
+        WorkLogEntry."Shift Code" := ShiftCode;
+        WorkLogEntry."Event Type" := EventType;
+        WorkLogEntry."Disruption Code" := DisruptionCode;
+        WorkLogEntry."Start Time" := StartTime;
+        WorkLogEntry.Source := Source;
+        WorkLogEntry."Correction Id" := CorrectionId;
+        WorkLogEntry."Replaces Entry No." := ReplacesEntryNo;
+        ApplyEndTime(WorkLogEntry, EndTime);
+        WorkLogEntry.Insert(true);
+        exit(WorkLogEntry."Entry No.");
+    end;
+
+    local procedure ApplyEndTime(var WorkLogEntry: Record "ALP Work Log Entry"; EndTime: DateTime)
+    var
+        DurationMs: BigInteger;
+    begin
+        WorkLogEntry."End Time" := EndTime;
+        if EndTime = 0DT then begin
+            WorkLogEntry."Duration Sec" := 0;
+            WorkLogEntry.Status := WorkLogEntry.Status::Open;
+            exit;
+        end;
+
         DurationMs := EndTime - WorkLogEntry."Start Time";
         if DurationMs > 0 then
             WorkLogEntry."Duration Sec" := DurationMs div 1000
@@ -47,6 +91,5 @@ codeunit 50013 "ALP Work Log Svc"
             WorkLogEntry."Duration Sec" := 0;
 
         WorkLogEntry.Status := WorkLogEntry.Status::Closed;
-        WorkLogEntry.Modify(true);
     end;
 }
