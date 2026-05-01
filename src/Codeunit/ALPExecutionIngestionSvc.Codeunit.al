@@ -200,7 +200,8 @@ codeunit 50010 "ALP Execution Ingestion Svc"
 
         if IsNew then begin
             Exec."Started At" := Exec."Source Timestamp";
-            Exec."Operator Id" := OperatorId;
+            if OperatorId <> '' then
+                Exec."Operator Id" := OperatorId;
             Exec."Last Update At" := CurrentDateTime();
             Exec.Insert(true);
 
@@ -210,7 +211,8 @@ codeunit 50010 "ALP Execution Ingestion Svc"
         end else
             if ExistingExec."Source Timestamp" < Exec."Source Timestamp" then begin
                 ExistingExec."Started At" := Exec."Source Timestamp";
-                ExistingExec."Operator Id" := OperatorId;
+                if OperatorId <> '' then
+                    ExistingExec."Operator Id" := OperatorId;
                 ExistingExec."Source Timestamp" := Exec."Source Timestamp";
                 ExistingExec."Last Update At" := CurrentDateTime();
                 ExistingExec.Modify(true);
@@ -261,6 +263,9 @@ codeunit 50010 "ALP Execution Ingestion Svc"
         ExecCalcSvc: Codeunit "ALP Execution Calc Svc";
         WorkLogSvc: Codeunit "ALP Work Log Svc";
         WorkLogEventType: Enum "ALP Work Log Event Type";
+        ExistingOperatorId: Code[20];
+        ExistingWorkCenterNo: Code[20];
+        ExistingStartedAt: DateTime;
         IsNew: Boolean;
     begin
         WorkLogSvc.CloseWorkLogEntryWithEndMessageId(Exec."Order No.", Exec."Operation No.", WorkLogEventType::Execution, Exec."Source Timestamp", SourceEventId);
@@ -279,7 +284,16 @@ codeunit 50010 "ALP Execution Ingestion Svc"
         if IsNew then
             Exec.Insert(true)
         else begin
+            ExistingOperatorId := ExistingExec."Operator Id";
+            ExistingWorkCenterNo := ExistingExec."Work Center No.";
+            ExistingStartedAt := ExistingExec."Started At";
             ExistingExec.TransferFields(Exec, false);
+            if ExistingStartedAt <> 0DT then
+                ExistingExec."Started At" := ExistingStartedAt;
+            if OperatorId = '' then
+                ExistingExec."Operator Id" := ExistingOperatorId;
+            if (ExistingExec."Work Center No." = '') and (ExistingWorkCenterNo <> '') then
+                ExistingExec."Work Center No." := ExistingWorkCenterNo;
             ExistingExec."Last Update At" := CurrentDateTime();
             ExistingExec.Modify(true);
         end;
