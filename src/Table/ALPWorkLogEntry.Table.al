@@ -116,6 +116,9 @@ table 50006 "ALP Work Log Entry"
         key(OrderOp; "Order No.", "Operation No.", Status)
         {
         }
+        key(OpenIntervalByStart; "Order No.", "Operation No.", "Event Type", Status, "Start Time")
+        {
+        }
         key(MessageId; "Message Id")
         {
         }

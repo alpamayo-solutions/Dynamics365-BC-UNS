@@ -23,6 +23,10 @@ page 50044 "ALP Integration Inbox API"
                 {
                     Caption = 'Message ID';
                 }
+                field(sourceEventId; Rec."Source Event Id")
+                {
+                    Caption = 'Source Event Id';
+                }
                 field(messageType; Rec."Message Type")
                 {
                     Caption = 'Message Type';
@@ -50,6 +54,10 @@ page 50044 "ALP Integration Inbox API"
                 field(error; Rec.Error)
                 {
                     Caption = 'Error';
+                }
+                field(warning; Rec.Warning)
+                {
+                    Caption = 'Warning';
                 }
             }
         }

@@ -1,9 +1,15 @@
 codeunit 50013 "ALP Work Log Svc"
 {
+    var
+        WorkLogMessageIdRequiredErr: Label 'Work log Message Id is required';
+
     procedure CreateWorkLogEntry(MessageId: Text[50]; OrderNo: Code[20]; OperationNo: Code[10]; WorkCenterNo: Code[20]; OperatorId: Code[20]; ItemNo: Code[20]; ShiftCode: Code[10]; EventType: Enum "ALP Work Log Event Type"; DisruptionCode: Code[20]; StartTime: DateTime; Source: Text[50])
     var
         WorkLogEntry: Record "ALP Work Log Entry";
     begin
+        if MessageId = '' then
+            Error(WorkLogMessageIdRequiredErr);
+
         // Idempotency: skip if a work log entry with this MessageId already exists
         WorkLogEntry.SetRange("Message Id", MessageId);
         if not WorkLogEntry.IsEmpty() then
@@ -34,10 +40,20 @@ codeunit 50013 "ALP Work Log Svc"
     var
         WorkLogEntry: Record "ALP Work Log Entry";
     begin
+        if EndMessageId <> '' then begin
+            WorkLogEntry.SetRange("End Message Id", EndMessageId);
+            if not WorkLogEntry.IsEmpty() then
+                exit;
+            WorkLogEntry.Reset();
+        end;
+
+        WorkLogEntry.SetCurrentKey("Order No.", "Operation No.", "Event Type", Status, "Start Time");
         WorkLogEntry.SetRange("Order No.", OrderNo);
         WorkLogEntry.SetRange("Operation No.", OperationNo);
         WorkLogEntry.SetRange("Event Type", EventType);
         WorkLogEntry.SetRange(Status, WorkLogEntry.Status::Open);
+        if EndTime <> 0DT then
+            WorkLogEntry.SetFilter("Start Time", '..%1', EndTime);
         if not WorkLogEntry.FindLast() then
             exit;
 
@@ -50,6 +66,9 @@ codeunit 50013 "ALP Work Log Svc"
     var
         WorkLogEntry: Record "ALP Work Log Entry";
     begin
+        if MessageId = '' then
+            Error(WorkLogMessageIdRequiredErr);
+
         WorkLogEntry.SetRange("Message Id", MessageId);
         if WorkLogEntry.FindFirst() then
             exit(WorkLogEntry."Entry No.");

@@ -21,7 +21,7 @@ This extension provides the ERP side of a UNS (Unified Namespace) architecture, 
 ## Features
 
 **APIs (Write)**
-- REST API endpoint for KPI ingestion (`/executionEvents`)
+- REST API endpoint for execution event ingestion and canonical work-log interval creation (`/executionEvents`)
 - REST API endpoint for audited execution corrections (`/executionCorrections`)
 - UNS Topic Mapping API for ERP-hosted configuration (`/unsTopicMappings`)
 
@@ -30,9 +30,10 @@ This extension provides the ERP side of a UNS (Unified Namespace) architecture, 
 - Work Centers, Routings, Items
 
 **Data Integrity**
-- Idempotent API with message-level deduplication
-- Out-of-order protection via source timestamps
+- Idempotent API with source-event-level deduplication
+- Out-of-order protection for current-state KPI fields via source timestamps
 - Integration inbox for audit trail and troubleshooting
+- Historical/post-hoc events still create or close work-log audit intervals even when they are older than current state
 - Correction commands preserve original work-log intervals for auditability and create linked corrected intervals
 
 **Configuration**
@@ -51,8 +52,8 @@ The extension adds three new tables and extends two standard tables:
 
 | Table | Purpose |
 |-------|---------|
-| **ALP Integration Inbox** | Audit trail of all received messages (idempotency key) |
-| **ALP Operation Execution** | KPI storage per Order + Operation |
+| **ALP Integration Inbox** | Audit trail of received messages and source event IDs |
+| **ALP Operation Execution** | Current-state KPI storage per Order + Operation |
 | **ALP UNS Topic Mapping** | Configuration: UNS Topic → Work Center |
 | **ALP Work Log Entry** | Time-bounded execution/disruption intervals, including correction links |
 | **ALP Execution Correction** | Audited correction commands and processing result |
@@ -68,7 +69,15 @@ The `/executionCorrections` API accepts supervisor/admin correction commands for
 - `replace_interval`: mark the targeted interval as `Superseded` and create a linked replacement interval
 - `change_metadata`: mark the targeted interval as `Superseded` and create a linked interval with corrected metadata
 
-Targets are resolved from `targetEventIds` against both the start `messageId` and the stored `endMessageId`. Original work-log rows are not deleted or edited in place for corrective actions; they keep their audit trail through `invalidatedByCorrectionId`, while replacement rows store `correctionId` and `replacesEntryNo`.
+Targets are resolved from `targetEventIds` against both the start `messageId` and the stored `endMessageId` on `ALP Work Log Entry`. For `/executionEvents` ingestion, these values should be the UNS/UI `sourceEventId` values. Original work-log rows are not deleted or edited in place for corrective actions; they keep their audit trail through `invalidatedByCorrectionId`, while replacement rows store `correctionId` and `replacesEntryNo`.
+
+## Execution Event Ownership
+
+For normal bridge ingestion, `/executionEvents` is the only write endpoint. It updates current-state KPI records and creates or closes `ALP Work Log Entry` audit intervals as part of the same processing flow.
+
+`/workLogEntries` is the read model for interval/audit verification and remains writable only for controlled diagnostics or compatibility. The bridge must not post a second normal execution interval there.
+
+`ALP Operation Execution` is keyed by order and operation and stores the latest current-state/KPI values. Older source timestamps do not update that current state. `ALP Work Log Entry` stores time-bounded audit intervals; historical or post-hoc start/end events still create and close intervals even when their timestamps are older than the current-state row.
 
 ## Bridge Communication Patterns
 
@@ -148,7 +157,7 @@ Messages arriving out of order do not corrupt the latest state:
 | Property | Value |
 |----------|-------|
 | Platform | 26.0 (BC 2025 Wave 1) |
-| Runtime | 14.0 |
+| Runtime | 15.0 |
 | Target | Cloud (SaaS) |
 
 ## API Reference
@@ -163,23 +172,35 @@ POST /api/alpamayo/shopfloor/v1.0/companies({companyId})/executionEvents
 
 OAuth 2.0 Bearer token with `https://api.businesscentral.dynamics.com` resource.
 
-### Request Body
+### Start Request Body
 
 ```json
 {
-  "messageId": "11111111-1111-1111-1111-111111111111",
+  "sourceEventId": "uns-start-001",
+  "eventType": "Start",
   "orderNo": "101001",
-  "operationNo": "10",
-  "workCenter": "MACH0001",
+  "workCenter": "K5",
+  "operatorId": "OP-001",
+  "shiftCode": "F",
+  "sourceTimestamp": "2026-05-01T08:00:00Z",
+  "source": "PREKIT"
+}
+```
+
+### End Request Body
+
+```json
+{
+  "sourceEventId": "uns-stop-001",
+  "eventType": "End",
+  "orderNo": "101001",
+  "workCenter": "K5",
   "qtyProduced": 100,
-  "qtyRejected": 5,
-  "runtimeSec": 3600,
-  "downtimeSec": 300,
+  "qtyRejected": 0,
   "availability": 0.92,
   "productivity": 0.85,
-  "actualCycleTimeSec": 36.5,
-  "sourceTimestamp": "2024-01-24T10:30:00Z",
-  "source": "MES-SCADA"
+  "sourceTimestamp": "2026-05-01T09:00:00Z",
+  "source": "PREKIT"
 }
 ```
 
@@ -187,10 +208,14 @@ OAuth 2.0 Bearer token with `https://api.businesscentral.dynamics.com` resource.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| messageId | GUID | Yes | Unique message ID for idempotency |
+| messageId | GUID | No* | Request/inbox correlation ID. Required only when `sourceEventId` is omitted. |
+| sourceEventId | Text[50] | Recommended | UNS/UI event ID used for idempotency and work-log correction targeting. |
+| eventType | Text[20] | No | `Start`, `End`, `DisruptionStart`, or `DisruptionEnd`. Empty defaults to `End` for legacy KPI ingestion. |
 | orderNo | Code[20] | Yes | Production Order number |
 | operationNo | Code[10] | No* | Operation number in routing (*Required if Work Center has multiple operations on the order) |
 | workCenter | Code[20] | No* | Work Center code (*Required if operationNo is not specified) |
+| operatorId | Code[20] | No | Operator copied to the work-log interval |
+| shiftCode | Code[10] | No | Shift copied to the work-log interval |
 | qtyProduced | Integer | No | Quantity produced (total) |
 | qtyRejected | Integer | No | Quantity rejected (must be <= qtyProduced) |
 | runtimeSec | Decimal | No | Runtime in seconds |
@@ -333,7 +358,7 @@ BC_ENV="Sandbox"
 BC_COMPANY="your-company-id"
 ```
 
-### 1. Normal Insert
+### 1. Normal End Insert
 
 ```bash
 curl -X POST "https://api.businesscentral.dynamics.com/v2.0/${BC_TENANT}/${BC_ENV}/api/alpamayo/shopfloor/v1.0/companies(${BC_COMPANY})/executionEvents" \
@@ -341,6 +366,8 @@ curl -X POST "https://api.businesscentral.dynamics.com/v2.0/${BC_TENANT}/${BC_EN
   -H "Content-Type: application/json" \
   -d '{
     "messageId": "11111111-1111-1111-1111-111111111111",
+    "sourceEventId": "uns-stop-001",
+    "eventType": "End",
     "orderNo": "101001",
     "operationNo": "10",
     "workCenter": "MACH0001",
@@ -356,7 +383,7 @@ curl -X POST "https://api.businesscentral.dynamics.com/v2.0/${BC_TENANT}/${BC_EN
   }'
 ```
 
-### 2. Idempotency Test (Duplicate messageId)
+### 2. Idempotency Test (Duplicate sourceEventId)
 
 Run the same command again. Should return 200 OK without creating duplicate records.
 
@@ -368,6 +395,8 @@ curl -X POST "https://api.businesscentral.dynamics.com/v2.0/${BC_TENANT}/${BC_EN
   -H "Content-Type: application/json" \
   -d '{
     "messageId": "22222222-2222-2222-2222-222222222222",
+    "sourceEventId": "uns-stop-older-001",
+    "eventType": "End",
     "orderNo": "101001",
     "operationNo": "10",
     "workCenter": "MACH0001",

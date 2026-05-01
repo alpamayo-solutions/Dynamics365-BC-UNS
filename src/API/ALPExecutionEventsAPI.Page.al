@@ -24,6 +24,10 @@ page 50030 "ALP Execution Events API"
                 {
                     Caption = 'Message ID';
                 }
+                field(sourceEventId; SourceEventIdText)
+                {
+                    Caption = 'Source Event Id';
+                }
                 field(orderNo; Rec."Order No.")
                 {
                     Caption = 'Order No.';
@@ -91,20 +95,27 @@ page 50030 "ALP Execution Events API"
     var
         IngestionSvc: Codeunit "ALP Execution Ingestion Svc";
         MessageIdText: Text[50];
+        SourceEventIdText: Text[50];
         EventTypeText: Text[20];
         OperatorIdCode: Code[20];
         ShiftCodeValue: Code[10];
-        InvalidMessageIdErr: Label 'Invalid messageId format. Expected a valid GUID.', Comment = 'Error when API receives malformed GUID';
+        InvalidMessageIdErr: Label 'Invalid messageId format. Expected a valid GUID, or provide sourceEventId without messageId.', Comment = 'Error when API receives malformed GUID';
         ProcessingFailedErr: Label 'Failed to process execution event. Check Integration Inbox for details.', Comment = 'Error when event processing fails';
 
     trigger OnInsertRecord(BelowxRec: Boolean): Boolean
     var
         MessageGuid: Guid;
     begin
-        if not Evaluate(MessageGuid, MessageIdText) then
-            Error(InvalidMessageIdErr);
+        if MessageIdText <> '' then begin
+            if not Evaluate(MessageGuid, MessageIdText) then
+                Error(InvalidMessageIdErr);
+        end else
+            if SourceEventIdText <> '' then
+                MessageGuid := CreateGuid()
+            else
+                Error(InvalidMessageIdErr);
 
-        if not IngestionSvc.ProcessExecutionEvent(Rec, MessageGuid, EventTypeText, OperatorIdCode, ShiftCodeValue) then
+        if not IngestionSvc.ProcessExecutionEvent(Rec, MessageGuid, EventTypeText, OperatorIdCode, ShiftCodeValue, SourceEventIdText) then
             Error(ProcessingFailedErr);
 
         exit(false); // We handle the insert in the codeunit

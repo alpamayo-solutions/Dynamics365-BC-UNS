@@ -50,6 +50,11 @@ table 50001 "ALP Integration Inbox"
             Caption = 'Warning';
             DataClassification = SystemMetadata;
         }
+        field(10; "Source Event Id"; Text[50])
+        {
+            Caption = 'Source Event Id';
+            DataClassification = SystemMetadata;
+        }
     }
 
     keys
@@ -62,6 +67,12 @@ table 50001 "ALP Integration Inbox"
         {
         }
         key(Status; Status, "Received At")
+        {
+        }
+        key(SourceEventId; "Source Event Id")
+        {
+        }
+        key(SourceEventStatus; "Source Event Id", Status)
         {
         }
     }

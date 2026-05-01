@@ -29,28 +29,43 @@ codeunit 50010 "ALP Execution Ingestion Svc"
     /// EventType: '' or 'End' uses existing KPI-based behavior + closes the execution work log entry.
     /// </summary>
     procedure ProcessExecutionEvent(var Exec: Record "ALP Operation Execution"; MessageId: Guid; EventType: Text[20]; OperatorId: Code[20]; ShiftCode: Code[10]): Boolean
+    begin
+        exit(ProcessExecutionEvent(Exec, MessageId, EventType, OperatorId, ShiftCode, ''));
+    end;
+
+    /// <summary>
+    /// Main entry point for execution event processing with source event id routing.
+    /// SourceEventId is the UNS/UI event id used for work-log idempotency and correction targeting.
+    /// If SourceEventId is empty, MessageId remains the backward-compatible source id.
+    /// </summary>
+    procedure ProcessExecutionEvent(var Exec: Record "ALP Operation Execution"; MessageId: Guid; EventType: Text[20]; OperatorId: Code[20]; ShiftCode: Code[10]; SourceEventId: Text[50]): Boolean
     var
         Inbox: Record "ALP Integration Inbox";
         ProdOrder: Record "Production Order";
-        ProdOrderRoutingLine: Record "Prod. Order Routing Line";
         ErrorText: Text;
+        IsNewInbox: Boolean;
     begin
-        if Inbox.Get(MessageId) then
+        SourceEventId := NormalizeSourceEventId(SourceEventId, MessageId);
+
+        if FindInboxBySourceEventId(SourceEventId, Inbox) then begin
             if Inbox.Status = Inbox.Status::Processed then
                 exit(true);
-        // If previously failed, we'll retry
-        if not Inbox.Get(MessageId) then begin
+        end else
+            if Inbox.Get(MessageId) then begin
+                if Inbox.Status = Inbox.Status::Processed then
+                    exit(true);
+            end else begin
+                IsNewInbox := true;
+            end;
+
+        // If previously failed, we'll retry in the same inbox row.
+        if IsNewInbox then begin
             Inbox.Init();
             Inbox."Message Id" := MessageId;
-            Inbox."Message Type" := 'ExecutionEvent';
-            Inbox."Order No." := Exec."Order No.";
-            Inbox."Operation No." := Exec."Operation No.";
-            Inbox."Received At" := CurrentDateTime();
-            Inbox.Status := Inbox.Status::Received;
+            SetInboxReceived(Inbox, Exec, SourceEventId);
             Inbox.Insert(true);
         end else begin
-            Inbox.Status := Inbox.Status::Received;
-            Inbox.Error := '';
+            SetInboxReceived(Inbox, Exec, SourceEventId);
             Inbox.Modify(true);
         end;
 
@@ -70,19 +85,19 @@ codeunit 50010 "ALP Execution Ingestion Svc"
 
         // Route based on event type
         if EventType = 'START' then begin
-            IngestStartEvent(Exec, ProdOrder, MessageId, OperatorId, ShiftCode);
+            IngestStartEvent(Exec, ProdOrder, SourceEventId, OperatorId, ShiftCode);
             MarkInboxProcessed(Inbox);
             exit(true);
         end;
 
         if EventType = DisruptionStartTok then begin
-            IngestDisruptionStartEvent(Exec, ProdOrder, MessageId, OperatorId, ShiftCode);
+            IngestDisruptionStartEvent(Exec, ProdOrder, SourceEventId, OperatorId, ShiftCode);
             MarkInboxProcessed(Inbox);
             exit(true);
         end;
 
         if EventType = DisruptionEndTok then begin
-            IngestDisruptionEndEvent(Exec, MessageId);
+            IngestDisruptionEndEvent(Exec, SourceEventId);
             MarkInboxProcessed(Inbox);
             exit(true);
         end;
@@ -91,7 +106,7 @@ codeunit 50010 "ALP Execution Ingestion Svc"
         if not ValidateEndEventKPIs(Exec, Inbox) then
             exit(false);
 
-        IngestEndEvent(Exec, ProdOrder, MessageId, OperatorId, ShiftCode);
+        IngestEndEvent(Exec, ProdOrder, SourceEventId, OperatorId, ShiftCode);
         MarkInboxProcessed(Inbox);
         exit(true);
     end;
@@ -174,36 +189,40 @@ codeunit 50010 "ALP Execution Ingestion Svc"
         exit(true);
     end;
 
-    local procedure IngestStartEvent(var Exec: Record "ALP Operation Execution"; var ProdOrder: Record "Production Order"; MessageId: Guid; OperatorId: Code[20]; ShiftCode: Code[10])
+    local procedure IngestStartEvent(var Exec: Record "ALP Operation Execution"; var ProdOrder: Record "Production Order"; SourceEventId: Text[50]; OperatorId: Code[20]; ShiftCode: Code[10])
     var
         ExistingExec: Record "ALP Operation Execution";
         WorkLogSvc: Codeunit "ALP Work Log Svc";
         WorkLogEventType: Enum "ALP Work Log Event Type";
         IsNew: Boolean;
     begin
-        // Create or update OpExec record with StartedAt and OperatorId
         IsNew := not ExistingExec.Get(Exec."Order No.", Exec."Operation No.");
 
-        Exec."Started At" := Exec."Source Timestamp";
-        Exec."Operator Id" := OperatorId;
-        Exec."Last Update At" := CurrentDateTime();
+        if IsNew then begin
+            Exec."Started At" := Exec."Source Timestamp";
+            Exec."Operator Id" := OperatorId;
+            Exec."Last Update At" := CurrentDateTime();
+            Exec.Insert(true);
 
-        if IsNew then
-            Exec.Insert(true)
-        else begin
-            ExistingExec."Started At" := Exec."Source Timestamp";
-            ExistingExec."Operator Id" := OperatorId;
-            ExistingExec."Last Update At" := CurrentDateTime();
-            ExistingExec.Modify(true);
-        end;
+            ProdOrder."ALP Last Exec Update At" := CurrentDateTime();
+            ProdOrder."ALP Execution Source" := Exec.Source;
+            ProdOrder.Modify(true);
+        end else
+            if ExistingExec."Source Timestamp" < Exec."Source Timestamp" then begin
+                ExistingExec."Started At" := Exec."Source Timestamp";
+                ExistingExec."Operator Id" := OperatorId;
+                ExistingExec."Source Timestamp" := Exec."Source Timestamp";
+                ExistingExec."Last Update At" := CurrentDateTime();
+                ExistingExec.Modify(true);
 
-        ProdOrder."ALP Last Exec Update At" := CurrentDateTime();
-        ProdOrder."ALP Execution Source" := Exec.Source;
-        ProdOrder.Modify(true);
+                ProdOrder."ALP Last Exec Update At" := CurrentDateTime();
+                ProdOrder."ALP Execution Source" := Exec.Source;
+                ProdOrder.Modify(true);
+            end;
 
         // Create work log entry — no KPI aggregation for Start events
         WorkLogSvc.CreateWorkLogEntry(
-            Format(MessageId),
+            SourceEventId,
             Exec."Order No.",
             Exec."Operation No.",
             Exec."Work Center No.",
@@ -216,13 +235,13 @@ codeunit 50010 "ALP Execution Ingestion Svc"
             Exec.Source);
     end;
 
-    local procedure IngestDisruptionStartEvent(var Exec: Record "ALP Operation Execution"; var ProdOrder: Record "Production Order"; MessageId: Guid; OperatorId: Code[20]; ShiftCode: Code[10])
+    local procedure IngestDisruptionStartEvent(var Exec: Record "ALP Operation Execution"; var ProdOrder: Record "Production Order"; SourceEventId: Text[50]; OperatorId: Code[20]; ShiftCode: Code[10])
     var
         WorkLogSvc: Codeunit "ALP Work Log Svc";
         WorkLogEventType: Enum "ALP Work Log Event Type";
     begin
         WorkLogSvc.CreateWorkLogEntry(
-            Format(MessageId),
+            SourceEventId,
             Exec."Order No.",
             Exec."Operation No.",
             Exec."Work Center No.",
@@ -235,7 +254,7 @@ codeunit 50010 "ALP Execution Ingestion Svc"
             Exec.Source);
     end;
 
-    local procedure IngestEndEvent(var Exec: Record "ALP Operation Execution"; var ProdOrder: Record "Production Order"; MessageId: Guid; OperatorId: Code[20]; ShiftCode: Code[10])
+    local procedure IngestEndEvent(var Exec: Record "ALP Operation Execution"; var ProdOrder: Record "Production Order"; SourceEventId: Text[50]; OperatorId: Code[20]; ShiftCode: Code[10])
     var
         ExistingExec: Record "ALP Operation Execution";
         ProdOrderRoutingLine: Record "Prod. Order Routing Line";
@@ -244,6 +263,8 @@ codeunit 50010 "ALP Execution Ingestion Svc"
         WorkLogEventType: Enum "ALP Work Log Event Type";
         IsNew: Boolean;
     begin
+        WorkLogSvc.CloseWorkLogEntryWithEndMessageId(Exec."Order No.", Exec."Operation No.", WorkLogEventType::Execution, Exec."Source Timestamp", SourceEventId);
+
         IsNew := not ExistingExec.Get(Exec."Order No.", Exec."Operation No.");
         if not IsNew then
             if ExistingExec."Source Timestamp" >= Exec."Source Timestamp" then
@@ -281,11 +302,9 @@ codeunit 50010 "ALP Execution Ingestion Svc"
 
         ExecCalcSvc.UpdateProductionOrderAggregates(ProdOrder);
 
-        // Close open work log entry for this operation
-        WorkLogSvc.CloseWorkLogEntryWithEndMessageId(Exec."Order No.", Exec."Operation No.", WorkLogEventType::Execution, Exec."Source Timestamp", Format(MessageId));
     end;
 
-    local procedure IngestDisruptionEndEvent(var Exec: Record "ALP Operation Execution"; MessageId: Guid)
+    local procedure IngestDisruptionEndEvent(var Exec: Record "ALP Operation Execution"; SourceEventId: Text[50])
     var
         WorkLogSvc: Codeunit "ALP Work Log Svc";
         WorkLogEventType: Enum "ALP Work Log Event Type";
@@ -295,7 +314,41 @@ codeunit 50010 "ALP Execution Ingestion Svc"
             Exec."Operation No.",
             WorkLogEventType::Disruption,
             Exec."Source Timestamp",
-            Format(MessageId));
+            SourceEventId);
+    end;
+
+    local procedure NormalizeSourceEventId(SourceEventId: Text[50]; MessageId: Guid): Text[50]
+    begin
+        SourceEventId := CopyStr(DelChr(SourceEventId, '<>', ' '), 1, MaxStrLen(SourceEventId));
+        if SourceEventId = '' then
+            SourceEventId := CopyStr(Format(MessageId), 1, MaxStrLen(SourceEventId));
+        exit(SourceEventId);
+    end;
+
+    local procedure FindInboxBySourceEventId(SourceEventId: Text[50]; var Inbox: Record "ALP Integration Inbox"): Boolean
+    begin
+        if SourceEventId = '' then
+            exit(false);
+
+        Inbox.Reset();
+        Inbox.SetRange("Source Event Id", SourceEventId);
+        if Inbox.FindFirst() then
+            exit(true);
+
+        Inbox.Reset();
+        exit(false);
+    end;
+
+    local procedure SetInboxReceived(var Inbox: Record "ALP Integration Inbox"; var Exec: Record "ALP Operation Execution"; SourceEventId: Text[50])
+    begin
+        Inbox."Message Type" := 'ExecutionEvent';
+        Inbox."Order No." := Exec."Order No.";
+        Inbox."Operation No." := Exec."Operation No.";
+        Inbox."Source Event Id" := SourceEventId;
+        Inbox."Received At" := CurrentDateTime();
+        Inbox.Status := Inbox.Status::Received;
+        Inbox.Error := '';
+        Inbox.Warning := '';
     end;
 
     local procedure MarkInboxProcessed(var Inbox: Record "ALP Integration Inbox")
