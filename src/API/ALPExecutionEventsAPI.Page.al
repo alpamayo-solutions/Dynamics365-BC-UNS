@@ -76,6 +76,10 @@ page 50030 "ALP Execution Events API"
                 {
                     Caption = 'Started At';
                 }
+                field(timestampStart; TimestampStartValue)
+                {
+                    Caption = 'Timestamp Start';
+                }
                 field(source; Rec.Source)
                 {
                     Caption = 'Source';
@@ -84,13 +88,17 @@ page 50030 "ALP Execution Events API"
                 {
                     Caption = 'Event Type';
                 }
-                field(operatorId; Rec."Operator Id")
+                field(operatorId; OperatorIdCode)
                 {
                     Caption = 'Operator Id';
                 }
                 field(shiftCode; ShiftCodeValue)
                 {
                     Caption = 'Shift Code';
+                }
+                field(sourceStartEventId; SourceStartEventIdText)
+                {
+                    Caption = 'Source Start Event Id';
                 }
             }
         }
@@ -100,8 +108,11 @@ page 50030 "ALP Execution Events API"
         IngestionSvc: Codeunit "ALP Execution Ingestion Svc";
         MessageIdText: Text[50];
         SourceEventIdText: Text[50];
+        SourceStartEventIdText: Text[50];
         EventTypeText: Text[20];
+        OperatorIdCode: Code[20];
         ShiftCodeValue: Code[10];
+        TimestampStartValue: DateTime;
         InvalidMessageIdErr: Label 'Invalid messageId format. Expected a valid GUID, or provide sourceEventId without messageId.', Comment = 'Error when API receives malformed GUID';
         ProcessingFailedErr: Label 'Failed to process execution event. Check Integration Inbox for details.', Comment = 'Error when event processing fails';
 
@@ -118,7 +129,7 @@ page 50030 "ALP Execution Events API"
             else
                 Error(InvalidMessageIdErr);
 
-        if not IngestionSvc.ProcessExecutionEvent(Rec, MessageGuid, EventTypeText, Rec."Operator Id", ShiftCodeValue, SourceEventIdText) then
+        if not IngestionSvc.ProcessExecutionEvent(Rec, MessageGuid, EventTypeText, OperatorIdCode, ShiftCodeValue, SourceEventIdText, TimestampStartValue, SourceStartEventIdText) then
             Error(ProcessingFailedErr);
 
         exit(false); // We handle the insert in the codeunit

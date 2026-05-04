@@ -119,6 +119,15 @@ table 50006 "ALP Work Log Entry"
         key(OpenIntervalByStart; "Order No.", "Operation No.", "Event Type", Status, "Start Time")
         {
         }
+        key(OpenParticipant; "Order No.", "Operation No.", "Work Center No.", "Operator Id", "Event Type", Status, "Start Time")
+        {
+        }
+        key(OpenByStartMessage; "Message Id", Status)
+        {
+        }
+        key(OpenTask; "Order No.", "Operation No.", "Work Center No.", "Event Type", Status)
+        {
+        }
         key(MessageId; "Message Id")
         {
         }

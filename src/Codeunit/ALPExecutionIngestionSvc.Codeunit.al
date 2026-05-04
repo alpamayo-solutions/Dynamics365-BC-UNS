@@ -10,8 +10,10 @@ codeunit 50010 "ALP Execution Ingestion Svc"
         OperationNotFoundForWCErr: Label 'No routing line found for Order %1, Work Center %2', Comment = '%1 = Order No., %2 = Work Center No.';
         MultipleOperationsForWCErr: Label 'Multiple routing lines found for Order %1, Work Center %2. Operation No. must be specified.', Comment = '%1 = Order No., %2 = Work Center No.';
         WorkCenterRequiredErr: Label 'Work Center No. is required when Operation No. is not specified';
+        OpenParticipantNotFoundErr: Label 'No unique open participant interval found for Order %1, Operation %2, Work Center %3, Operator %4', Comment = '%1 = Order No., %2 = Operation No., %3 = Work Center No., %4 = Operator Id';
         DisruptionStartTok: Label 'DISRUPTIONSTART', Locked = true;
         DisruptionEndTok: Label 'DISRUPTIONEND', Locked = true;
+        OperatorSignoffTok: Label 'OPERATORSIGNOFF', Locked = true;
 
     /// <summary>
     /// Backward-compatible overload that defaults to End event behavior.
@@ -39,6 +41,11 @@ codeunit 50010 "ALP Execution Ingestion Svc"
     /// If SourceEventId is empty, MessageId remains the backward-compatible source id.
     /// </summary>
     procedure ProcessExecutionEvent(var Exec: Record "ALP Operation Execution"; MessageId: Guid; EventType: Text[20]; OperatorId: Code[20]; ShiftCode: Code[10]; SourceEventId: Text[50]): Boolean
+    begin
+        exit(ProcessExecutionEvent(Exec, MessageId, EventType, OperatorId, ShiftCode, SourceEventId, 0DT, ''));
+    end;
+
+    procedure ProcessExecutionEvent(var Exec: Record "ALP Operation Execution"; MessageId: Guid; EventType: Text[20]; OperatorId: Code[20]; ShiftCode: Code[10]; SourceEventId: Text[50]; TimestampStart: DateTime; SourceStartEventId: Text[50]): Boolean
     var
         Inbox: Record "ALP Integration Inbox";
         ProdOrder: Record "Production Order";
@@ -46,6 +53,7 @@ codeunit 50010 "ALP Execution Ingestion Svc"
         IsNewInbox: Boolean;
     begin
         SourceEventId := NormalizeSourceEventId(SourceEventId, MessageId);
+        SourceStartEventId := NormalizeOptionalSourceEventId(SourceStartEventId);
 
         if FindInboxBySourceEventId(SourceEventId, Inbox) then begin
             if Inbox.Status = Inbox.Status::Processed then
@@ -90,6 +98,16 @@ codeunit 50010 "ALP Execution Ingestion Svc"
             exit(true);
         end;
 
+        if EventType = OperatorSignoffTok then begin
+            if not IngestOperatorSignoffEvent(Exec, SourceEventId, OperatorId, SourceStartEventId) then begin
+                ErrorText := StrSubstNo(OpenParticipantNotFoundErr, Exec."Order No.", Exec."Operation No.", Exec."Work Center No.", OperatorId);
+                MarkInboxFailed(Inbox, ErrorText);
+                exit(false);
+            end;
+            MarkInboxProcessed(Inbox);
+            exit(true);
+        end;
+
         if EventType = DisruptionStartTok then begin
             IngestDisruptionStartEvent(Exec, ProdOrder, SourceEventId, OperatorId, ShiftCode);
             MarkInboxProcessed(Inbox);
@@ -106,7 +124,7 @@ codeunit 50010 "ALP Execution Ingestion Svc"
         if not ValidateEndEventKPIs(Exec, Inbox) then
             exit(false);
 
-        IngestEndEvent(Exec, ProdOrder, SourceEventId, OperatorId, ShiftCode);
+        IngestEndEvent(Exec, ProdOrder, SourceEventId, OperatorId, ShiftCode, TimestampStart, SourceStartEventId);
         MarkInboxProcessed(Inbox);
         exit(true);
     end;
@@ -159,6 +177,9 @@ codeunit 50010 "ALP Execution Ingestion Svc"
                 MarkInboxFailed(Inbox, ErrorText);
                 exit(false);
             end;
+
+            if (Exec."Work Center No." = '') and (ProdOrderRoutingLine.Type = ProdOrderRoutingLine.Type::"Work Center") then
+                Exec."Work Center No." := ProdOrderRoutingLine."No.";
         end;
 
         exit(true);
@@ -256,7 +277,7 @@ codeunit 50010 "ALP Execution Ingestion Svc"
             Exec.Source);
     end;
 
-    local procedure IngestEndEvent(var Exec: Record "ALP Operation Execution"; var ProdOrder: Record "Production Order"; SourceEventId: Text[50]; OperatorId: Code[20]; ShiftCode: Code[10])
+    local procedure IngestEndEvent(var Exec: Record "ALP Operation Execution"; var ProdOrder: Record "Production Order"; SourceEventId: Text[50]; OperatorId: Code[20]; ShiftCode: Code[10]; TimestampStart: DateTime; SourceStartEventId: Text[50])
     var
         ExistingExec: Record "ALP Operation Execution";
         ProdOrderRoutingLine: Record "Prod. Order Routing Line";
@@ -267,8 +288,18 @@ codeunit 50010 "ALP Execution Ingestion Svc"
         ExistingWorkCenterNo: Code[20];
         ExistingStartedAt: DateTime;
         IsNew: Boolean;
+        StartMessageId: Text[50];
     begin
-        WorkLogSvc.CloseWorkLogEntryWithEndMessageId(Exec."Order No.", Exec."Operation No.", WorkLogEventType::Execution, Exec."Source Timestamp", SourceEventId);
+        if TimestampStart <> 0DT then begin
+            if SourceStartEventId <> '' then begin
+                if not WorkLogSvc.CloseOneOpenWorkLogEntry(Exec."Order No.", Exec."Operation No.", Exec."Work Center No.", OperatorId, WorkLogEventType::Execution, Exec."Source Timestamp", SourceEventId, SourceStartEventId) then
+                    WorkLogSvc.CreateClosedExecutionWorkLogEntry(SourceStartEventId, SourceEventId, Exec."Order No.", Exec."Operation No.", Exec."Work Center No.", OperatorId, ProdOrder."Source No.", ShiftCode, TimestampStart, Exec."Source Timestamp", Exec.Source);
+            end else begin
+                StartMessageId := CopyStr(SourceEventId + '-start', 1, MaxStrLen(StartMessageId));
+                WorkLogSvc.CreateClosedExecutionWorkLogEntry(StartMessageId, SourceEventId, Exec."Order No.", Exec."Operation No.", Exec."Work Center No.", OperatorId, ProdOrder."Source No.", ShiftCode, TimestampStart, Exec."Source Timestamp", Exec.Source);
+            end;
+        end else
+            WorkLogSvc.CloseAllOpenWorkLogEntries(Exec."Order No.", Exec."Operation No.", Exec."Work Center No.", WorkLogEventType::Execution, Exec."Source Timestamp", SourceEventId);
 
         IsNew := not ExistingExec.Get(Exec."Order No.", Exec."Operation No.");
         if not IsNew then
@@ -318,6 +349,22 @@ codeunit 50010 "ALP Execution Ingestion Svc"
 
     end;
 
+    local procedure IngestOperatorSignoffEvent(var Exec: Record "ALP Operation Execution"; SourceEventId: Text[50]; OperatorId: Code[20]; SourceStartEventId: Text[50]): Boolean
+    var
+        WorkLogSvc: Codeunit "ALP Work Log Svc";
+        WorkLogEventType: Enum "ALP Work Log Event Type";
+    begin
+        exit(WorkLogSvc.CloseOneOpenWorkLogEntry(
+            Exec."Order No.",
+            Exec."Operation No.",
+            Exec."Work Center No.",
+            OperatorId,
+            WorkLogEventType::Execution,
+            Exec."Source Timestamp",
+            SourceEventId,
+            SourceStartEventId));
+    end;
+
     local procedure IngestDisruptionEndEvent(var Exec: Record "ALP Operation Execution"; SourceEventId: Text[50])
     var
         WorkLogSvc: Codeunit "ALP Work Log Svc";
@@ -337,6 +384,11 @@ codeunit 50010 "ALP Execution Ingestion Svc"
         if SourceEventId = '' then
             SourceEventId := CopyStr(Format(MessageId), 1, MaxStrLen(SourceEventId));
         exit(SourceEventId);
+    end;
+
+    local procedure NormalizeOptionalSourceEventId(SourceEventId: Text[50]): Text[50]
+    begin
+        exit(CopyStr(DelChr(SourceEventId, '<>', ' '), 1, MaxStrLen(SourceEventId)));
     end;
 
     local procedure FindInboxBySourceEventId(SourceEventId: Text[50]; var Inbox: Record "ALP Integration Inbox"): Boolean
