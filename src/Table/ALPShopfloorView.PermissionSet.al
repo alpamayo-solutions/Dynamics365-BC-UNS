@@ -6,6 +6,7 @@ permissionset 50040 "ALP Shopfloor View"
     Permissions =
         tabledata "ALP Integration Inbox" = R,
         tabledata "ALP Execution Correction" = R,
+        tabledata "ALP Execution Time Attribution" = R,
         tabledata "ALP Operation Execution" = R,
         tabledata "ALP UNS Topic Mapping" = R,
         tabledata "ALP Work Log Entry" = R,
@@ -21,6 +22,7 @@ permissionset 50040 "ALP Shopfloor View"
         page "ALP Integration Inbox List" = X,
         page "ALP Integration Inbox API" = X,
         page "ALP Execution Corrections API" = X,
+        page "ALP Exec Time Attr API" = X,
         page "ALP Prod Order Routing API" = X,
         page "ALP Prod Order Components API" = X,
         page "ALP Production Orders API" = X,

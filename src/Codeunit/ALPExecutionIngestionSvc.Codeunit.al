@@ -104,6 +104,7 @@ codeunit 50010 "ALP Execution Ingestion Svc"
                 MarkInboxFailed(Inbox, ErrorText);
                 exit(false);
             end;
+            RefreshAttributions();
             MarkInboxProcessed(Inbox);
             exit(true);
         end;
@@ -125,6 +126,7 @@ codeunit 50010 "ALP Execution Ingestion Svc"
             exit(false);
 
         IngestEndEvent(Exec, ProdOrder, SourceEventId, OperatorId, ShiftCode, TimestampStart, SourceStartEventId);
+        RefreshAttributions();
         MarkInboxProcessed(Inbox);
         exit(true);
     end;
@@ -376,6 +378,13 @@ codeunit 50010 "ALP Execution Ingestion Svc"
             WorkLogEventType::Disruption,
             Exec."Source Timestamp",
             SourceEventId);
+    end;
+
+    local procedure RefreshAttributions()
+    var
+        AttributionSvc: Codeunit "ALP Execution Attribution Svc";
+    begin
+        AttributionSvc.RefreshAll();
     end;
 
     local procedure NormalizeSourceEventId(SourceEventId: Text[50]; MessageId: Guid): Text[50]

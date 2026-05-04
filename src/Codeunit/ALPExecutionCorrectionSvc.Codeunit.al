@@ -69,6 +69,7 @@ codeunit 50014 "ALP Execution Correction Svc"
         Correction.Processed := true;
         Correction.Error := '';
         Correction.Insert(true);
+        RefreshAttributions();
         exit(true);
     end;
 
@@ -309,6 +310,13 @@ codeunit 50014 "ALP Execution Correction Svc"
     local procedure NormalizeText(Value: Text): Text
     begin
         exit(DelChr(UpperCase(Value), '=', '_ '));
+    end;
+
+    local procedure RefreshAttributions()
+    var
+        AttributionSvc: Codeunit "ALP Execution Attribution Svc";
+    begin
+        AttributionSvc.RefreshAll();
     end;
 
     local procedure MarkFailed(var Correction: Record "ALP Execution Correction"; ErrorText: Text)
