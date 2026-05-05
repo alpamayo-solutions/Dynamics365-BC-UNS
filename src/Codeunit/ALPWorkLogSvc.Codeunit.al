@@ -104,6 +104,8 @@ codeunit 50013 "ALP Work Log Svc"
     procedure CloseAllOpenWorkLogEntries(OrderNo: Code[20]; OperationNo: Code[10]; WorkCenterNo: Code[20]; EventType: Enum "ALP Work Log Event Type"; EndTime: DateTime; EndMessageId: Text[50]): Integer
     var
         WorkLogEntry: Record "ALP Work Log Entry";
+        EntryNos: List of [Integer];
+        EntryNo: Integer;
         ClosedCount: Integer;
     begin
         WorkLogEntry.SetCurrentKey("Order No.", "Operation No.", "Work Center No.", "Event Type", Status);
@@ -119,11 +121,16 @@ codeunit 50013 "ALP Work Log Svc"
             exit(0);
 
         repeat
+            EntryNos.Add(WorkLogEntry."Entry No.");
+        until WorkLogEntry.Next() = 0;
+
+        foreach EntryNo in EntryNos do begin
+            WorkLogEntry.Get(EntryNo);
             WorkLogEntry."End Message Id" := EndMessageId;
             ApplyEndTime(WorkLogEntry, EndTime);
             WorkLogEntry.Modify(true);
             ClosedCount += 1;
-        until WorkLogEntry.Next() = 0;
+        end;
 
         exit(ClosedCount);
     end;
