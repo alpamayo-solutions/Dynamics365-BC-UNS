@@ -1,0 +1,83 @@
+name: SBOM Scan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  sbom:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate SBOM
+        run: |
+          mkdir -p sboms
+          mkdir -p /tmp/trivy-cache
+          docker run --rm \
+            -v /tmp/trivy-cache:/trivy-cache \
+            -v "$PWD":/repo \
+            aquasec/trivy:0.58.2 fs \
+              --cache-dir /trivy-cache \
+              --format cyclonedx \
+              --output "/repo/sboms/dynamics365-bc-uns-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || github.sha }}.cdx.json" \
+              /repo
+
+      - name: Scan SBOM with Trivy
+        run: |
+          mkdir -p /tmp/trivy-cache trivy-reports
+          for sbom in sboms/*.cdx.json; do
+            base="$(basename "$sbom" .cdx.json)"
+            docker run --rm \
+              -v /tmp/trivy-cache:/trivy-cache \
+              -v "$PWD/sboms":/sboms \
+              -v "$PWD/trivy-reports":/trivy-reports \
+              aquasec/trivy:0.58.2 sbom \
+                --cache-dir /trivy-cache \
+                --format table \
+                --output "/trivy-reports/${base}.trivy.txt" \
+                --severity HIGH,CRITICAL \
+                "/sboms/$(basename "$sbom")"
+            docker run --rm \
+              -v /tmp/trivy-cache:/trivy-cache \
+              -v "$PWD/sboms":/sboms \
+              aquasec/trivy:0.58.2 sbom \
+                --cache-dir /trivy-cache \
+                --exit-code 1 \
+                --severity HIGH,CRITICAL \
+                "/sboms/$(basename "$sbom")"
+          done
+
+      - name: Upload SBOM artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dynamics365-bc-uns-sboms-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || github.sha }}
+          path: |
+            sboms/*.cdx.json
+            trivy-reports/*.trivy.txt
+          if-no-files-found: error
+
+      # TODO: Re-enable once SBOM publishing to Alpamayo Intelligence is ready.
+      # - name: Publish SBOMs to Alpamayo Intelligence
+      #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      #   uses: alpamayo-solutions/intelligence-publish-version-action@v1
+      #   with:
+      #     api-url: ${{ vars.ALP_API_URL }}
+      #     client-id: intelligence-version-publisher
+      #     client-secret: ${{ secrets.KC_VERSION_PUBLISHER_CLIENT_SECRET }}
+      #     project-id: ${{ vars.ALP_VERSION_PROJECT_ID }}
+      #     resource-id: ${{ vars.ALP_VERSION_RESOURCE_ID }}
+      #     version: ${{ github.sha }}
+      #     source-ref-kind: git_commit
+      #     source-ref: ${{ github.ref_name }}
+      #     resolved-ref: ${{ github.sha }}
+      #     artifact-kind: sbom
+      #     artifact-files: sboms/*.cdx.json
