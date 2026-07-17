@@ -2,7 +2,7 @@ pageextension 50021 "ALP Production Order Ext" extends "Released Production Orde
 {
     layout
     {
-        addafter(General)
+        addlast(Content)
         {
             group(ShopfloorExecution)
             {
