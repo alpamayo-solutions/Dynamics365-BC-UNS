@@ -1,0 +1,18 @@
+{
+  "id": "dbbe7042-978c-461f-abe3-5ce36a97d623",
+  "name": "UNS Bridge Connector Demo Seed",
+  "publisher": "alpamayo",
+  "version": "2.0.0.0",
+  "brief": "Development only: the chocolate demo plant in a Business Central container",
+  "description": "Creates the PREKIT chocolate demo plant (work and machine centers, routings, items, employees, released production orders) in a Business Central test container, so the Execution app can run against it. Never install it in a customer environment.",
+  "platform": "26.0.0.0",
+  "application": "26.0.0.0",
+  "runtime": "15.0",
+  "target": "OnPrem",
+  "idRanges": [{ "from": 50200, "to": 50209 }],
+  "dependencies": [
+    { "id": "dbbe7042-978c-461f-abe3-5ce36a97d621", "name": "UNS Bridge Connector", "publisher": "alpamayo", "version": "2.0.0.0" },
+    { "id": "5d86850b-0d76-4eca-bd7b-951ad998e997", "name": "Tests-TestLibraries", "publisher": "Microsoft", "version": "26.0.0.0" }
+  ],
+  "features": ["NoImplicitWith"]
+}
