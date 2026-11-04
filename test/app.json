@@ -1,0 +1,46 @@
+{
+  "id": "dbbe7042-978c-461f-abe3-5ce36a97d622",
+  "name": "UNS Bridge Connector Tests",
+  "publisher": "alpamayo",
+  "version": "2.0.0.0",
+  "brief": "Automated tests for UNS Bridge Connector",
+  "description": "Test codeunits for the Execution app surface of UNS Bridge Connector: step ids, step finishes with and without output posting, person time, order notes, step moves and fine plan.",
+  "platform": "26.0.0.0",
+  "application": "26.0.0.0",
+  "runtime": "15.0",
+  "target": "Cloud",
+  "idRanges": [
+    {
+      "from": 50150,
+      "to": 50199
+    }
+  ],
+  "dependencies": [
+    {
+      "id": "dbbe7042-978c-461f-abe3-5ce36a97d621",
+      "name": "UNS Bridge Connector",
+      "publisher": "alpamayo",
+      "version": "2.0.0.0"
+    },
+    {
+      "id": "dd0be2ea-f733-4d65-bb34-a28f4624fb14",
+      "name": "Library Assert",
+      "publisher": "Microsoft",
+      "version": "26.0.0.0"
+    },
+    {
+      "id": "5d86850b-0d76-4eca-bd7b-951ad998e997",
+      "name": "Tests-TestLibraries",
+      "publisher": "Microsoft",
+      "version": "26.0.0.0"
+    }
+  ],
+  "resourceExposurePolicy": {
+    "allowDebugging": true,
+    "allowDownloadingSource": true,
+    "includeSourceInSymbolFile": true
+  },
+  "features": [
+    "NoImplicitWith"
+  ]
+}

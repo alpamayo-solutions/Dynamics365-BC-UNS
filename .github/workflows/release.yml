@@ -38,16 +38,18 @@ jobs:
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           # Update version in app.json using jq
-          jq --arg v "$VERSION" '.version = $v' app.json > app.json.tmp
-          mv app.json.tmp app.json
+          jq --arg v "$VERSION" '.version = $v' app/app.json > app/app.json.tmp
+          mv app/app.json.tmp app/app.json
+          jq --arg v "$VERSION" '.version = $v | (.dependencies[] | select(.name == "UNS Bridge Connector") | .version) = $v' test/app.json > test/app.json.tmp
+          mv test/app.json.tmp test/app.json
           echo "Updated app.json to version $VERSION"
-          cat app.json | grep version
+          grep version app/app.json
 
       - name: Commit version update
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add app.json
+          git add app/app.json test/app.json
           git commit -m "chore: bump version to ${{ steps.version.outputs.version }}" || echo "No changes to commit"
           git push origin main
 
@@ -60,19 +62,14 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: main
-          path: app
+          path: repo
 
-      - name: Checkout test repository
-        uses: actions/checkout@v4
-        with:
-          repository: alpamayo-solutions/Dynamics365-BC-UNS-Tests
-          path: tests
 
       - name: Read app.json
         id: app-info
         shell: pwsh
         run: |
-          $appJson = Get-Content -Path "app/app.json" -Raw | ConvertFrom-Json
+          $appJson = Get-Content -Path "repo/app/app.json" -Raw | ConvertFrom-Json
           $version = $appJson.version
           $name = $appJson.name
           $publisher = $appJson.publisher
@@ -95,8 +92,8 @@ jobs:
           $sourceDir = "C:\src"
           New-Item -ItemType Directory -Path "$sourceDir\app" -Force | Out-Null
           New-Item -ItemType Directory -Path "$sourceDir\tests" -Force | Out-Null
-          Copy-Item -Path "app\*" -Destination "$sourceDir\app" -Recurse -Force
-          Copy-Item -Path "tests\*" -Destination "$sourceDir\tests" -Recurse -Force
+          Copy-Item -Path "repo\app\*" -Destination "$sourceDir\app" -Recurse -Force
+          Copy-Item -Path "repo\test\*" -Destination "$sourceDir\tests" -Recurse -Force
           Write-Host "Copied source files to $sourceDir"
           Get-ChildItem -Path $sourceDir -Recurse | Select-Object -First 20
 
@@ -148,6 +145,20 @@ jobs:
           echo "app-file=$appFileName" >> $env:GITHUB_OUTPUT
           Write-Host "Built: $appFileName"
 
+      - name: Install previous release (upgrade test)
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # 2.0 must install over the last released 1.x without errors (schema sync + data upgrade).
+          Import-Module BcContainerHelper
+          New-Item -ItemType Directory -Path "C:\src\previous" -Force | Out-Null
+          gh release download v1.5.2 -R ${{ github.repository }} -p "*.zip" -D "C:\src\previous"
+          Expand-Archive -Path (Get-ChildItem "C:\src\previous\*.zip" | Select-Object -First 1).FullName -DestinationPath "C:\src\previous" -Force
+          $previous = Get-ChildItem -Path "C:\src\previous\*.app" | Select-Object -First 1
+          Publish-BcContainerApp -containerName "bcbuild" -appFile $previous.FullName -skipVerification -install -sync
+          Write-Host "Installed previous release: $($previous.Name)"
+
       - name: Publish AL App
         shell: pwsh
         run: |
@@ -160,10 +171,12 @@ jobs:
             -containerName $containerName `
             -appFile $appFile.FullName `
             -skipVerification `
-            -install `
-            -sync
+            -sync `
+            -upgrade `
+            -install
 
-          Write-Host "Published and installed: $($appFile.Name)"
+          Get-BcContainerAppInfo -containerName $containerName -tenantSpecificProperties | Where-Object { $_.Publisher -eq 'alpamayo' } | Format-Table Name, Version, IsInstalled, SyncState, NeedsUpgrade
+          Write-Host "Published and upgraded: $($appFile.Name)"
 
       - name: Compile Test App
         id: compile-tests
