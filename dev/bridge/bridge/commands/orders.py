@@ -7,7 +7,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from ..client import BCClient, BCApiError
+from ..client import BCApiError, BCClient
 from ..config import get_config_with_token
 
 console = Console()
@@ -270,7 +270,10 @@ def get_order(order_no: str, json_out: bool):
                     f"[bold]Status:[/bold] {order.status or '-'}\n"
                     f"[bold]Item:[/bold] {order.source_no or '-'}\n"
                     f"[bold]Description:[/bold] {order.description or '-'}\n"
-                    f"[bold]Quantity:[/bold] {order.quantity:.0f}" if order.quantity else "-"
+                    f"[bold]Quantity:[/bold] {order.quantity if order.quantity is not None else '-'}\n"
+                    f"[bold]Item no.:[/bold] {order.item_no or '-'}\n"
+                    f"[bold]Customer order:[/bold] {order.customer_order_no or '-'}\n"
+                    f"[bold]Held:[/bold] {'yes' if order.held else 'no'}"
                 )
                 if order.due_date:
                     info += f"\n[bold]Due Date:[/bold] {order.due_date}"

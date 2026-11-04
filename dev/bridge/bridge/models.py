@@ -1,69 +1,62 @@
 """Pydantic models for BC API payloads."""
 
-from datetime import date, datetime, timezone
-from uuid import UUID, uuid4
+from datetime import UTC, date, datetime
+from uuid import UUID
 
-from pydantic import BaseModel, Field, field_serializer
+from pydantic import BaseModel, Field
 
 
 def utc_now() -> datetime:
     """Return current UTC time with timezone info."""
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
-class ExecutionEvent(BaseModel):
-    """Execution event payload for the Shopfloor API."""
-
-    message_id: UUID = Field(default_factory=uuid4, alias="messageId")
-    order_no: str = Field(alias="orderNo")
-    operation_no: str = Field(default="10", alias="operationNo")
-    work_center: str | None = Field(default=None, alias="workCenter")
-    qty_produced: int = Field(default=0, alias="qtyProduced")
-    qty_rejected: int = Field(default=0, alias="qtyRejected")
-    runtime_sec: float = Field(default=0, alias="runtimeSec")
-    downtime_sec: float = Field(default=0, alias="downtimeSec")
-    availability: float = Field(default=0.95, ge=0, le=1)
-    productivity: float = Field(default=0.90, ge=0, le=1)
-    actual_cycle_time_sec: float = Field(default=0, alias="actualCycleTimeSec")
-    source_timestamp: datetime = Field(default_factory=utc_now, alias="sourceTimestamp")
-    source: str = "BRIDGE-CLI"
-
-    model_config = {"populate_by_name": True}
-
-    @field_serializer("source_timestamp")
-    def serialize_timestamp(self, value: datetime) -> str:
-        """Serialize datetime to ISO format with Z suffix for BC OData."""
-        if value.tzinfo is None:
-            value = value.replace(tzinfo=timezone.utc)
-        return value.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
-
-
-class ProductionOrder(BaseModel):
-    """Production order from BC API."""
-
-    id: UUID | None = None
-    number: str
-    description: str | None = None
-    status: str | None = None
-    source_no: str | None = Field(default=None, alias="sourceNo")
-    quantity: float | None = None
-
-    model_config = {"populate_by_name": True}
+def bc_datetime(value: datetime) -> str:
+    """Format a datetime for BC OData: UTC, ISO 8601 with a ``Z`` suffix."""
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=UTC)
+    return value.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 class RoutingLine(BaseModel):
-    """Production order routing line from BC API."""
+    """Released production order routing line (one Execution app step)."""
 
+    id: UUID | None = None
+    step_id: str | None = Field(default=None, alias="stepId")
     status: str | None = None
     prod_order_no: str = Field(alias="prodOrderNo")
+    routing_reference_no: int | None = Field(default=None, alias="routingReferenceNo")
+    routing_no: str | None = Field(default=None, alias="routingNo")
     operation_no: str = Field(alias="operationNo")
+    sequence_no: int | None = Field(default=None, alias="sequenceNo")
+    previous_operation_no: str | None = Field(default=None, alias="previousOperationNo")
+    next_operation_no: str | None = Field(default=None, alias="nextOperationNo")
     type: str | None = None
     no: str | None = None
+    work_center_no: str | None = Field(default=None, alias="workCenterNo")
+    work_center_group_code: str | None = Field(default=None, alias="workCenterGroupCode")
     description: str | None = None
-    run_time: float | None = Field(default=None, alias="runTime")
     setup_time: float | None = Field(default=None, alias="setupTime")
+    run_time: float | None = Field(default=None, alias="runTime")
+    input_quantity: float | None = Field(default=None, alias="inputQuantity")
+    planned_minutes: float | None = Field(default=None, alias="plannedMinutes")
+    routing_status: str | None = Field(default=None, alias="routingStatus")
+    starting_date_time: datetime | None = Field(default=None, alias="startingDateTime")
+    ending_date_time: datetime | None = Field(default=None, alias="endingDateTime")
+    execution_finished: bool | None = Field(default=None, alias="executionFinished")
+    execution_finished_at: datetime | None = Field(default=None, alias="executionFinishedAt")
+    output_quantity: float | None = Field(default=None, alias="outputQuantity")
+    scrap_quantity: float | None = Field(default=None, alias="scrapQuantity")
+    planned_start: datetime | None = Field(default=None, alias="plannedStart")
+    planned_end: datetime | None = Field(default=None, alias="plannedEnd")
+    queue_position: int | None = Field(default=None, alias="queuePosition")
 
     model_config = {"populate_by_name": True}
+
+    @property
+    def done(self) -> bool:
+        """A step is done when the Execution app finished it or BC reports it Finished."""
+        return bool(self.execution_finished) or self.routing_status == "Finished"
 
 
 class Item(BaseModel):
@@ -114,9 +107,12 @@ class ProductionOrderDetail(BaseModel):
     starting_date: date | None = Field(default=None, alias="startingDate")
     ending_date: date | None = Field(default=None, alias="endingDate")
     location_code: str | None = Field(default=None, alias="locationCode")
-    last_modified_date_time: datetime | None = Field(
-        default=None, alias="lastModifiedDateTime"
-    )
+    item_no: str | None = Field(default=None, alias="itemNo")
+    customer_order_no: str | None = Field(default=None, alias="customerOrderNo")
+    starting_date_time: datetime | None = Field(default=None, alias="startingDateTime")
+    ending_date_time: datetime | None = Field(default=None, alias="endingDateTime")
+    finished_date: date | None = Field(default=None, alias="finishedDate")
+    held: bool | None = None
     system_modified_at: datetime | None = Field(default=None, alias="systemModifiedAt")
 
     model_config = {"populate_by_name": True}
@@ -140,37 +136,5 @@ class ProductionOrderComponent(BaseModel):
     flushing_method: str | None = Field(default=None, alias="flushingMethod")
     routing_link_code: str | None = Field(default=None, alias="routingLinkCode")
     due_date: date | None = Field(default=None, alias="dueDate")
-
-    model_config = {"populate_by_name": True}
-
-
-class InboxEntry(BaseModel):
-    """Integration inbox entry from BC API."""
-
-    message_id: UUID = Field(alias="messageId")
-    message_type: str | None = Field(default=None, alias="messageType")
-    order_no: str | None = Field(default=None, alias="orderNo")
-    operation_no: str | None = Field(default=None, alias="operationNo")
-    status: str | None = None
-    received_at: datetime | None = Field(default=None, alias="receivedAt")
-    processed_at: datetime | None = Field(default=None, alias="processedAt")
-    error: str | None = None
-    warning: str | None = None
-
-    model_config = {"populate_by_name": True}
-
-
-class UNSTopicMapping(BaseModel):
-    """UNS topic to work center mapping from BC API."""
-
-    uns_topic: str = Field(alias="unsTopic")
-    work_center_no: str | None = Field(default=None, alias="workCenterNo")
-    status: str = "Active"
-    description: str | None = None
-    source_system: str | None = Field(default=None, alias="sourceSystem")
-    valid_from: date | None = Field(default=None, alias="validFrom")
-    valid_to: date | None = Field(default=None, alias="validTo")
-    created_at: datetime | None = Field(default=None, alias="createdAt")
-    created_by: str | None = Field(default=None, alias="createdBy")
 
     model_config = {"populate_by_name": True}

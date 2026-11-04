@@ -1,160 +1,127 @@
-# Bridge Emulator CLI
+# Bridge dev CLI
 
-A Python CLI that emulates the shopfloor bridge's interactions with the Business Central ERP API. The bridge subscribes to MQTT events from shopfloor systems and aggregates them before posting to BC. This CLI skips the MQTT/aggregation logic but provides commands to simulate the bridge's API interactions.
+A Python CLI (and a small Streamlit GUI) for the Business Central side of the PREKIT Execution app:
+the UNS Bridge Connector 2.0 API. It reads the order book and writes execution facts the way the
+Execution app's BC adapter does. The field contract is in
+[`docs/execution-app-contract.md`](../../docs/execution-app-contract.md).
 
 ## Installation
 
 ```bash
-# From project root
-cd dev/bridge
-uv pip install -e .
-
-# Or with pip
-pip install -e dev/bridge
-
-# Or run directly with uv
 uv run --directory dev/bridge bridge --help
+# or
+uv run --directory dev/bridge python -m bridge --help
 ```
 
-## Prerequisites
+## Connection
 
-1. Azure CLI installed and logged in: `az login`
-2. `.env` file in project root with:
-   ```
-   BC_TENANT=your-tenant-id
-   BC_ENV=Sandbox
-   BC_COMPANY=your-company-id
-   ```
-3. **ShopfloorExecutionBridge extension deployed to BC** (required for `post-event` and `setup work-centers`)
-   - Open project in VS Code
-   - Press F5 to deploy to BC Sandbox
+Settings come from the environment or a `.env` file in the repo root.
 
-## Commands
+| Mode | Variables | Auth |
+|---|---|---|
+| SaaS (default) | `BC_TENANT`, `BC_ENV` | Bearer token from `az account get-access-token` (run `az login` first), or `ACCESS_TOKEN` |
+| On-prem / container | `BC_API_BASE_URL`, e.g. `http://bcserver:7048/BC/api` | Basic auth with `BC_USERNAME` / `BC_PASSWORD` when set (NavUserPassword) |
 
-### Authentication & Discovery
+`BC_API_BASE_URL` wins when set. The company is `BC_COMPANY` (GUID). When it is unset,
+`BC_COMPANY_NAME` is resolved through `/v2.0/companies` (exact name).
 
 ```bash
-# Verify authentication works (fetches token from Azure CLI)
-bridge auth
-
-# Show current configuration
-bridge config
-
-# List available companies (useful for finding BC_COMPANY value)
-bridge companies
+bridge config      # show the target and company
+bridge auth        # SaaS: check the az token; on-prem: show the auth mode
+bridge companies   # list companies (to find BC_COMPANY / BC_COMPANY_NAME)
 ```
 
-The CLI automatically fetches an OAuth token from Azure CLI when needed. If you get 401 errors, run `az login` to refresh your Azure session.
+The extension (`app/`) must be published to the environment.
 
-### Query Production Orders
+## Read
 
 ```bash
-# List released production orders
-bridge get-orders
-
-# Filter by status
-bridge get-orders --status Planned
-
-# Filter by item (client-side)
-bridge get-orders --item TEST-001
-
-# Output as JSON
-bridge get-orders --json-output
-
-# Get routing lines for an order
-bridge get-routing RPO-00001
+bridge get-orders [--status Released] [--since 2026-11-01T00:00:00Z] [--with-routing]
+bridge get-order 101001
+bridge steps --order 101001           # stepId, routing status, execution state, output, fine plan
+bridge machine-centers
+bridge get-work-centers
+bridge get-components 101001
+bridge get-routing 101001
+bridge get-items / get-routings
 ```
 
-### Post Execution Events
+All read commands take `--json-output`.
+
+## Write (Execution app commands)
+
+Every write carries an idempotency key. `eventId` / `noteId` default to a new uuid4; pass
+`--event-id` / `--note-id` to repeat a call (a repeat returns `result = Duplicate`). Times are UTC.
+
+| Command | Endpoint |
+|---|---|
+| `bridge finish <stepId> --output N [--scrap N] [--scrap-code C] [--run-min M] [--setup-min M] [--ran-on-type "Machine Center" --ran-on-no MC1] [--employee E] [--started-at T] [--finished-at T]` | POST `stepFinishes` |
+| `bridge person-time add --employee E [--step S] [--start T] [--end T] [--session-id ID] [--session-key K] [--slice N]` | POST `personTimes` (eventId defaults to `{sessionKey}:{slice}`) |
+| `bridge person-time add --session-id ID --cancel` | POST `personTimes` with `cancelled = true` |
+| `bridge person-time list <sessionId>` | GET `personTimes` |
+| `bridge note add <orderNo> "<text>" [--author A]` / `note list <orderNo>` / `note delete <noteId>` | POST / GET / DELETE `orderNotes` |
+| `bridge move <stepId> --to-type "Work Center" --to-no 200` | POST `stepMoves` |
+| `bridge plan <stepId> [--start T] [--end T] [--queue N]` | PATCH `stepPlans({id})` |
+
+`stepId` is `{prodOrderNo}:{routingReferenceNo}:{operationNo}`, e.g. `101001:10000:10`
+(see `bridge steps`). A new `--session-key` for an existing `--session-id` supersedes the
+session's earlier person-time rows.
+
+Whether `finish` posts output depends on **ALP Shopfloor Setup → Post Output** in BC: off, the
+step is recorded on the routing line only (`result = Recorded`); on, an output journal line is
+posted (`result = Posted`).
+
+## Smoke test against a live BC: `bridge e2e`
 
 ```bash
-# Interactive prompts
-bridge post-event
-
-# With arguments
-bridge post-event --order RPO-00001 --operation 10 --qty-produced 100 --qty-rejected 5
-
-# With more options
-bridge post-event \
-  --order RPO-00001 \
-  --operation 10 \
-  --work-center WC-001 \
-  --qty-produced 100 \
-  --qty-rejected 5 \
-  --runtime 3600 \
-  --downtime 300 \
-  --availability 0.92 \
-  --productivity 0.85
-
-# From JSON file
-bridge post-event --file event.json
+bridge e2e --order 101001 --yes [--employee E1] [--output 1] [--move-to 400]
 ```
 
-Example `event.json`:
-```json
-{
-  "orderNo": "RPO-00001",
-  "operationNo": "10",
-  "workCenter": "WC-001",
-  "qtyProduced": 100,
-  "qtyRejected": 5,
-  "runtimeSec": 3600,
-  "downtimeSec": 300,
-  "availability": 0.92,
-  "productivity": 0.85,
-  "actualCycleTimeSec": 36.0
-}
-```
+It writes to BC, so it refuses to run without `--yes`. Use a fresh released order with at least
+two routing lines. It checks, on the first order line's routing:
 
-### Setup Production Orders
+1. Order and step read fields exist; `machineCenters` is readable.
+2. Finishing step 2 before step 1 is refused with HTTP 400.
+3. Finishing step 1 returns `Recorded` or `Posted`, and the step then reads as done.
+4. Re-sending the same `eventId` returns `Duplicate`.
+5. Person time (only with `--employee`): a second `sessionKey` supersedes the first.
+6. A note is added, read back, deleted and gone.
+7. The last not-started step moves to another work center (`--move-to`, or the lowest-numbered
+   other non-blocked one) and back.
+8. A fine plan PATCH on step 2 reads back.
 
-The Cronus sandbox already has items (with BOMs/routings) and work centers. Use `setup prod-order` to create production orders from existing items.
+It prints a PASS / FAIL / SKIP table and exits 1 on any FAIL. Checks that need a state the order
+no longer has (e.g. step 1 already finished) are SKIP; use a new order for a full run.
+
+## Test data setup
 
 ```bash
-# Create a released production order (item must have BOM/routing)
-bridge setup prod-order --item SP-BOM2000 --quantity 100
-bridge setup prod-order --item SP-BOM2000 --quantity 100 --due-date 2026-01-26
-
-# Create demo orders (3 released + 2 planned, uses existing items)
-bridge setup demo
-bridge setup demo --released 5 --planned 3
-
-# Cleanup - delete production orders (sandbox only!)
-bridge setup cleanup
-bridge setup cleanup --status Released  # Only delete released orders
+bridge setup prod-order --item SP-BOM2000 --quantity 100 [--due-date 2026-11-30]
+bridge setup demo [--released 3] [--planned 2]
+bridge setup items / work-centers / all
+bridge setup cleanup [--status Released] [--yes]     # sandbox only
 ```
 
-## Verification
-
-1. **Auth check**: `bridge auth` should print "Authenticated successfully"
-2. **List orders**: `bridge get-orders` should list released production orders (or show none)
-3. **Setup data**: `bridge setup all` should create test items and work centers
-4. **Post event**: `bridge post-event --order <order-no>` should return success
-
-## API Endpoints Used
-
-**Standard BC API** (`/api/v2.0/`):
-| Action | Method | Endpoint |
-|--------|--------|----------|
-| List companies | GET | `/api/v2.0/companies` |
-| Create/get items | GET/POST | `/api/v2.0/companies({id})/items` |
-
-**Custom API** (`/api/alpamayo/shopfloor/v1.0/`) - requires extension:
-| Action | Method | Endpoint |
-|--------|--------|----------|
-| List/create production orders | GET/POST | `.../productionOrders` |
-| Get routing lines | GET | `.../prodOrderRoutingLines` |
-| List/create work centers | GET/POST | `.../workCenters` |
-| Post execution event | POST | `.../executionEvents` |
-
-Note: Microsoft's standard API doesn't expose manufacturing entities (production orders, work centers, routing). The extension provides custom API pages for these.
-
-## Development
+## GUI
 
 ```bash
-# Run from source
-python -m bridge --help
-
-# Run with uv
-uv run bridge --help
+cd dev/bridge && uv run streamlit run gui/app.py
 ```
+
+Read-only: work orders (create one) and the steps of an order with their execution state. Writes
+go through the CLI.
+
+## API endpoints used
+
+Custom API `.../api/alpamayo/shopfloor/v1.0/companies({id})/`:
+
+| Endpoint | Methods |
+|---|---|
+| `productionOrders` | GET, POST, PATCH, DELETE, `Microsoft.NAV.Refresh` |
+| `prodOrderRoutingLines`, `prodOrderComponents`, `routings`, `items`, `machineCenters` | GET |
+| `workCenters` | GET, POST |
+| `stepFinishes`, `personTimes`, `stepMoves` | POST (`personTimes` also GET) |
+| `orderNotes` | GET, POST, DELETE |
+| `stepPlans` | PATCH |
+
+Standard API `.../api/v2.0/`: `companies`, `companies({id})/items`, `companies({id})/employees`.
