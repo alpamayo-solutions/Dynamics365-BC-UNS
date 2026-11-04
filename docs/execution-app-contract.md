@@ -33,7 +33,9 @@ A step is one released production order routing line. Its id is
 stepId = "{prodOrderNo}:{routingReferenceNo}:{operationNo}"     e.g. "101001:10000:10"
 ```
 
-`stepId` is stable while the order is Released. Every write takes `stepId`.
+`stepId` keeps its value when the order is Finished (same order no.). Every write takes `stepId`.
+`stepId` is computed, so it cannot be used in `$filter`: filter on `prodOrderNo`, `routingReferenceNo`
+and `operationNo` instead.
 
 ## Read: order book
 
@@ -87,13 +89,16 @@ Filter `$filter=status eq 'Released'` (optionally `and prodOrderNo eq '...'`).
 
 A step is done when `executionFinished` is true or `routingStatus` is `Finished`.
 
+Places are named by number only. Work centers and machine centers should not share numbers; the adapter
+cannot tell them apart in the PREKIT element mapping.
+
 ### `machineCenters` (new, read-only)
 
 `id, number, name, workCenterNo, blocked, capacity, efficiency`.
 
 ### `workCenters`, `items`, `prodOrderComponents`, `routings`, `workShifts`, `shopCalendars`, `shopCalendarWorkingDays`
 
-Unchanged from 1.x. Employees come from the standard API (`/api/v2.0/companies({id})/employees`, `number` = the Employee No. that PREKIT identities carry as `employee_id`).
+Unchanged from 1.x (`items`: `number, description, itemCategoryCode, baseUnitOfMeasure, ...`). Employees come from the standard API (`/api/v2.0/companies({id})/employees`, `number` = the Employee No. that PREKIT identities carry as `employee_id`).
 
 ## Write
 
@@ -142,12 +147,16 @@ Person time on a step (the ERPNext Timesheet analogue). One row per time slice. 
 | `cancelled` | Boolean | no | |
 | `status` | Text | read | `Active`, `Superseded`, `Cancelled` |
 
+A cancel needs only `eventId`, `sessionId` and `cancelled = true`. GET `personTimes?$filter=sessionId eq '...'`
+returns the rows of a session (with `eventId`, `sessionKey`, `status`).
+
 ### `orderNotes`
 
 A note on a released production order. It appears in the Notes FactBox of the order.
 
-POST `noteId, orderNo, text (<= 2048), author`. DELETE `orderNotes({id})` removes the note again.
-A repeat POST with the same `noteId` returns the existing row.
+POST `noteId, orderNo, text (<= 2048), author`. To remove it, GET `orderNotes?$filter=noteId eq '...'`
+and DELETE `orderNotes({id})` for every row returned (`id` is the row's SystemId). A repeat POST with the
+same `noteId` adds a row with `result = "Duplicate"` and no second note.
 
 ### `stepMoves`
 
