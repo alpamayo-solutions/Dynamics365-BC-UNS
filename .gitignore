@@ -18,7 +18,7 @@ Thumbs.db
 *.tmp
 
 # Translation files (if generated)
-Translations/*.g.xlf
+**/Translations/*.g.xlf
 
 # Symbols
 *.app.json
