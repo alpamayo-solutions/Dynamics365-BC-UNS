@@ -15,9 +15,12 @@ codeunit 50152 "ALP Step Finish Tests"
         StepFinish: Record "ALP Step Finish";
         RoutingLine: Record "Prod. Order Routing Line";
         CapacityLedgerEntry: Record "Capacity Ledger Entry";
+        StatusBefore: Enum "Prod. Order Routing Status";
     begin
         Helper.SetPostOutput(false);
         Helper.CreateReleasedOrderTwoSteps(ProductionOrder, WorkCenter, 10);
+        Helper.GetRoutingLine(ProductionOrder, '10', RoutingLine);
+        StatusBefore := RoutingLine."Routing Status";
         Helper.NewStepFinish(StepFinish, Helper.StepId(ProductionOrder, '10'), 9);
         StepFinish."Scrap Quantity" := 1;
 
@@ -28,7 +31,8 @@ codeunit 50152 "ALP Step Finish Tests"
         Assert.IsTrue(RoutingLine."ALP Exec. Finished", 'Step must be marked finished');
         Assert.AreEqual(9, RoutingLine."ALP Output Qty.", 'Output');
         Assert.AreEqual(1, RoutingLine."ALP Scrap Qty.", 'Scrap');
-        Assert.AreEqual(RoutingLine."Routing Status"::Planned, RoutingLine."Routing Status", 'Observer mode must not change routing status');
+        // A refreshed routing line starts with a blank routing status; observer mode leaves it as it was.
+        Assert.AreEqual(StatusBefore, RoutingLine."Routing Status", 'Observer mode must not change routing status');
         CapacityLedgerEntry.SetRange("Order No.", ProductionOrder."No.");
         Assert.RecordIsEmpty(CapacityLedgerEntry);
     end;
@@ -146,6 +150,7 @@ codeunit 50152 "ALP Step Finish Tests"
     begin
         Helper.SetPostOutput(false);
         Helper.CreateReleasedOrderTwoSteps(ProductionOrder, WorkCenter, 10);
+        ProductionOrder.Get(ProductionOrder.Status, ProductionOrder."No."); // The refresh changed it.
         ProductionOrder."ALP Held" := true;
         ProductionOrder.Modify();
         Helper.NewStepFinish(StepFinish, Helper.StepId(ProductionOrder, '10'), 10);

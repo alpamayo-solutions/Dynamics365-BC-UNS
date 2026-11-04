@@ -101,7 +101,7 @@ codeunit 50200 "ALP Demo Seed"
         WorkCenter."Search Name" := UpperCase(Name);
         WorkCenter."Work Center Group Code" := GroupCode;
         WorkCenter.Insert(true);
-        LibraryManufacturing.CalculateWorkCenterCalendar(WorkCenter, CalcDate('<-CM-1M>', WorkDate()), CalcDate('<CM+3M>', WorkDate()));
+        LibraryManufacturing.CalculateWorkCenterCalendar(WorkCenter, CalcDate('<-CM-6M>', WorkDate()), CalcDate('<CM+12M>', WorkDate()));
         for i := 1 to Count do begin
             Clear(MachineCenter);
             MachineCenter.Init();
@@ -112,7 +112,7 @@ codeunit 50200 "ALP Demo Seed"
             MachineCenter.Validate(Capacity, 1);
             MachineCenter.Validate(Efficiency, 100);
             MachineCenter.Modify(true);
-            LibraryManufacturing.CalculateMachCenterCalendar(MachineCenter, CalcDate('<-CM-1M>', WorkDate()), CalcDate('<CM+3M>', WorkDate()));
+            LibraryManufacturing.CalculateMachCenterCalendar(MachineCenter, CalcDate('<-CM-6M>', WorkDate()), CalcDate('<CM+12M>', WorkDate()));
         end;
     end;
 
