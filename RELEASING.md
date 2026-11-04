@@ -9,7 +9,7 @@ The repository uses GitHub Actions to automatically handle releases:
 1. **Create a release on GitHub** with a version tag (e.g., `v1.1.0`)
 2. The workflow automatically:
    - Extracts the version from the tag
-   - Updates `app.json` with the new version
+   - Updates `app/app.json` and `test/app.json` with the new version
    - Commits the version bump to `main`
    - Builds the app in a BC container
    - Uploads the zip file to the release
@@ -42,16 +42,16 @@ gh release create v1.1.0 \
 
 ### What Happens Automatically
 
-1. **Version extraction:** `v1.1.0` → `1.1.0.0` in `app.json`
+1. **Version extraction:** `v1.1.0` → `1.1.0.0` in `app/app.json`
 2. **Commit:** Version bump committed to `main`
-3. **Build:** App compiled in BC 26 container with CodeCop and UICop
+3. **Build:** App compiled in a BC 26 container with CodeCop and UICop, the last 1.x release installed and upgraded to the build, test app run
 4. **Upload:** Zip file attached to the release
 
 ## CI/CD Workflows
 
 | Workflow | Trigger | Purpose |
 |----------|---------|---------|
-| `build.yml` | Push to main, PRs | Validates builds compile successfully |
+| `build.yml` | PRs to main, manual | Compiles, tests the upgrade from 1.5.2, runs the test app |
 | `release.yml` | Release created | Bumps version, builds, uploads artifact |
 
 ## Version Convention
@@ -69,14 +69,14 @@ Semantic versioning:
 For local testing without creating a release:
 
 1. In VS Code, press `Cmd+Shift+B` / `Ctrl+Shift+B`
-2. Select **AL: Package**
-3. The `.app` file is created in the project root
+2. Select **AL: Package** (open the `app/` folder)
+3. The `.app` file is created in `app/`
 
 ## Post-Release Verification
 
 1. Check the release at: https://github.com/alpamayo-solutions/Dynamics365-BC-UNS/releases
 2. Verify the zip file is attached
-3. Check that `app.json` on `main` has the updated version
+3. Check that `app/app.json` on `main` has the updated version
 4. Website should show new version (may take a few minutes)
 
 ## Troubleshooting
