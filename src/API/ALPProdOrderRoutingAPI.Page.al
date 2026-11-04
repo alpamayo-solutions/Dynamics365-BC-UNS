@@ -12,6 +12,9 @@ page 50033 "ALP Prod Order Routing API"
     InsertAllowed = false;
     ModifyAllowed = false;
     DeleteAllowed = false;
+    Editable = false;
+    ODataKeyFields = SystemId;
+    DataAccessIntent = ReadOnly;
 
     layout
     {
@@ -19,6 +22,14 @@ page 50033 "ALP Prod Order Routing API"
         {
             repeater(Records)
             {
+                field(id; Rec.SystemId)
+                {
+                    Caption = 'Id';
+                }
+                field(stepId; StepId)
+                {
+                    Caption = 'Step Id';
+                }
                 field(status; Rec.Status)
                 {
                     Caption = 'Status';
@@ -35,6 +46,22 @@ page 50033 "ALP Prod Order Routing API"
                 {
                     Caption = 'Operation No.';
                 }
+                field(routingNo; Rec."Routing No.")
+                {
+                    Caption = 'Routing No.';
+                }
+                field(sequenceNo; SequenceNo)
+                {
+                    Caption = 'Sequence No.';
+                }
+                field(previousOperationNo; Rec."Previous Operation No.")
+                {
+                    Caption = 'Previous Operation No.';
+                }
+                field(nextOperationNo; Rec."Next Operation No.")
+                {
+                    Caption = 'Next Operation No.';
+                }
                 field(type; Rec.Type)
                 {
                     Caption = 'Type';
@@ -42,6 +69,14 @@ page 50033 "ALP Prod Order Routing API"
                 field(no; Rec."No.")
                 {
                     Caption = 'No.';
+                }
+                field(workCenterNo; Rec."Work Center No.")
+                {
+                    Caption = 'Work Center No.';
+                }
+                field(workCenterGroupCode; Rec."Work Center Group Code")
+                {
+                    Caption = 'Work Center Group Code';
                 }
                 field(description; Rec.Description)
                 {
@@ -67,7 +102,69 @@ page 50033 "ALP Prod Order Routing API"
                 {
                     Caption = 'Input Quantity';
                 }
+                field(plannedMinutes; PlannedMinutes)
+                {
+                    Caption = 'Planned Minutes';
+                }
+                field(routingStatus; Rec."Routing Status")
+                {
+                    Caption = 'Routing Status';
+                }
+                field(startingDateTime; Rec."Starting Date-Time")
+                {
+                    Caption = 'Starting Date-Time';
+                }
+                field(endingDateTime; Rec."Ending Date-Time")
+                {
+                    Caption = 'Ending Date-Time';
+                }
+                field(executionFinished; Rec."ALP Exec. Finished")
+                {
+                    Caption = 'Execution Finished';
+                }
+                field(executionFinishedAt; Rec."ALP Exec. Finished At")
+                {
+                    Caption = 'Execution Finished At';
+                }
+                field(outputQuantity; Rec."ALP Output Qty.")
+                {
+                    Caption = 'Output Quantity';
+                }
+                field(scrapQuantity; Rec."ALP Scrap Qty.")
+                {
+                    Caption = 'Scrap Quantity';
+                }
+                field(plannedStart; Rec."ALP Planned Start")
+                {
+                    Caption = 'Planned Start';
+                }
+                field(plannedEnd; Rec."ALP Planned End")
+                {
+                    Caption = 'Planned End';
+                }
+                field(queuePosition; Rec."ALP Queue Position")
+                {
+                    Caption = 'Queue Position';
+                }
+                field(systemModifiedAt; Rec.SystemModifiedAt)
+                {
+                    Caption = 'System Modified At';
+                }
             }
         }
     }
+
+    var
+        StepId: Text[100];
+        SequenceNo: Integer;
+        PlannedMinutes: Decimal;
+
+    trigger OnAfterGetRecord()
+    var
+        StepResolver: Codeunit "ALP Step Resolver";
+    begin
+        StepId := StepResolver.FormatStepId(Rec);
+        SequenceNo := StepResolver.SequenceNo(Rec);
+        PlannedMinutes := StepResolver.PlannedMinutes(Rec);
+    end;
 }

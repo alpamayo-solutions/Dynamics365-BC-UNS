@@ -1,5 +1,8 @@
 table 50001 "ALP Integration Inbox"
 {
+    ObsoleteState = Pending;
+    ObsoleteReason = 'Replaced by the Execution app surface in 2.0. Data is not migrated.';
+    ObsoleteTag = '2.0';
     Caption = 'ALP Integration Inbox';
     DataClassification = SystemMetadata;
 

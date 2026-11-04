@@ -1,5 +1,8 @@
 table 50006 "ALP Work Log Entry"
 {
+    ObsoleteState = Pending;
+    ObsoleteReason = 'Replaced by the Execution app surface in 2.0. Data is not migrated.';
+    ObsoleteTag = '2.0';
     Caption = 'ALP Work Log Entry';
     DataClassification = CustomerContent;
 

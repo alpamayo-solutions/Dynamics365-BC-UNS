@@ -4,6 +4,9 @@
 // Operation No. is resolved DYNAMICALLY at execution time based on Production Order context.
 table 50005 "ALP UNS Topic Mapping"
 {
+    ObsoleteState = Pending;
+    ObsoleteReason = 'Replaced by the Execution app surface in 2.0. Data is not migrated.';
+    ObsoleteTag = '2.0';
     Caption = 'UNS Topic Mapping';
     DataClassification = CustomerContent;
 

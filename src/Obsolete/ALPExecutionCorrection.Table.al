@@ -1,5 +1,8 @@
 table 50007 "ALP Execution Correction"
 {
+    ObsoleteState = Pending;
+    ObsoleteReason = 'Replaced by the Execution app surface in 2.0. Data is not migrated.';
+    ObsoleteTag = '2.0';
     Caption = 'ALP Execution Correction';
     DataClassification = CustomerContent;
 

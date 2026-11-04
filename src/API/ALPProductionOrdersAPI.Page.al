@@ -66,6 +66,41 @@ page 50032 "ALP Production Orders API"
                 {
                     Caption = 'Location Code';
                 }
+                field(itemNo; ItemNo)
+                {
+                    Caption = 'Item No.';
+                    Editable = false;
+                }
+                field(customerOrderNo; CustomerOrderNo)
+                {
+                    Caption = 'Customer Order No.';
+                    Editable = false;
+                }
+                field(startingDateTime; Rec."Starting Date-Time")
+                {
+                    Caption = 'Starting Date-Time';
+                    Editable = false;
+                }
+                field(endingDateTime; Rec."Ending Date-Time")
+                {
+                    Caption = 'Ending Date-Time';
+                    Editable = false;
+                }
+                field(finishedDate; Rec."Finished Date")
+                {
+                    Caption = 'Finished Date';
+                    Editable = false;
+                }
+                field(held; Rec."ALP Held")
+                {
+                    Caption = 'Held';
+                    Editable = false;
+                }
+                field(systemCreatedAt; Rec.SystemCreatedAt)
+                {
+                    Caption = 'System Created At';
+                    Editable = false;
+                }
                 field(systemModifiedAt; Rec.SystemModifiedAt)
                 {
                     Caption = 'System Modified At';
@@ -80,10 +115,34 @@ page 50032 "ALP Production Orders API"
     // API creation/modification is for dev/test data setup only.
     var
         EnvironmentInfo: Codeunit "Environment Information";
+        ItemNo: Code[20];
+        CustomerOrderNo: Code[20];
         SandboxOnlyCreateErr: Label 'Production order creation via API is only allowed in Sandbox environments.', Comment = 'Error when trying to create production order in non-sandbox environment';
         SandboxOnlyModifyErr: Label 'Production order modification via API is only allowed in Sandbox environments.', Comment = 'Error when trying to modify production order in non-sandbox environment';
         SandboxOnlyDeleteErr: Label 'Production order deletion via API is only allowed in Sandbox environments.', Comment = 'Error when trying to delete production order in non-sandbox environment';
         SandboxOnlyRefreshErr: Label 'Production order refresh via API is only allowed in Sandbox environments.', Comment = 'Error when trying to refresh production order in non-sandbox environment';
+
+    // The product is the source item when the order is made for an item; for family and sales orders it is
+    // the item of the first order line. The customer order is the sales order the production order was made from.
+    trigger OnAfterGetRecord()
+    var
+        ProdOrderLine: Record "Prod. Order Line";
+    begin
+        ItemNo := '';
+        CustomerOrderNo := '';
+        case Rec."Source Type" of
+            Rec."Source Type"::Item:
+                ItemNo := Rec."Source No.";
+            Rec."Source Type"::"Sales Header":
+                CustomerOrderNo := Rec."Source No.";
+        end;
+        if ItemNo = '' then begin
+            ProdOrderLine.SetRange(Status, Rec.Status);
+            ProdOrderLine.SetRange("Prod. Order No.", Rec."No.");
+            if ProdOrderLine.FindFirst() then
+                ItemNo := ProdOrderLine."Item No.";
+        end;
+    end;
 
     trigger OnInsertRecord(BelowxRec: Boolean): Boolean
     begin

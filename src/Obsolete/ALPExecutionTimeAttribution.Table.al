@@ -1,5 +1,8 @@
 table 50008 "ALP Execution Time Attribution"
 {
+    ObsoleteState = Pending;
+    ObsoleteReason = 'Replaced by the Execution app surface in 2.0. Data is not migrated.';
+    ObsoleteTag = '2.0';
     Caption = 'ALP Execution Time Attribution';
     DataClassification = CustomerContent;
 

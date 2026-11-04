@@ -1,5 +1,8 @@
 table 50002 "ALP Operation Execution"
 {
+    ObsoleteState = Pending;
+    ObsoleteReason = 'Replaced by the Execution app surface in 2.0. Data is not migrated.';
+    ObsoleteTag = '2.0';
     Caption = 'ALP Operation Execution';
     DataClassification = CustomerContent;
 

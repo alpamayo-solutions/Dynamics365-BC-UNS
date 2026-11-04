@@ -1,17 +1,13 @@
-pageextension 50023 "ALP Released Prod. Orders Ext" extends "Released Production Orders"
+pageextension 50102 "ALP Released Prod. Orders Ext" extends "Released Production Orders"
 {
     layout
     {
-        addafter(Quantity)
+        addlast(Control1)
         {
-            field("ALP Exec Qty. Produced"; Rec."ALP Exec Qty. Produced")
+            field("ALP Held"; Rec."ALP Held")
             {
                 ApplicationArea = Manufacturing;
-                Caption = 'Qty. Produced';
-                ToolTip = 'Total quantity produced as reported from shopfloor';
-                Editable = false;
-                Style = Favorable;
-                StyleExpr = Rec."ALP Exec Qty. Produced" >= Rec.Quantity;
+                ToolTip = 'Specifies that the order is on hold for the shop floor Execution app.';
             }
         }
     }
