@@ -62,205 +62,46 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: main
-          path: repo
-
 
       - name: Read app.json
         id: app-info
         shell: pwsh
         run: |
-          $appJson = Get-Content -Path "repo/app/app.json" -Raw | ConvertFrom-Json
-          $version = $appJson.version
-          $name = $appJson.name
-          $publisher = $appJson.publisher
-          echo "version=$version" >> $env:GITHUB_OUTPUT
-          echo "name=$name" >> $env:GITHUB_OUTPUT
-          echo "publisher=$publisher" >> $env:GITHUB_OUTPUT
-          Write-Host "App: $publisher - $name v$version"
+          $appJson = Get-Content -Path "app/app.json" -Raw | ConvertFrom-Json
+          echo "version=$($appJson.version)" >> $env:GITHUB_OUTPUT
 
       - name: Install BcContainerHelper
         shell: pwsh
         run: |
           Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
           Install-Module -Name BcContainerHelper -Force -AllowClobber
-          Import-Module BcContainerHelper
 
-      - name: Prepare source folder
-        shell: pwsh
-        run: |
-          # Copy source to C: drive for container sharing
-          $sourceDir = "C:\src"
-          New-Item -ItemType Directory -Path "$sourceDir\app" -Force | Out-Null
-          New-Item -ItemType Directory -Path "$sourceDir\tests" -Force | Out-Null
-          Copy-Item -Path "repo\app\*" -Destination "$sourceDir\app" -Recurse -Force
-          Copy-Item -Path "repo\test\*" -Destination "$sourceDir\tests" -Recurse -Force
-          Write-Host "Copied source files to $sourceDir"
-          Get-ChildItem -Path $sourceDir -Recurse | Select-Object -First 20
-
-      - name: Create BC Container
-        shell: pwsh
-        run: |
-          Import-Module BcContainerHelper
-
-          $appJson = Get-Content -Path "C:\src\app\app.json" -Raw | ConvertFrom-Json
-          $bcVersion = $appJson.platform -replace '\.0\.0$', ''
-
-          $containerName = "bcbuild"
-          $artifactUrl = Get-BcArtifactUrl -type OnPrem -version $bcVersion -country w1 -select Latest
-
-          Write-Host "Creating container with artifact: $artifactUrl"
-
-          $credential = New-Object PSCredential "admin", (ConvertTo-SecureString -String "P@ssw0rd" -AsPlainText -Force)
-
-          New-BcContainer `
-            -accept_eula `
-            -containerName $containerName `
-            -artifactUrl $artifactUrl `
-            -auth NavUserPassword `
-            -credential $credential `
-            -updateHosts `
-            -accept_outdated `
-            -includeTestToolkit `
-            -includeTestLibrariesOnly `
-            -additionalParameters @("--volume", "C:\src:C:\src")
-
-      - name: Compile AL App
-        id: compile
-        shell: pwsh
-        run: |
-          Import-Module BcContainerHelper
-
-          $containerName = "bcbuild"
-          $credential = New-Object PSCredential "admin", (ConvertTo-SecureString -String "P@ssw0rd" -AsPlainText -Force)
-
-          $appFile = Compile-AppInBcContainer `
-            -containerName $containerName `
-            -credential $credential `
-            -appProjectFolder "C:\src\app" `
-            -appOutputFolder "C:\src\app" `
-            -EnableCodeCop `
-            -EnableUICop
-
-          $appFileName = Split-Path $appFile -Leaf
-          echo "app-file=$appFileName" >> $env:GITHUB_OUTPUT
-          Write-Host "Built: $appFileName"
-
-      - name: Install previous release (upgrade test)
+      - name: Download previous release (upgrade test)
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # 2.0 must install over the last released 1.x without errors (schema sync + data upgrade).
-          Import-Module BcContainerHelper
-          New-Item -ItemType Directory -Path "C:\src\previous" -Force | Out-Null
-          gh release download v1.5.2 -R ${{ github.repository }} -p "*.zip" -D "C:\src\previous"
-          Expand-Archive -Path (Get-ChildItem "C:\src\previous\*.zip" | Select-Object -First 1).FullName -DestinationPath "C:\src\previous" -Force
-          $previous = Get-ChildItem -Path "C:\src\previous\*.app" | Select-Object -First 1
-          Publish-BcContainerApp -containerName "bcbuild" -appFile $previous.FullName -skipVerification -install -sync
-          Write-Host "Installed previous release: $($previous.Name)"
+        run: gh release download v1.5.2 -R ${{ github.repository }} -p "*.zip" -D previous
 
-      - name: Publish AL App
+      - name: Build, upgrade and test in BC container
         shell: pwsh
         run: |
-          Import-Module BcContainerHelper
-
-          $containerName = "bcbuild"
-          $appFile = Get-ChildItem -Path "C:\src\app\*.app" | Select-Object -First 1
-
-          Publish-BcContainerApp `
-            -containerName $containerName `
-            -appFile $appFile.FullName `
-            -skipVerification `
-            -sync `
-            -upgrade `
-            -install
-
-          Get-BcContainerAppInfo -containerName $containerName -tenantSpecificProperties | Where-Object { $_.Publisher -eq 'alpamayo' } | Format-Table Name, Version, IsInstalled, SyncState, NeedsUpgrade
-          Write-Host "Published and upgraded: $($appFile.Name)"
-
-      - name: Compile Test App
-        id: compile-tests
-        shell: pwsh
-        run: |
-          Import-Module BcContainerHelper
-
-          $containerName = "bcbuild"
-          $credential = New-Object PSCredential "admin", (ConvertTo-SecureString -String "P@ssw0rd" -AsPlainText -Force)
-
-          $testAppFile = Compile-AppInBcContainer `
-            -containerName $containerName `
-            -credential $credential `
-            -appProjectFolder "C:\src\tests" `
-            -appOutputFolder "C:\src\tests" `
-            -appSymbolsFolder "C:\src\app"
-
-          $testAppFileName = Split-Path $testAppFile -Leaf
-          echo "test-app-file=$testAppFileName" >> $env:GITHUB_OUTPUT
-          Write-Host "Built test app: $testAppFileName"
-
-      - name: Publish Test App
-        shell: pwsh
-        run: |
-          Import-Module BcContainerHelper
-
-          $containerName = "bcbuild"
-          $testAppFile = Get-ChildItem -Path "C:\src\tests\*.app" | Select-Object -First 1
-
-          Publish-BcContainerApp `
-            -containerName $containerName `
-            -appFile $testAppFile.FullName `
-            -skipVerification `
-            -install `
-            -sync
-
-          Write-Host "Published and installed test app: $($testAppFile.Name)"
-
-      - name: Run Tests
-        shell: pwsh
-        run: |
-          Import-Module BcContainerHelper
-
-          $containerName = "bcbuild"
-          $credential = New-Object PSCredential "admin", (ConvertTo-SecureString -String "P@ssw0rd" -AsPlainText -Force)
-
-          Run-TestsInBcContainer `
-            -containerName $containerName `
-            -credential $credential `
-            -extensionId "dbbe7042-978c-461f-abe3-5ce36a97d622" `
-            -XUnitResultFileName "C:\src\TestResults.xml"
-
-          # Copy test results to workspace
-          Copy-Item -Path "C:\src\TestResults.xml" -Destination "$env:GITHUB_WORKSPACE\TestResults.xml" -Force
-          Write-Host "Test results saved to TestResults.xml"
+          $previous = (Get-ChildItem previous\*.zip | Select-Object -First 1).FullName
+          ./scripts/Test-InBcContainer.ps1 -RepoRoot $env:GITHUB_WORKSPACE -PreviousApp $previous
 
       - name: Publish Test Results
         uses: mikepenz/action-junit-report@v4
         if: always()
         with:
-          report_paths: TestResults.xml
+          report_paths: out/TestResults.xml
           fail_on_failure: true
           include_passed: true
           check_name: AL Tests
-
-      - name: Copy artifacts to workspace
-        if: success()
-        shell: pwsh
-        run: |
-          Copy-Item -Path "C:\src\app\*.app" -Destination "$env:GITHUB_WORKSPACE" -Force
-          Write-Host "Copied .app files to workspace"
-
-      - name: Remove BC Container
-        if: always()
-        shell: pwsh
-        run: |
-          Import-Module BcContainerHelper
-          Remove-BcContainer -containerName "bcbuild" -ErrorAction SilentlyContinue
 
       - name: Create zip and upload to release
         if: success()
         shell: pwsh
         run: |
-          $appFile = Get-ChildItem -Path "*.app" | Select-Object -First 1
+          $appFile = Get-ChildItem -Path "out/*.app" | Select-Object -First 1
           $zipName = $appFile.BaseName + ".zip"
           Compress-Archive -Path $appFile.FullName -DestinationPath $zipName
           gh release upload ${{ github.event.release.tag_name }} $zipName --clobber -R ${{ github.repository }}
@@ -272,5 +113,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: al-app-${{ steps.app-info.outputs.version }}
-          path: "*.app"
+          path: out/*.app
           if-no-files-found: error

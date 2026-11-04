@@ -35,3 +35,6 @@ __pycache__/
 
 docs/implementation-plan-v3.md
 AGENTS.md
+
+# Container test output
+out/
