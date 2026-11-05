@@ -4,7 +4,8 @@
 /// Rules (each failure raises an error, so the API answers 400 and nothing is written):
 /// - the step must be a released routing line (ALP Step Resolver);
 /// - the production order must not be on hold;
-/// - every previous operation must be done (the Execution app finishes steps in sequence);
+/// - the step may finish before earlier operations: the shop floor reports what happened, and a shift lead
+///   may start a later step first (the Execution app then closes the earlier ones without a finish);
 /// - quantities must not be negative.
 ///
 /// A repeat of an Event Id is answered with Result = Duplicate and changes nothing.
@@ -20,7 +21,6 @@ codeunit 50101 "ALP Step Finish Svc"
     var
         StepResolver: Codeunit "ALP Step Resolver";
         OrderOnHoldErr: Label 'Production order %1 is on hold.', Comment = '%1 = order no.';
-        PreviousOpenErr: Label 'Step %1 cannot finish before operation %2 of the same order is finished.', Comment = '%1 = step id, %2 = operation no.';
         NegativeQtyErr: Label 'Output and scrap quantities must not be negative.';
         FinishedAtRequiredErr: Label 'Finished At is required.';
         ProdOrderLineErr: Label 'Step %1 must belong to exactly one production order line, found %2.', Comment = '%1 = step id, %2 = count';
@@ -33,7 +33,6 @@ codeunit 50101 "ALP Step Finish Svc"
         ProductionOrder: Record "Production Order";
         Setup: Record "ALP Shopfloor Setup";
         StepMoveSvc: Codeunit "ALP Step Move Svc";
-        OpenPrevious: Code[10];
     begin
         StepFinish."Received At" := CurrentDateTime();
 
@@ -62,10 +61,6 @@ codeunit 50101 "ALP Step Finish Svc"
         ProductionOrder.Get(ProductionOrder.Status::Released, RoutingLine."Prod. Order No.");
         if ProductionOrder."ALP Held" then
             Error(OrderOnHoldErr, ProductionOrder."No.");
-
-        OpenPrevious := StepResolver.FirstOpenPreviousOperation(RoutingLine);
-        if OpenPrevious <> '' then
-            Error(PreviousOpenErr, StepFinish."Step Id", OpenPrevious);
 
         // The step ran somewhere else than planned: move it first, so time and output land on the right center.
         if (StepFinish."Ran On No." <> '') then

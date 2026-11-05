@@ -41,8 +41,8 @@ The full API contract, including the step id format and error semantics, is in
 | Off (default) | The step is recorded on the routing line (Execution Finished, output, scrap). Nothing is posted; inventory, capacity and costing are untouched. |
 | On | The step also posts one output journal line, exactly as the standard Production Journal would: output and scrap quantity, setup and run time, Finished = yes. The routing status becomes Finished; on the last operation the output is booked to inventory and backward-flushed components are consumed. |
 
-In both modes Business Central enforces the sequence (a step cannot finish before its previous operations)
-and refuses finishes on held orders.
+In both modes Business Central records a finish even before earlier operations are done (the shop floor
+reports what happened: a shift lead may start a later step first) and refuses finishes on held orders.
 
 ## Install and upgrade
 

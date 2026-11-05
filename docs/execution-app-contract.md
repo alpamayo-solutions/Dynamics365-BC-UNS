@@ -19,7 +19,7 @@ All DateTime values are UTC (ISO 8601, `Z`). Business Central has no site time z
 | HTTP | Meaning | Adapter reaction |
 |---|---|---|
 | 201 / 200 / 204 | Accepted (including an idempotent repeat) | Done |
-| 400 | Business Central refused the data (validation, sequence, posting error). Body: `{"error":{"code","message"}}` | Permanent refusal: log and skip |
+| 400 | Business Central refused the data (validation, posting error). Body: `{"error":{"code","message"}}` | Permanent refusal: log and skip |
 | 401 | Token expired | Re-authenticate, retry |
 | 404 | Entity not found | Permanent refusal |
 | 409 / 412 | Concurrency conflict | Retry |
@@ -107,8 +107,8 @@ returns 201 with `result = "Duplicate"` and changes nothing.
 
 ### `stepFinishes`
 
-Finish a step. Business Central checks the sequence (every previous operation must be finished)
-and, when **ALP Shopfloor Setup → Post Output** is on, posts an output journal line
+Finish a step, also before earlier operations are done: the shop floor reports what happened (a shift lead
+may start a later step first, and the app closes the earlier ones without a finish). When **ALP Shopfloor Setup → Post Output** is on, posts an output journal line
 (output, scrap, setup and run time, `Finished` = yes) so the routing line's status becomes Finished.
 With Post Output off, the step is recorded on the routing line only.
 
@@ -163,6 +163,9 @@ same `noteId` adds a row with `result = "Duplicate"` and no second note.
 Move a not-yet-started step to another work or machine center.
 
 POST `eventId, stepId, toType, toNo`. Refused (400) when the step has output or is finished.
+The move validates the routing line's new center the standard way, so Business Central recalculates the
+order's dates exactly as when a planner changes the center by hand (its Due Date can move with them). The
+operation keeps its description.
 
 ### `stepPlans`
 

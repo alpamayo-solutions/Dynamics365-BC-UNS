@@ -126,19 +126,25 @@ codeunit 50152 "ALP Step Finish Tests"
     end;
 
     [Test]
-    procedure Finish_BeforePreviousStep_IsRefused()
+    procedure Finish_BeforePreviousStep_IsRecorded()
     var
         ProductionOrder: Record "Production Order";
         WorkCenter: Record "Work Center";
         StepFinish: Record "ALP Step Finish";
+        RoutingLine: Record "Prod. Order Routing Line";
     begin
+        // A shift lead started the later step first: the shop floor's fact is kept, not refused.
         Helper.SetPostOutput(false);
         Helper.CreateReleasedOrderTwoSteps(ProductionOrder, WorkCenter, 10);
         Helper.NewStepFinish(StepFinish, Helper.StepId(ProductionOrder, '20'), 10);
 
-        asserterror Helper.FinishStep(StepFinish);
+        Helper.FinishStep(StepFinish);
 
-        Assert.ExpectedError('cannot finish before operation 10');
+        Assert.AreEqual(StepFinish.Result::Recorded, StepFinish.Result, 'Result');
+        Helper.GetRoutingLine(ProductionOrder, '20', RoutingLine);
+        Assert.IsTrue(RoutingLine."ALP Exec. Finished", 'The later step is finished');
+        Helper.GetRoutingLine(ProductionOrder, '10', RoutingLine);
+        Assert.IsFalse(RoutingLine."ALP Exec. Finished", 'The earlier step stays open');
     end;
 
     [Test]

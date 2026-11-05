@@ -88,24 +88,6 @@ codeunit 50100 "ALP Step Resolver"
         exit(RoutingLine."ALP Exec. Finished" or (RoutingLine."Routing Status" = RoutingLine."Routing Status"::Finished));
     end;
 
-    /// <summary>Returns the first previous operation that is not done, or '' when all previous operations are done.</summary>
-    procedure FirstOpenPreviousOperation(RoutingLine: Record "Prod. Order Routing Line"): Code[10]
-    var
-        Previous: Record "Prod. Order Routing Line";
-        PreviousNos: List of [Text];
-        PreviousNo: Text;
-    begin
-        if RoutingLine."Previous Operation No." = '' then
-            exit('');
-        PreviousNos := Format(RoutingLine."Previous Operation No.").Split('|');
-        foreach PreviousNo in PreviousNos do
-            if PreviousNo <> '' then
-                if Previous.Get(RoutingLine.Status, RoutingLine."Prod. Order No.", RoutingLine."Routing Reference No.", RoutingLine."Routing No.", CopyStr(PreviousNo, 1, MaxStrLen(Previous."Operation No."))) then
-                    if not IsDone(Previous) then
-                        exit(Previous."Operation No.");
-        exit('');
-    end;
-
     procedure ParseWorkPlaceType(TypeText: Text): Enum "Capacity Type Routing"
     var
         CapacityType: Enum "Capacity Type Routing";
