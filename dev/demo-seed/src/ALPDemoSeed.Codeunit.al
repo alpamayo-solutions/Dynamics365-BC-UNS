@@ -26,24 +26,33 @@ codeunit 50200 "ALP Demo Seed"
 
     local procedure Employees()
     begin
-        Employee('EMP-0001', 'Franz', 'Gerber');
-        Employee('EMP-0002', 'Clara', 'Fischer');
-        Employee('EMP-0003', 'Lukas', 'Brändli');
-        Employee('EMP-0004', 'Dev', 'Operator');
-        Employee('EMP-0005', 'Ana', 'Lüthi');
+        // The chocolate rig's people (alpamayo-chocolate-2 seeder/src/seeder/render.py DEMO_EMPLOYEES): the
+        // Execution app sends a person's employee_id, which must exist here. operator08 has none.
+        Employee('EMP-0001', 'Franz', 'Hodler');
+        Employee('EMP-0002', 'Sandra', 'Brunner');
+        Employee('EMP-0003', 'Marco', 'Keller');
+        Employee('EMP-0004', 'Lukas', 'Gerber');
+        Employee('EMP-0005', 'Nina', 'Zbinden');
+        Employee('EMP-0006', 'Andrea', 'Meier');
+        Employee('EMP-0007', 'Daniel', 'Huber');
+        Employee('EMP-0008', 'Laura', 'Steiner');
+        Employee('EMP-0009', 'Reto', 'Baumann');
+        Employee('EMP-0010', 'Claudia', 'Frei');
+        Employee('EMP-0011', 'Thomas', 'Moser');
     end;
 
     local procedure Employee(No: Code[20]; FirstName: Text[30]; LastName: Text[30])
     var
         Emp: Record Employee;
     begin
-        if Emp.Get(No) then
-            exit;
-        Emp.Init();
-        Emp."No." := No;
+        if not Emp.Get(No) then begin
+            Emp.Init();
+            Emp."No." := No;
+            Emp.Insert(true);
+        end;
         Emp."First Name" := FirstName;
         Emp."Last Name" := LastName;
-        Emp.Insert(true);
+        Emp.Modify(true);
     end;
 
     local procedure Plant()
