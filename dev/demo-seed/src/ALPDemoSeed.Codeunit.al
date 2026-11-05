@@ -18,6 +18,7 @@ codeunit 50200 "ALP Demo Seed"
     begin
         Employees();
         Plant();
+        Calendars();
         Routings();
         Items();
         Orders();
@@ -77,6 +78,24 @@ codeunit 50200 "ALP Demo Seed"
         PatternWorkCenter.Delete(true);
     end;
 
+    /// <summary>Every run: the plant's calendars from 6 months back to 12 ahead, enough for backward scheduling of the largest order.</summary>
+    local procedure Calendars()
+    var
+        WorkCenter: Record "Work Center";
+        MachineCenter: Record "Machine Center";
+    begin
+        WorkCenter.SetFilter("Work Center Group Code", 'BEAN|MOULD|PACK');
+        if WorkCenter.FindSet() then
+            repeat
+                LibraryManufacturing.CalculateWorkCenterCalendar(WorkCenter, CalcDate('<-CM-6M>', WorkDate()), CalcDate('<CM+12M>', WorkDate()));
+                MachineCenter.SetRange("Work Center No.", WorkCenter."No.");
+                if MachineCenter.FindSet() then
+                    repeat
+                        LibraryManufacturing.CalculateMachCenterCalendar(MachineCenter, CalcDate('<-CM-6M>', WorkDate()), CalcDate('<CM+12M>', WorkDate()));
+                    until MachineCenter.Next() = 0;
+            until WorkCenter.Next() = 0;
+    end;
+
     local procedure Group(Code: Code[10]; Name: Text[50])
     var
         WorkCenterGroup: Record "Work Center Group";
@@ -101,7 +120,6 @@ codeunit 50200 "ALP Demo Seed"
         WorkCenter."Search Name" := UpperCase(Name);
         WorkCenter."Work Center Group Code" := GroupCode;
         WorkCenter.Insert(true);
-        LibraryManufacturing.CalculateWorkCenterCalendar(WorkCenter, CalcDate('<-CM-6M>', WorkDate()), CalcDate('<CM+12M>', WorkDate()));
         for i := 1 to Count do begin
             Clear(MachineCenter);
             MachineCenter.Init();
@@ -112,7 +130,6 @@ codeunit 50200 "ALP Demo Seed"
             MachineCenter.Validate(Capacity, 1);
             MachineCenter.Validate(Efficiency, 100);
             MachineCenter.Modify(true);
-            LibraryManufacturing.CalculateMachCenterCalendar(MachineCenter, CalcDate('<-CM-6M>', WorkDate()), CalcDate('<CM+12M>', WorkDate()));
         end;
     end;
 
