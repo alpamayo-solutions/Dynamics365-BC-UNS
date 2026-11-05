@@ -29,9 +29,14 @@ codeunit 50155 "ALP Step Move Tests"
         OtherWorkCenter: Record "Work Center";
         StepMove: Record "ALP Step Move";
         RoutingLine: Record "Prod. Order Routing Line";
+        Operation: Text[100];
     begin
         Helper.CreateReleasedOrderTwoSteps(ProductionOrder, WorkCenter, 10);
         LibraryManufacturing.CreateWorkCenterWithCalendar(OtherWorkCenter);
+        Helper.GetRoutingLine(ProductionOrder, '20', RoutingLine);
+        RoutingLine.Description := 'Conching';
+        RoutingLine.Modify(true);
+        Operation := RoutingLine.Description;
 
         Move(StepMove, Helper.StepId(ProductionOrder, '20'), 'Work Center', OtherWorkCenter."No.");
 
@@ -39,6 +44,7 @@ codeunit 50155 "ALP Step Move Tests"
         Assert.AreEqual(WorkCenter."No.", StepMove."From No.", 'From');
         Helper.GetRoutingLine(ProductionOrder, '20', RoutingLine);
         Assert.AreEqual(OtherWorkCenter."No.", RoutingLine."No.", 'Step moved');
+        Assert.AreEqual(Operation, RoutingLine.Description, 'The operation keeps its name');
     end;
 
     [Test]

@@ -195,8 +195,9 @@ codeunit 50200 "ALP Demo Seed"
     var
         RoutingLine: Record "Routing Line";
     begin
+        // Operation No. is a Code field and BC orders it as text: '0010'..'0170', so '100' never runs before '20'.
         OpNo += 10;
-        LibraryManufacturing.CreateRoutingLine(RoutingHeader, RoutingLine, '', Format(OpNo), RoutingLine.Type::"Machine Center", MachineNo(MachinePrefix, 1));
+        LibraryManufacturing.CreateRoutingLine(RoutingHeader, RoutingLine, '', Format(OpNo, 0, '<Integer,4><Filler Character,0>'), RoutingLine.Type::"Machine Center", MachineNo(MachinePrefix, 1));
         RoutingLine.Validate(Description, Description);
         RoutingLine.Validate("Setup Time", SetupMinutes);
         RoutingLine.Validate("Run Time", RunMinutes);

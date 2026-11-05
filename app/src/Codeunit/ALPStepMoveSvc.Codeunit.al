@@ -3,7 +3,8 @@
 /// Only a step that has not started is moved: no capacity posted, not finished. Otherwise the move is refused,
 /// because time already booked on the old center would no longer match the routing.
 /// The move uses the standard field validation of the routing line, so Business Central recalculates
-/// the line exactly as when a planner changes it by hand.
+/// the line exactly as when a planner changes it by hand. Only the description stays: that validation
+/// copies the new center's name into it, but the operation is the same one, now done elsewhere.
 /// </summary>
 codeunit 50104 "ALP Step Move Svc"
 {
@@ -42,6 +43,7 @@ codeunit 50104 "ALP Step Move Svc"
     var
         WorkCenter: Record "Work Center";
         MachineCenter: Record "Machine Center";
+        Operation: Text[100];
     begin
         if StepResolver.IsDone(RoutingLine) or StepResolver.HasPostedCapacity(RoutingLine) then
             Error(StepStartedErr, StepResolver.FormatStepId(RoutingLine));
@@ -61,8 +63,10 @@ codeunit 50104 "ALP Step Move Svc"
                 end;
         end;
 
+        Operation := RoutingLine.Description;
         RoutingLine.Validate(Type, ToType);
         RoutingLine.Validate("No.", ToNo);
+        RoutingLine.Description := Operation;
         RoutingLine.Modify(true);
     end;
 }
