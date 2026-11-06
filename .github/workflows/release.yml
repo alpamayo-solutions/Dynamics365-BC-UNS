@@ -70,6 +70,15 @@ jobs:
           $appJson = Get-Content -Path "app/app.json" -Raw | ConvertFrom-Json
           echo "version=$($appJson.version)" >> $env:GITHUB_OUTPUT
 
+      - name: Start Docker
+        shell: pwsh
+        run: |
+          # windows-latest (windows-2025-vs2026 since 2026-10) has Docker installed but not running.
+          $docker = Get-Service docker -ErrorAction SilentlyContinue
+          if (-not $docker) { throw "Docker is not installed on this runner image" }
+          if ($docker.Status -ne 'Running') { Start-Service docker }
+          docker version
+
       - name: Install BcContainerHelper
         shell: pwsh
         run: |
