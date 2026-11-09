@@ -3,7 +3,7 @@
 import click
 from rich.console import Console
 
-from ..client import BCClient, BCApiError
+from ..client import BCApiError, BCClient
 from ..config import get_config_with_token
 from ..models import CreateProductionOrder, Item, WorkCenter
 
@@ -13,7 +13,6 @@ console = Console()
 @click.group()
 def setup():
     """Setup commands for test data population."""
-    pass
 
 
 @setup.command("items")
@@ -164,7 +163,7 @@ def setup_prod_order(item_no: str | None, quantity: float, description: str | No
             if system_id:
                 try:
                     client.refresh_production_order(system_id)
-                    console.print(f"  [dim]Refreshed (routing/components calculated)[/dim]")
+                    console.print("  [dim]Refreshed (routing/components calculated)[/dim]")
                 except BCApiError as e:
                     console.print(f"  [yellow]Warning: Refresh failed:[/yellow] {e.message}")
             console.print(f"  Item: {item_no}")

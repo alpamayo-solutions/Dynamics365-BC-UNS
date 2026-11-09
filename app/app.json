@@ -1,0 +1,29 @@
+{
+  "id": "dbbe7042-978c-461f-abe3-5ce36a97d621",
+  "name": "UNS Bridge Connector",
+  "publisher": "alpamayo",
+  "version": "2.0.0.0",
+  "logo": "assets/logo.png",
+  "brief": "Run the PREKIT shop floor Execution app on Business Central production orders",
+  "description": "UNS Bridge Connector connects Microsoft Dynamics 365 Business Central manufacturing to the PREKIT shop floor Execution app and the Unified Namespace (UNS).\n\nThe Execution app reads released production orders and their routing lines (steps) through the extension's API, and reports back what happened on the shop floor: finished steps with output, scrap, setup and run time, person time per step, operator notes, reroutes to other work or machine centers, and the fine plan per station.\n\nBy default the extension records these facts on the production order routing lines and posts nothing. When Post Output is switched on in Shopfloor Execution Setup, a finished step posts an output journal line exactly as the standard production journal would, so routing status, capacity and output follow the shop floor.\n\nPREKIT Edge Nodes are one example of an edge-based technology that collects shop floor data and publishes it into a Unified Namespace.",
+  "contextSensitiveHelpUrl": "https://alpamayo-solutions.com/docs/uns-bridge-connector",
+  "platform": "26.0.0.0",
+  "application": "26.0.0.0",
+  "runtime": "15.0",
+  "target": "Cloud",
+  "idRanges": [
+    {
+      "from": 50000,
+      "to": 50149
+    }
+  ],
+  "resourceExposurePolicy": {
+    "allowDebugging": true,
+    "allowDownloadingSource": true,
+    "includeSourceInSymbolFile": true
+  },
+  "features": [
+    "NoImplicitWith",
+    "TranslationFile"
+  ]
+}

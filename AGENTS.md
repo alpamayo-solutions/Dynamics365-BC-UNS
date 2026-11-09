@@ -4,22 +4,23 @@
 
 This repository contains the Business Central AL extension for the PREKIT UNS bridge.
 
-The extension:
-- ingests shopfloor execution and disruption events
-- creates and closes work log entries
-- exposes read/write API pages used by the bridge
-- applies audited execution corrections
+The extension is the Business Central side of the PREKIT shop floor Execution app (2.0+):
+- exposes the order book (production orders, routing lines as steps, work and machine centers) through API pages
+- accepts step finishes, person time, operator notes, step moves and the station fine plan
+- posts output only when Shopfloor Execution Setup "Post Output" is on; otherwise it records and posts nothing
 
-The extension does not replace ERP production posting or costing logic. It is an integration layer anchored in Business Central.
+The contract with the Execution app's BC adapter is `docs/execution-app-contract.md`. Change both together.
+
+Layout: `app/` is the extension, `test/` the test app, `dev/bridge` a dev CLI.
 
 ## Versioning
 
-The extension version is defined in [app.json](/Users/alpamayo/projects/d365_uns_app/app.json) under the `version` field.
+The extension version is defined in [app/app.json](app/app.json) under the `version` field.
 
 Current rule:
 - version bumps are manual
 - do not assume CI or GitHub will bump the AL app version automatically
-- if a change should produce a new deployable `.app` artifact, bump `app.json` before merging to `main`
+- if a change should produce a new deployable `.app` artifact, bump `app/app.json` before merging to `main`
 
 ### When To Bump
 
@@ -42,7 +43,7 @@ If in doubt, prefer bumping.
 
 ### How To Bump
 
-Edit the `version` field in [app.json](/Users/alpamayo/projects/d365_uns_app/app.json).
+Edit the `version` field in [app/app.json](app/app.json).
 
 Use Business Central's four-part version format:
 - `major.minor.patch.build`
@@ -61,10 +62,10 @@ Examples:
 
 Before merging to `main`:
 - confirm whether the branch changes require a new deployable artifact
-- if yes, ensure `app.json` was bumped on the branch being merged
+- if yes, ensure `app/app.json` was bumped on the branch being merged
 - do not rely on re-running an older merged commit if the version was not updated
 
-If a merged PR was missing the bump, create a follow-up PR that only updates `app.json` and merge that before expecting the next build artifact to be usable as a new version.
+If a merged PR was missing the bump, create a follow-up PR that only updates `app/app.json` and merge that before expecting the next build artifact to be usable as a new version.
 
 ## Key Constraints
 
@@ -78,5 +79,7 @@ If a merged PR was missing the bump, create a follow-up PR that only updates `ap
 Minimum expectation after functional changes:
 - ensure the app version is correct for the release intent
 - run or observe the AL build pipeline
-- run related AL tests when available
+- compile locally with alc (see README) including CodeCop, UICop and PerTenantExtensionCop
+- run the AL tests in a BC container (Windows) before pushing; CI repeats them
+- keep the upgrade from the last released version working (CI installs it first)
 - verify any new API page or correction path end-to-end when possible

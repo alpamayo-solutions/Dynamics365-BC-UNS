@@ -147,13 +147,8 @@ try:
                     st.write(f"**Status:** {detail.get('status', '-')}")
                     st.write(f"**Description:** {detail.get('description', '-')}")
 
-                col1, col2 = st.columns(2)
-                with col1:
-                    if st.button("View Routing", use_container_width=True):
-                        st.switch_page("pages/2_Work_Order_Routing.py")
-                with col2:
-                    if st.button("Post Event", use_container_width=True):
-                        st.switch_page("pages/3_Shopfloor_Execution.py")
+                if st.button("View Steps", use_container_width=True):
+                    st.switch_page("pages/2_Work_Order_Routing.py")
 
                 # Show components/materials
                 with st.expander("Materials (Components)"):

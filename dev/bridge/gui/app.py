@@ -24,16 +24,6 @@ st.set_page_config(
 )
 
 
-def get_client() -> BCClient | None:
-    """Get BCClient instance with error handling."""
-    try:
-        config = get_config_with_token()
-        return BCClient(config)
-    except Exception as e:
-        st.session_state["connection_error"] = str(e)
-        return None
-
-
 def check_connection() -> tuple[bool, str, str | None]:
     """Check BC API connection status. Returns (connected, message, url)."""
     try:
@@ -41,7 +31,7 @@ def check_connection() -> tuple[bool, str, str | None]:
         with BCClient(config) as client:
             companies = client.get_companies()
             if companies:
-                return True, f"Connected to {config.bc_env}", config.base_url
+                return True, f"Connected: {config.display_target}", config.api_root
             return False, "No companies found", None
     except BCApiError as e:
         return False, f"API Error: {e.message}", None
@@ -62,7 +52,7 @@ with st.sidebar:
             st.caption(bc_url)
     else:
         st.error(status_msg)
-        st.info("Ensure .env is configured and run `az login`")
+        st.info("Ensure .env is configured (SaaS: run `az login`; on-prem: BC_API_BASE_URL)")
 
 
 # Main Content - Home Page
@@ -78,7 +68,7 @@ st.divider()
 
 # Quick Stats
 if connected:
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3 = st.columns(3)
 
     with BCClient(get_config_with_token()) as client:
         try:
@@ -94,18 +84,9 @@ if connected:
             col2.metric("Work Centers", "-")
 
         try:
-            mappings = client.get_uns_topic_mappings(top=100)
-            active_mappings = [m for m in mappings if m.status == "Active"]
-            col3.metric("Active Mappings", len(active_mappings))
+            col3.metric("Machine Centers", len(client.get_machine_centers()))
         except BCApiError:
-            col3.metric("Active Mappings", "-")
-
-        try:
-            inbox = client.get_integration_inbox(top=100)
-            pending = [e for e in inbox if e.status == "Received"]
-            col4.metric("Pending Events", len(pending))
-        except BCApiError:
-            col4.metric("Pending Events", "-")
+            col3.metric("Machine Centers", "-")
 
 st.divider()
 
@@ -113,38 +94,19 @@ st.divider()
 st.subheader("Demo Flow")
 
 st.markdown("""
-Follow these steps to demonstrate the UNS Bridge integration:
-
 1. **Work Orders** - View released production orders (create one if none exist)
-2. **Work Order Routing** - Examine routing operations for the selected order
-3. **Shopfloor Execution** - Post execution events with OEE metrics
+2. **Steps** - Examine the steps (routing lines) of an order with their execution state
+3. **CLI** - Write execution facts with `bridge finish`, `bridge person-time add`, `bridge note`,
+   `bridge move`, `bridge plan`, or run `bridge e2e --order <no> --yes`
 4. **BC UI** - Open Business Central to verify results
 """)
 
-# Quick Actions
-st.divider()
-st.subheader("Quick Actions")
-
-col1, col2 = st.columns(2)
-
-with col1:
-    if st.button("View Work Orders", use_container_width=True):
-        st.switch_page("pages/1_Work_Orders.py")
-
-with col2:
-    if st.button("Post Execution Event", use_container_width=True):
-        st.switch_page("pages/3_Shopfloor_Execution.py")
-
-# Advanced section
-st.divider()
-with st.expander("Advanced: UNS Mapping"):
-    st.markdown("View and register UNS topics for work center mapping in Business Central.")
-    if st.button("Open UNS Mapping"):
-        st.switch_page("pages/4_UNS_Mapping.py")
+if st.button("View Work Orders", use_container_width=True):
+    st.switch_page("pages/1_Work_Orders.py")
 
 # Footer
 st.divider()
 st.caption("""
-**Note:** This is a read-only observer interface. It does not post inventory,
-output, capacity, or ledger entries. All KPIs are derived and informational.
+**Note:** This interface is read-only. Writes go through the CLI; Business Central posts output
+only when ALP Shopfloor Setup "Post Output" is on.
 """)

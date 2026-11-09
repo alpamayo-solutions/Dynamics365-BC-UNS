@@ -39,7 +39,7 @@ with st.sidebar:
 
 
 # Main Content
-st.title("Routing Lines")
+st.title("Steps")
 
 client = get_client()
 if not client:
@@ -84,7 +84,7 @@ with client:
 
     # Fetch routing lines for selected order
     try:
-        routing_lines = client.get_routing_lines(order_no=selected_order)
+        routing_lines = client.get_routing_lines(order_no=selected_order, status="Released")
 
         if not routing_lines:
             st.warning(f"No routing lines found for order {selected_order}")
@@ -93,30 +93,30 @@ with client:
             st.subheader(f"Routing for Order: {selected_order}")
             st.info(f"Found {len(routing_lines)} operation(s)")
 
-            # Display routing lines
-            for line in routing_lines:
-                with st.container():
-                    col1, col2, col3, col4, col5 = st.columns([1, 2, 2, 2, 2])
-
-                    with col1:
-                        st.markdown(f"**Op {line.operation_no}**")
-                    with col2:
-                        st.text(line.type or "-")
-                        st.caption(line.no or "-")
-                    with col3:
-                        st.text(line.description or "-")
-                    with col4:
-                        runtime = line.run_time or 0
-                        setup = line.setup_time or 0
-                        st.text(f"Run: {runtime:.1f} min")
-                        st.text(f"Setup: {setup:.1f} min")
-                    with col5:
-                        if st.button("Post Event", key=f"post_{line.operation_no}", use_container_width=True):
-                            st.session_state["selected_operation"] = line.operation_no
-                            st.session_state["selected_work_center"] = line.no
-                            st.switch_page("pages/3_Shopfloor_Execution.py")
-
-                    st.divider()
+            # Read-only step view: execution facts come from the Execution app, not from here.
+            st.dataframe(
+                [
+                    {
+                        "stepId": line.step_id,
+                        "Seq": line.sequence_no,
+                        "Place": f"{line.type or ''} {line.no or ''}".strip(),
+                        "Description": line.description,
+                        "Routing status": line.routing_status,
+                        "Exec. finished": bool(line.execution_finished),
+                        "Output": line.output_quantity,
+                        "Scrap": line.scrap_quantity,
+                        "Planned min": line.planned_minutes,
+                        "Plan start": line.planned_start,
+                        "Queue": line.queue_position,
+                    }
+                    for line in sorted(
+                        routing_lines,
+                        key=lambda r: (r.routing_reference_no or 0, r.sequence_no or 0),
+                    )
+                ],
+                use_container_width=True,
+                hide_index=True,
+            )
 
             # Summary
             total_runtime = sum(line.run_time or 0 for line in routing_lines)
@@ -135,10 +135,5 @@ with client:
 
 # Navigation
 st.divider()
-col1, col2 = st.columns(2)
-with col1:
-    if st.button("Back to Orders", use_container_width=True):
-        st.switch_page("pages/1_Work_Orders.py")
-with col2:
-    if st.button("Post Event", use_container_width=True, key="nav_post_event"):
-        st.switch_page("pages/3_Shopfloor_Execution.py")
+if st.button("Back to Orders", use_container_width=True):
+    st.switch_page("pages/1_Work_Orders.py")

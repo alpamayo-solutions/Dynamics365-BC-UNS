@@ -18,7 +18,7 @@ Thumbs.db
 *.tmp
 
 # Translation files (if generated)
-Translations/*.g.xlf
+**/Translations/*.g.xlf
 
 # Symbols
 *.app.json
@@ -35,3 +35,6 @@ __pycache__/
 
 docs/implementation-plan-v3.md
 AGENTS.md
+
+# Container test output
+out/
